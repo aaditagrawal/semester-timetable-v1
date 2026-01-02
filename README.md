@@ -1,36 +1,74 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Timetable Viewer - 3rd Year CCE-B
 
-## Getting Started
+A modern, responsive, and personalized timetable management application explicitly designed for **3rd Year Computer & Communication Engineering - Section B** (Semester VI, AY 2025-26) at **Manipal Institute of Technology**.
 
-First, run the development server:
+## 🚀 Features
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+- **Personalized View**: Select your specific electives (PE-1, PE-2, OE, and FC-2) and lab batches (B1/B2) to generate a timetable tailored exactly to your schedule.
+- **Day & Week Modes**: Toggle between a focused daily view and a comprehensive weekly overview.
+- **Real-time Tracking**: 
+    - **Active Class**: Automatically highlights the current period based on system time.
+    - **Progression**: Grays out past classes to help you focus on what's next.
+- **Configuration Management**:
+    - **Persistent Settings**: Your selections are saved locally and persist through browser refreshes.
+    - **Export/Import**: Share your configuration with classmates or back it up for later use.
+- **Modern Interface**: Built with a sleek, minimalist aesthetic using **Next.js**, **ShadCN**, and **Radix UI**.
+- **Responsive Design**: Fully optimized for both desktop and mobile devices.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 🛠️ Tech Stack
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- **Framework**: [Next.js 15](https://nextjs.org/)
+- **Styling**: [Tailwind CSS 4](https://tailwindcss.com/)
+- **Components**: [ShadCN UI](https://ui.shadcn.com/) / [Radix UI](https://www.radix-ui.com/)
+- **Icons**: [Phosphor Icons](https://phosphoricons.com/)
+- **Runtime**: [Bun](https://bun.sh/)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 🏃 Getting Started
 
-## Learn More
+### Prerequisites
 
-To learn more about Next.js, take a look at the following resources:
+Ensure you have [Bun](https://bun.sh/) installed on your machine.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Installation
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+1.  **Clone the repository**:
+    ```bash
+    git clone <repository-url>
+    cd timetable-v1
+    ```
 
-## Deploy on Vercel
+2.  **Install dependencies**:
+    ```bash
+    bun install
+    ```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+3.  **Run the development server**:
+    ```bash
+    bun dev
+    ```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+4.  **Open the app**:
+    Navigate to [http://localhost:3000](http://localhost:3000) in your browser.
+
+## 📂 Project Structure
+
+- `app/`: Next.js App Router pages and layouts.
+- `components/`: Reusable UI components (Timetable tiles, Modals, Settings).
+- `lib/`: Utility functions and the core `timetable-data.ts` definition.
+- `public/`: Static assets and icons.
+
+## 📝 Configuration
+
+The timetable data is centrally managed in `lib/timetable-data.ts`. This includes:
+- Course codes and names.
+- Faculty assignments.
+- Room numbers.
+- Lab batch timings.
+
+## 🤝 Contributing
+
+This project is tailored for CCE-B. If you find any discrepancies in the schedule or have feature requests, feel free to open a PR or an issue!
+
+---
+
+*Made for MITians by MITians.*
