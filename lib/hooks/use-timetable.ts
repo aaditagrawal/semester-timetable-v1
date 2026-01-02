@@ -45,7 +45,7 @@ export function useTimetable() {
             try {
                 const parsed = JSON.parse(savedSelections);
                 setSelections(parsed);
-                // Check if setup is complete (has labBatch and FC-2 at minimum)
+                // Check if setup is complete (has labBatch and Flexi Core 2 at minimum)
                 if (parsed.labBatch && parsed["FC-2"]) {
                     setIsSetupComplete(true);
                 }

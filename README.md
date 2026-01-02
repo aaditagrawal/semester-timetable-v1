@@ -4,7 +4,7 @@ A modern, responsive, and personalized timetable management application explicit
 
 ## 🚀 Features
 
-- **Personalized View**: Select your specific electives (PE-1, PE-2, OE, and FC-2) and lab batches (B1/B2) to generate a timetable tailored exactly to your schedule.
+- **Personalized View**: Select your specific electives (PE-1, PE-2, OE, and Flexi Core 2) and lab batches (B1/B2) to generate a timetable tailored exactly to your schedule.
 - **Day & Week Modes**: Toggle between a focused daily view and a comprehensive weekly overview.
 - **Real-time Tracking**: 
     - **Active Class**: Automatically highlights the current period based on system time.

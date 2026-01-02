@@ -10,6 +10,7 @@ import { DayView } from "@/components/day-view";
 import { WeekView } from "@/components/week-view";
 import { SetupModal } from "@/components/setup-modal";
 import { SettingsDialog } from "@/components/settings-dialog";
+import { CalendarExportLink } from "@/components/calendar-export";
 import { useTimetable } from "@/lib/hooks/use-timetable";
 import { useCurrentTime } from "@/lib/hooks/use-current-time";
 import { days, Day, Course } from "@/lib/timetable-data";
@@ -100,6 +101,7 @@ export function Timetable() {
                 open={showSettings}
                 onClose={() => setShowSettings(false)}
                 selections={selections}
+                customElectives={customElectives}
                 onExport={exportSettings}
                 onImport={importSettings}
                 onReset={() => {
@@ -222,7 +224,7 @@ export function Timetable() {
                 {/* Footer */}
                 <footer className="mt-8 pt-4 border-t border-border/50">
                     <p className="text-center text-[10px] text-muted-foreground">
-                        Room: AB5-306 • Tap/click course for details
+                        Room: AB5-306 • Tap/click course for details • <CalendarExportLink />
                     </p>
                 </footer>
             </div>

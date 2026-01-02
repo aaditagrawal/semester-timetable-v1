@@ -130,14 +130,14 @@ export function SetupModal({
             case "OE":
                 return "Open Elective";
             case "FC-2":
-                return "Focus Course 2";
+                return "Flexi Core 2";
             default:
                 return type;
         }
     };
 
     const isFormComplete = () => {
-        // Only require lab batch and FC-2
+        // Only require lab batch and Flexi Core 2
         // PE and OE are always optional
         return Boolean(selections.labBatch && selections["FC-2"]);
     };
@@ -210,7 +210,7 @@ export function SetupModal({
                                     <CardTitle className="flex items-center justify-between">
                                         <span className="text-sm">{getTypeLabel(type)}</span>
                                         <div className="flex gap-1">
-                                            <Badge variant="outline">{type}</Badge>
+                                            <Badge variant="outline">{type === "FC-2" ? "Flexi Core" : type}</Badge>
                                             {isRequired && <Badge variant="secondary">Required</Badge>}
                                         </div>
                                     </CardTitle>
@@ -222,7 +222,7 @@ export function SetupModal({
                                             onValueChange={(value) => handleSelectionChange(type, value)}
                                         >
                                             <SelectTrigger className="w-full">
-                                                <SelectValue placeholder={`Select ${type}`} />
+                                                <SelectValue placeholder={`Select ${getTypeLabel(type)}`} />
                                             </SelectTrigger>
                                             <SelectContent>
                                                 {options.map((option) => (

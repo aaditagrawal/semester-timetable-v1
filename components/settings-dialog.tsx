@@ -16,7 +16,7 @@ import { Separator } from "@/components/ui/separator";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
-import { UserElectiveSelections } from "@/lib/hooks/use-timetable";
+import { UserElectiveSelections, CustomElective } from "@/lib/hooks/use-timetable";
 import {
     ExportIcon,
     UploadIcon,
@@ -30,6 +30,7 @@ interface SettingsDialogProps {
     open: boolean;
     onClose: () => void;
     selections: UserElectiveSelections;
+    customElectives: CustomElective[];
     onExport: () => string;
     onImport: (json: string) => boolean;
     onReset: () => void;
@@ -127,7 +128,7 @@ export function SettingsDialog({
                                 <Badge variant="outline">{selections.labBatch || "Not set"}</Badge>
                             </div>
                             <div className="flex items-center justify-between text-xs">
-                                <span className="text-muted-foreground">FC-2</span>
+                                <span className="text-muted-foreground">Flexi Core 2</span>
                                 <Badge variant="outline">
                                     {selections["FC-2"] ? "Selected" : "Not set"}
                                 </Badge>
