@@ -33,7 +33,7 @@ Ensure you have [Bun](https://bun.sh/) installed on your machine.
 
 1.  **Clone the repository**:
     ```bash
-    git clone <repository-url>
+    git clone https://github.com/aaditagrawal/semester-timetable-v1
     cd timetable-v1
     ```
 
