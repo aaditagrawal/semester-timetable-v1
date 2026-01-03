@@ -124,9 +124,9 @@ export function SetupModal({
     const getTypeLabel = (type: string) => {
         switch (type) {
             case "PE-1":
-                return "Professional Elective 1";
+                return "Program Elective 1";
             case "PE-2":
-                return "Professional Elective 2";
+                return "Program Elective 2";
             case "OE":
                 return "Open Elective";
             case "FC-2":
