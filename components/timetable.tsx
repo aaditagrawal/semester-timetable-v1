@@ -36,6 +36,7 @@ export function Timetable() {
         saveSelections,
         addCustomElective,
         removeCustomElective,
+        updateCustomElective,
         getSelectedElective,
         getLabBatch,
         resetSetup,
@@ -78,6 +79,7 @@ export function Timetable() {
                 onSave={saveSelections}
                 onAddCustom={addCustomElective}
                 onRemoveCustom={removeCustomElective}
+                onUpdateCustom={updateCustomElective}
             />
 
             {/* Edit Electives Modal */}
@@ -92,6 +94,7 @@ export function Timetable() {
                 }}
                 onAddCustom={addCustomElective}
                 onRemoveCustom={removeCustomElective}
+                onUpdateCustom={updateCustomElective}
                 onClose={() => setShowEditElectives(false)}
                 isEditing
             />

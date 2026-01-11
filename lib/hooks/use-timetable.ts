@@ -93,6 +93,18 @@ export function useTimetable() {
         [customElectives]
     );
 
+    // Update custom elective
+    const updateCustomElective = useCallback(
+        (elective: CustomElective) => {
+            const updated = customElectives.map((e) =>
+                e.id === elective.id ? elective : e
+            );
+            setCustomElectives(updated);
+            localStorage.setItem(CUSTOM_ELECTIVES_KEY, JSON.stringify(updated));
+        },
+        [customElectives]
+    );
+
     // Get all elective options for a type (including custom ones)
     const getElectiveOptions = useCallback(
         (type: "PE-1" | "PE-2" | "OE" | "FC-2"): ElectiveOption[] => {
@@ -188,6 +200,7 @@ export function useTimetable() {
         saveSelections,
         addCustomElective,
         removeCustomElective,
+        updateCustomElective,
         getElectiveOptions,
         getSelectedElective,
         getLabBatch,
