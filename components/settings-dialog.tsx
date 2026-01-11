@@ -116,7 +116,7 @@ export function SettingsDialog({
                     </AlertDialogDescription>
                 </AlertDialogHeader>
 
-                <div className="space-y-3 py-2">
+                 <div className="space-y-3 py-2 max-h-[70vh] overflow-y-auto">
                     {/* Current Config Summary */}
                     <Card size="sm">
                         <CardHeader className="pb-2">
