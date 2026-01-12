@@ -13,6 +13,8 @@ interface CourseTileProps {
     isPassed?: boolean;
     isLab?: boolean;
     className?: string;
+    /** Number of time slots this class spans - affects height proportionally */
+    durationSlots?: number;
 }
 
 export function CourseTile({
@@ -22,7 +24,13 @@ export function CourseTile({
     isPassed = false,
     isLab = false,
     className,
+    durationSlots = 1,
 }: CourseTileProps) {
+    // Base height is 44px per slot, with some extra for multi-slot items
+    const heightStyle = durationSlots > 1
+        ? { minHeight: `${44 * durationSlots + (durationSlots - 1) * 4}px` }
+        : undefined;
+
     const baseClasses = cn(
         "group relative flex items-center justify-center px-2 py-2 min-h-[44px] text-xs font-medium transition-all duration-200 cursor-pointer select-none",
         "hover:bg-accent active:scale-[0.98]",
@@ -45,7 +53,10 @@ export function CourseTile({
             isActive={isActive}
             isPassed={isPassed}
         >
-            <div className={cn(baseClasses, stateClasses, "flex-col gap-0.5")}>
+            <div
+                className={cn(baseClasses, stateClasses, "flex-col gap-0.5")}
+                style={heightStyle}
+            >
                 <span className="font-semibold">{course.abbreviation}</span>
                 {isLab && (
                     <Badge variant="secondary" className="text-[9px] h-3.5 px-1">

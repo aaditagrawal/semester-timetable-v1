@@ -15,6 +15,7 @@ import {
     isSlotActive,
     Course,
     LabBatch,
+    timeToMinutes,
 } from "@/lib/timetable-data";
 import { UserElectiveSelections } from "@/lib/hooks/use-timetable";
 import { SunIcon, MoonIcon, PlusIcon, ClockIcon, MapPinIcon } from "@phosphor-icons/react";
@@ -39,6 +40,27 @@ interface ClassEntry {
     isPassed: boolean;
     isLab: boolean;
     room?: string;
+    durationSlots?: number;
+}
+
+// Calculate how many slots a class spans based on its end time
+function calculateDurationSlots(startSlotIndex: number, endTime: string): number {
+    const endMinutes = timeToMinutes(endTime);
+    let slots = 1;
+
+    for (let i = startSlotIndex + 1; i < timeSlots.length; i++) {
+        const slotEndMinutes = timeToMinutes(timeSlots[i].end);
+        // If the class ends at or after this slot's end, include it
+        if (endMinutes >= timeToMinutes(timeSlots[i].start)) {
+            slots++;
+        }
+        // If the class ends before or at this slot's end, stop
+        if (endMinutes <= slotEndMinutes) {
+            break;
+        }
+    }
+
+    return slots;
 }
 
 export function DayView({
@@ -76,6 +98,7 @@ export function DayView({
             const labCourse = courses[batchLab.course];
 
             if (labCourse) {
+                const durationSlots = calculateDurationSlots(slotIndex, endTime);
                 classEntries.push({
                     course: { ...labCourse, room: batchLab.room },
                     timeSlot: `${startTime} - ${endTime}`,
@@ -85,6 +108,7 @@ export function DayView({
                     isPassed: isSlotPassed(endTime, currentTime, day),
                     isLab: true,
                     room: batchLab.room,
+                    durationSlots,
                 });
             }
 
@@ -217,6 +241,7 @@ export function DayView({
                                 isPassed={entry.isPassed}
                                 isLab={entry.isLab}
                                 className="min-h-10"
+                                durationSlots={entry.durationSlots}
                             />
                         </div>
                         {entry.isActive && (
