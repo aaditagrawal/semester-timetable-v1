@@ -101,6 +101,13 @@ export const courses: Record<string, Course> = {
         name: "Network Design and Programming Lab",
         faculty: [{ name: "Dr. Adesh N D" }, { name: "Dr. Ushakiran" }],
     },
+    PLACT: {
+        abbreviation: "PLACT",
+        code: "N/A",
+        name: "Placement Activities",
+        faculty: [{ name: "Placement Cell" }],
+        room: "TBD",
+    },
 };
 
 // Elective groups with options
@@ -229,8 +236,8 @@ export const weekSchedule: WeekSchedule = {
         4: null,
         5: { courseAbbreviation: "PE-2", isElective: true, electiveType: "PE-2" },
         6: { courseAbbreviation: "NPACN" },
-        7: null,
-        8: null,
+        7: { courseAbbreviation: "PLACT" },
+        8: { courseAbbreviation: "PLACT" },
     },
     WED: {
         0: { courseAbbreviation: "PE-2", isElective: true, electiveType: "PE-2" },
@@ -260,8 +267,8 @@ export const weekSchedule: WeekSchedule = {
         4: null,
         5: { courseAbbreviation: "EEFM" },
         6: { courseAbbreviation: "OE", isElective: true, electiveType: "OE" },
-        7: null,
-        8: null,
+        7: { courseAbbreviation: "PLACT" },
+        8: { courseAbbreviation: "PLACT" },
     },
     FRI: {
         0: { courseAbbreviation: "EEFM" },
