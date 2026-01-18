@@ -22,7 +22,7 @@ import {
     CustomElective,
 } from "@/lib/hooks/use-timetable";
 import { ElectiveGroup, LabBatch } from "@/lib/timetable-data";
-import { PlusIcon, TrashIcon, XIcon, CheckIcon, MagnifyingGlassIcon } from "@phosphor-icons/react";
+import { PlusIcon, TrashIcon, XIcon, CheckIcon, MagnifyingGlassIcon, PencilSimpleIcon } from "@phosphor-icons/react";
 
 interface SetupModalProps {
     open: boolean;
@@ -341,35 +341,52 @@ export function SetupModal({
                                         </div>
                                     )}
 
-                                    {/* Custom electives list */}
+                                    {/* Custom electives list - clickable to select */}
                                     {customElectives
                                         .filter((e) => e.groupType === type)
-                                        .map((custom) => (
-                                            <div
-                                                key={custom.id}
-                                                className="flex items-center justify-between gap-2 text-xs bg-muted/50 px-2 py-1.5"
-                                            >
-                                                <span className="truncate flex-1">
-                                                    {custom.abbreviation} - {custom.name}
-                                                </span>
-                                                <div className="flex gap-1 flex-shrink-0">
-                                                    <Button
-                                                        variant="ghost"
-                                                        size="icon-xs"
-                                                        onClick={() => handleEditCustom(custom)}
-                                                    >
-                                                        <CheckIcon className="size-3" />
-                                                    </Button>
-                                                    <Button
-                                                        variant="ghost"
-                                                        size="icon-xs"
-                                                        onClick={() => onRemoveCustom(custom.id)}
-                                                    >
-                                                        <TrashIcon className="size-3" />
-                                                    </Button>
+                                        .map((custom) => {
+                                            const isSelected = selections[type] === custom.id;
+                                            return (
+                                                <div
+                                                    key={custom.id}
+                                                    onClick={() => handleSelectionChange(type, custom.id)}
+                                                    className={`flex items-center justify-between gap-2 text-xs px-2 py-1.5 cursor-pointer transition-colors ${
+                                                        isSelected
+                                                            ? "bg-primary/10 border border-primary/20"
+                                                            : "bg-muted/50 hover:bg-muted/80"
+                                                    }`}
+                                                >
+                                                    <span className="truncate flex-1">
+                                                        {custom.abbreviation} - {custom.name}
+                                                    </span>
+                                                    <div className="flex gap-1 flex-shrink-0">
+                                                        {isSelected && (
+                                                            <CheckIcon className="size-3 text-primary" />
+                                                        )}
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="icon-xs"
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                handleEditCustom(custom);
+                                                            }}
+                                                        >
+                                                            <PencilSimpleIcon className="size-3" />
+                                                        </Button>
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="icon-xs"
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                onRemoveCustom(custom.id);
+                                                            }}
+                                                        >
+                                                            <TrashIcon className="size-3" />
+                                                        </Button>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        ))}
+                                            );
+                                        })}
 
                                     {showAddCustom === type ? (
                                         <div className="space-y-2 p-2 border border-border bg-muted/30">

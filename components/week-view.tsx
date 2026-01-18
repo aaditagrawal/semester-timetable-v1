@@ -46,20 +46,15 @@ function calculateLabRowSpan(startSlotIndex: number, endTime: string): number {
     return rowSpan;
 }
 
-// Calculate actual duration in minutes for consistent height
-function calculateDurationMinutes(startTime: string, endTime: string): number {
-    return timeToMinutes(endTime) - timeToMinutes(startTime);
+// Base height per minute for consistent sizing
+const PIXELS_PER_MINUTE = 0.9;
+
+// Calculate height in pixels based on actual duration
+function calculateDurationHeight(startTime: string, endTime: string): number {
+    const durationMinutes = timeToMinutes(endTime) - timeToMinutes(startTime);
+    return Math.round(durationMinutes * PIXELS_PER_MINUTE);
 }
 
-// Calculate total slot duration in minutes for a given span
-function calculateSlotsDurationMinutes(startSlotIndex: number, rowSpan: number): number {
-    let totalMinutes = 0;
-    for (let i = 0; i < rowSpan && startSlotIndex + i < timeSlots.length; i++) {
-        const slot = timeSlots[startSlotIndex + i];
-        totalMinutes += timeToMinutes(slot.end) - timeToMinutes(slot.start);
-    }
-    return totalMinutes;
-}
 
 export function WeekView({
     currentTime,
@@ -100,7 +95,7 @@ export function WeekView({
     }, [labBatch]);
 
     // Helper to render a cell
-    const renderCell = (day: Day, slotIndex: number): { element: React.ReactNode; rowSpan: number } | null => {
+    const renderCell = (day: Day, slotIndex: number): { element: React.ReactNode; rowSpan: number; height?: number } | null => {
         // Skip if this slot is consumed by a previous lab
         if (consumedSlots.has(`${day}-${slotIndex}`)) {
             return null;
@@ -118,18 +113,14 @@ export function WeekView({
         let endTime = slot.end;
         let isLab = false;
         let rowSpan = 1;
-        let heightRatio = 1; // Ratio of actual duration to slot duration
+        let durationHeight: number | undefined;
 
         if (entry.isLab && entry.labInfo && labBatch) {
             if (entry.labInfo.timeOverride) {
                 startTime = entry.labInfo.timeOverride.start;
                 endTime = entry.labInfo.timeOverride.end;
                 rowSpan = calculateLabRowSpan(slotIndex, endTime);
-
-                // Calculate height ratio for proper visual sizing
-                const actualDuration = calculateDurationMinutes(startTime, endTime);
-                const slotsDuration = calculateSlotsDurationMinutes(slotIndex, rowSpan);
-                heightRatio = slotsDuration > 0 ? actualDuration / slotsDuration : 1;
+                durationHeight = calculateDurationHeight(startTime, endTime);
             }
             const batchLab = entry.labInfo[labBatch];
             const labCourse = courses[batchLab.course];
@@ -171,26 +162,20 @@ export function WeekView({
         const isPassed = isSlotPassed(endTime, currentTime, day);
         const isActive = isSlotActive(startTime, endTime, currentTime, day);
 
-        // For labs with time override, apply height ratio to match actual duration
-        const tileStyle = isLab && heightRatio < 1
-            ? { height: `${heightRatio * 100}%` }
-            : undefined;
-
         return {
             element: (
-                <div style={tileStyle} className={isLab && heightRatio < 1 ? "" : "h-full"}>
-                    <CourseTile
-                        course={course}
-                        timeSlot={`${startTime} - ${endTime}`}
-                        isActive={isActive}
-                        isPassed={isPassed}
-                        isLab={isLab}
-                        className="h-full"
-                        durationSlots={rowSpan}
-                    />
-                </div>
+                <CourseTile
+                    course={course}
+                    timeSlot={`${startTime} - ${endTime}`}
+                    isActive={isActive}
+                    isPassed={isPassed}
+                    isLab={isLab}
+                    className="h-full"
+                    durationSlots={rowSpan}
+                />
             ),
             rowSpan,
+            height: durationHeight,
         };
     };
 
@@ -233,12 +218,19 @@ export function WeekView({
                                         return null;
                                     }
 
+                                    // For multi-slot cells, use duration-based height if available
+                                    // Otherwise fall back to row-based calculation
+                                    const cellHeight = cell.rowSpan > 1
+                                        ? { height: cell.height ? `${cell.height}px` : `${44 * cell.rowSpan + (cell.rowSpan - 1)}px` }
+                                        : undefined;
+
                                     return (
                                         <td
                                             key={`${day}-${slotIndex}`}
                                             rowSpan={cell.rowSpan}
+                                            style={cellHeight}
                                             className={cn(
-                                                "bg-background p-0 align-top",
+                                                "bg-background p-0",
                                                 day === currentDayName && "bg-primary/5"
                                             )}
                                         >
