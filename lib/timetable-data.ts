@@ -554,6 +554,77 @@ export const weekSchedule: WeekSchedule = {
   },
 };
 
+// Exam schedule data
+export interface ExamEntry {
+  courseAbbreviation: string;
+  courseCode: string;
+  courseName: string;
+  date: string; // YYYY-MM-DD format
+  startTime: string; // HH:MM format
+  endTime: string; // HH:MM format
+  isElective?: boolean;
+  electiveType?: "PE-1" | "PE-2" | "OE" | "FC-2";
+}
+
+export const midSemesterExams: ExamEntry[] = [
+  {
+    courseAbbreviation: "EEFM",
+    courseCode: "HUM 3021",
+    courseName: "Engineering Economics and Financial Management",
+    date: "2026-03-06",
+    startTime: "14:15",
+    endTime: "15:45",
+  },
+  {
+    courseAbbreviation: "NPACN",
+    courseCode: "ICT 3225",
+    courseName: "Network Programming and Advanced Communication Networks",
+    date: "2026-03-07",
+    startTime: "14:15",
+    endTime: "15:45",
+  },
+  {
+    courseAbbreviation: "FC-2",
+    courseCode: "",
+    courseName: "Flexi Core 2",
+    date: "2026-03-09",
+    startTime: "14:15",
+    endTime: "15:45",
+    isElective: true,
+    electiveType: "FC-2",
+  },
+  {
+    courseAbbreviation: "PE-1",
+    courseCode: "",
+    courseName: "Program Elective 1",
+    date: "2026-03-10",
+    startTime: "14:15",
+    endTime: "15:45",
+    isElective: true,
+    electiveType: "PE-1",
+  },
+  {
+    courseAbbreviation: "PE-2",
+    courseCode: "",
+    courseName: "Program Elective 2",
+    date: "2026-03-11",
+    startTime: "14:15",
+    endTime: "15:45",
+    isElective: true,
+    electiveType: "PE-2",
+  },
+  {
+    courseAbbreviation: "OE",
+    courseCode: "",
+    courseName: "Open Elective",
+    date: "2026-03-12",
+    startTime: "14:15",
+    endTime: "15:45",
+    isElective: true,
+    electiveType: "OE",
+  },
+];
+
 // Helper function to get course details
 export function getCourseByAbbreviation(
   abbreviation: string,

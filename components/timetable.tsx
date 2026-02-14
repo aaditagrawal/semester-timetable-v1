@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { DayView } from "@/components/day-view";
 import { WeekView } from "@/components/week-view";
+import { ExamView } from "@/components/exam-view";
 import { SetupModal } from "@/components/setup-modal";
 import { SettingsDialog } from "@/components/settings-dialog";
 import { CalendarExportLink } from "@/components/calendar-export";
@@ -17,10 +18,11 @@ import { days, Day, Course } from "@/lib/timetable-data";
 import {
     CalendarIcon,
     CalendarDotsIcon,
+    NotePencilIcon,
     GearIcon,
 } from "@phosphor-icons/react";
 
-type ViewMode = "day" | "week";
+type ViewMode = "day" | "week" | "exam";
 
 export function Timetable() {
     const [viewMode, setViewMode] = useState<ViewMode>("day");
@@ -176,6 +178,15 @@ export function Timetable() {
                                 <CalendarDotsIcon className="size-3.5" />
                                 <span className="hidden sm:inline">Week</span>
                             </Button>
+                            <Button
+                                variant={viewMode === "exam" ? "default" : "ghost"}
+                                size="sm"
+                                onClick={() => setViewMode("exam")}
+                                className="gap-1.5"
+                            >
+                                <NotePencilIcon className="size-3.5" />
+                                <span className="hidden sm:inline">Exams</span>
+                            </Button>
                         </div>
 
                         {/* Day selector (only in day view) */}
@@ -213,13 +224,18 @@ export function Timetable() {
                             labBatch={labBatch}
                             onConfigureElective={() => setShowEditElectives(true)}
                         />
-                    ) : (
+                    ) : viewMode === "week" ? (
                         <WeekView
                             currentTime={currentTime}
                             selections={selections}
                             getSelectedElective={getElective}
                             labBatch={labBatch}
                             onConfigureElective={() => setShowEditElectives(true)}
+                        />
+                    ) : (
+                        <ExamView
+                            selections={selections}
+                            getSelectedElective={getElective}
                         />
                     )}
                 </main>
