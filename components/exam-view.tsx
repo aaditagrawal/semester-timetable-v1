@@ -52,8 +52,9 @@ export function ExamView({ selections, getSelectedElective }: ExamViewProps) {
     const isCRA4402 = pe2Selection?.code === "CRA 4402";
 
     const allExams = React.useMemo(() => {
-        const exams = [...midSemesterExams];
+        let exams = [...midSemesterExams];
         if (isCRA4402) {
+            exams = exams.filter((e) => e.electiveType !== "PE-2");
             exams.push({
                 courseAbbreviation: "PE-2",
                 courseCode: "CRA 4402",
