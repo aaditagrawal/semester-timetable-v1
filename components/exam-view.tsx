@@ -22,14 +22,20 @@ function formatDate(dateStr: string): string {
     });
 }
 
-function getDateStatus(dateStr: string): "past" | "today" | "upcoming" {
-    const today = new Date();
-    const todayStr = today.getFullYear() + "-" +
-        String(today.getMonth() + 1).padStart(2, "0") + "-" +
-        String(today.getDate()).padStart(2, "0");
+function getExamStatus(dateStr: string, endTime: string): "past" | "today" | "upcoming" {
+    const now = new Date();
+    const todayStr = now.getFullYear() + "-" +
+        String(now.getMonth() + 1).padStart(2, "0") + "-" +
+        String(now.getDate()).padStart(2, "0");
 
     if (dateStr < todayStr) return "past";
-    if (dateStr === todayStr) return "today";
+    if (dateStr === todayStr) {
+        const [endH, endM] = endTime.split(":").map(Number);
+        if (now.getHours() > endH || (now.getHours() === endH && now.getMinutes() >= endM)) {
+            return "past";
+        }
+        return "today";
+    }
     return "upcoming";
 }
 
@@ -42,9 +48,34 @@ function getDaysRemaining(dateStr: string): number {
 }
 
 export function ExamView({ selections, getSelectedElective }: ExamViewProps) {
-    const sortedExams = [...midSemesterExams].sort((a, b) =>
-        a.date.localeCompare(b.date)
+    const pe2Selection = getSelectedElective("PE-2");
+    const isCRA4402 = pe2Selection?.code === "CRA 4402";
+
+    const allExams = React.useMemo(() => {
+        const exams = [...midSemesterExams];
+        if (isCRA4402) {
+            exams.push({
+                courseAbbreviation: "PE-2",
+                courseCode: "CRA 4402",
+                courseName: pe2Selection!.name,
+                date: "2026-03-26",
+                startTime: "17:00",
+                endTime: "18:00",
+                isElective: true,
+                electiveType: "PE-2",
+            });
+        }
+        return exams.sort((a, b) => a.date.localeCompare(b.date));
+    }, [isCRA4402, pe2Selection]);
+
+    // Compute statuses client-side to avoid hydration mismatch with server-rendered dates
+    const [mounted, setMounted] = React.useState(false);
+    React.useEffect(() => setMounted(true), []);
+
+    const examStatuses = allExams.map((exam) =>
+        mounted ? getExamStatus(exam.date, exam.endTime) : "upcoming" as const
     );
+    const highlightIdx = mounted ? examStatuses.findIndex((s) => s !== "past") : -1;
 
     return (
         <div className="space-y-4">
@@ -59,8 +90,9 @@ export function ExamView({ selections, getSelectedElective }: ExamViewProps) {
 
             {/* Exam list */}
             <div className="space-y-2">
-                {sortedExams.map((exam, idx) => {
-                    const status = getDateStatus(exam.date);
+                {allExams.map((exam, idx) => {
+                    const status = examStatuses[idx];
+                    const isHighlighted = idx === highlightIdx;
                     const daysRemaining = getDaysRemaining(exam.date);
 
                     // Resolve elective course if applicable
@@ -85,7 +117,7 @@ export function ExamView({ selections, getSelectedElective }: ExamViewProps) {
                             className={
                                 status === "past"
                                     ? "opacity-50"
-                                    : status === "today"
+                                    : isHighlighted
                                       ? "ring-2 ring-primary bg-primary/5"
                                       : ""
                             }

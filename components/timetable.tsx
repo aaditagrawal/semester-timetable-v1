@@ -20,7 +20,10 @@ import {
     CalendarDotsIcon,
     NotePencilIcon,
     GearIcon,
+    SunIcon,
+    MoonIcon,
 } from "@phosphor-icons/react";
+import { useTheme } from "@/lib/theme-provider";
 
 type ViewMode = "day" | "week" | "exam";
 
@@ -49,6 +52,8 @@ export function Timetable() {
 
     const { currentTime, getCurrentDay, getFormattedTime, getFormattedDate } =
         useCurrentTime();
+
+    const { theme, toggleTheme } = useTheme();
 
     // Determine which day to show
     const currentDayName = getCurrentDay();
@@ -136,13 +141,26 @@ export function Timetable() {
                                 )}
                             </p>
                         </div>
-                        <Button
-                            variant="ghost"
-                            size="icon-sm"
-                            onClick={() => setShowSettings(true)}
-                        >
-                            <GearIcon className="size-4" />
-                        </Button>
+                        <div className="flex items-center gap-1">
+                            <Button
+                                variant="ghost"
+                                size="icon-sm"
+                                onClick={toggleTheme}
+                            >
+                                {theme === "dark" ? (
+                                    <SunIcon className="size-4" />
+                                ) : (
+                                    <MoonIcon className="size-4" />
+                                )}
+                            </Button>
+                            <Button
+                                variant="ghost"
+                                size="icon-sm"
+                                onClick={() => setShowSettings(true)}
+                            >
+                                <GearIcon className="size-4" />
+                            </Button>
+                        </div>
                     </div>
 
                     {/* Time display */}
