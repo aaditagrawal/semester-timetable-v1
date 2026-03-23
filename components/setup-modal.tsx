@@ -198,7 +198,7 @@ export function SetupModal({
 
     return (
         <AlertDialog open={open}>
-            <AlertDialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-md md:max-w-lg p-3 sm:p-4 max-h-[90vh] overflow-hidden flex flex-col">
+            <AlertDialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-md md:max-w-lg p-3 sm:p-4 max-h-[90dvh] overflow-hidden flex flex-col">
                 <AlertDialogHeader className="flex-shrink-0">
                     <div className="flex items-center justify-between gap-2">
                         <AlertDialogTitle className="text-sm sm:text-base">
