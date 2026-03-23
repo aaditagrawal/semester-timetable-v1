@@ -23,6 +23,13 @@ import {
 } from "@/lib/hooks/use-timetable";
 import { ElectiveGroup, LabBatch } from "@/lib/timetable-data";
 import { PlusIcon, TrashIcon, XIcon, CheckIcon, MagnifyingGlassIcon, PencilSimpleIcon } from "@phosphor-icons/react";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
 
 interface SetupModalProps {
     open: boolean;
@@ -259,6 +266,7 @@ export function SetupModal({
                         const options = getOptionsForType(type);
                         const hasOptions = options.length > 0;
                         const isRequired = type === "FC-2";
+                        const useDropdown = type === "OE" || type === "FC-2";
                         const selectedOption = getSelectedOption(type);
                         const searchQuery = searchQueries[type] || "";
                         const filteredOptions = searchQuery
@@ -271,18 +279,34 @@ export function SetupModal({
                             : options.slice(0, 10);
 
                         return (
-                            <Card key={type} size="sm">
+                            <Card key={type} size="sm" className={isRequired ? "border-primary/20 bg-primary/5" : undefined}>
                                 <CardHeader className="pb-1">
                                     <CardTitle className="flex items-center justify-between gap-2 flex-wrap">
                                         <span className="text-xs sm:text-sm">{getTypeLabel(type)}</span>
                                         <div className="flex gap-1 flex-shrink-0">
                                             <Badge variant="outline" className="text-[10px] sm:text-xs">{type === "FC-2" ? "Flexi Core" : type}</Badge>
-                                            {isRequired && <Badge variant="secondary" className="text-[10px] sm:text-xs">Required</Badge>}
+                                            {isRequired && <Badge variant="default" className="text-[10px] sm:text-xs">Required</Badge>}
                                         </div>
                                     </CardTitle>
                                 </CardHeader>
                                 <CardContent className="space-y-2">
-                                    {selectedOption ? (
+                                    {useDropdown && hasOptions ? (
+                                        <Select
+                                            value={selections[type] || ""}
+                                            onValueChange={(value) => handleSelectionChange(type, value)}
+                                        >
+                                            <SelectTrigger className="w-full">
+                                                <SelectValue placeholder={`Select ${getTypeLabel(type)}...`} />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {options.map((option) => (
+                                                    <SelectItem key={option.id} value={option.id}>
+                                                        {option.abbreviation} — {option.name}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    ) : selectedOption ? (
                                         <div className="flex items-center justify-between gap-2 p-2 bg-primary/10 border border-primary/20 rounded-none">
                                             <div className="flex-1 min-w-0">
                                                 <div className="font-medium text-xs sm:text-sm">{selectedOption.abbreviation}</div>
