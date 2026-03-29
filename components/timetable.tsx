@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { DayView } from "@/components/day-view";
 import { WeekView } from "@/components/week-view";
-import { ExamView } from "@/components/exam-view";
+// ARCHIVED: import { ExamView } from "@/components/exam-view";
 import { SetupModal } from "@/components/setup-modal";
 import { SettingsDialog } from "@/components/settings-dialog";
 import { CalendarExportLink } from "@/components/calendar-export";
@@ -25,7 +25,7 @@ import {
 } from "@phosphor-icons/react";
 import { useTheme } from "@/lib/theme-provider";
 
-type ViewMode = "day" | "week" | "exam";
+type ViewMode = "day" | "week"; // ARCHIVED: removed "exam"
 
 export function Timetable() {
     const [viewMode, setViewMode] = useState<ViewMode>("day");
@@ -196,6 +196,7 @@ export function Timetable() {
                                 <CalendarDotsIcon className="size-3.5" />
                                 <span className="hidden sm:inline">Week</span>
                             </Button>
+                            {/* ARCHIVED: Exam view button removed
                             <Button
                                 variant={viewMode === "exam" ? "default" : "ghost"}
                                 size="sm"
@@ -205,6 +206,7 @@ export function Timetable() {
                                 <NotePencilIcon className="size-3.5" />
                                 <span className="hidden sm:inline">Exams</span>
                             </Button>
+                            */}
                         </div>
 
                         {/* Day selector (only in day view) */}
@@ -251,11 +253,22 @@ export function Timetable() {
                             onConfigureElective={() => setShowEditElectives(true)}
                         />
                     ) : (
+                        <WeekView
+                            currentTime={currentTime}
+                            selections={selections}
+                            getSelectedElective={getElective}
+                            labBatch={labBatch}
+                            onConfigureElective={() => setShowEditElectives(true)}
+                        />
+                    )
+                    /* ARCHIVED: Exam view section removed
+                    ) : (
                         <ExamView
                             selections={selections}
                             getSelectedElective={getElective}
                         />
-                    )}
+                    )
+                    */}
                 </main>
 
                 {/* Footer */}

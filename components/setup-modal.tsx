@@ -334,7 +334,7 @@ export function SetupModal({
                                                     />
                                                 </div>
                                                 {searchQuery && (
-                                                    <div className="mt-2 border border-border rounded-none">
+                                                    <div className="mt-2 border border-border rounded-none max-h-48 overflow-y-auto">
                                                         {filteredOptions.length > 0 ? (
                                                             filteredOptions.map((option) => (
                                                                 <button
