@@ -203,6 +203,10 @@ export function SetupModal({
         return getOptionsForType(type).find((opt) => opt.id === selectedId);
     };
 
+    // Memoize dropdown options to prevent scroll reset on parent re-render
+    const fc2Options = React.useMemo(() => getOptionsForType("FC-2"), [electiveGroups, customElectives]);
+    const oeOptions = React.useMemo(() => getOptionsForType("OE"), [electiveGroups, customElectives]);
+
     return (
         <AlertDialog open={open}>
             <AlertDialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-md md:max-w-lg p-3 sm:p-4 max-h-[90dvh] overflow-hidden flex flex-col">
@@ -266,7 +270,7 @@ export function SetupModal({
                         const options = getOptionsForType(type);
                         const hasOptions = options.length > 0;
                         const isRequired = type === "FC-2";
-                        const useDropdown = type === "OE" || type === "FC-2";
+                        const useDropdown = type === "FC-2";
                         const selectedOption = getSelectedOption(type);
                         const searchQuery = searchQueries[type] || "";
                         const filteredOptions = searchQuery
@@ -284,7 +288,10 @@ export function SetupModal({
                                     <CardTitle className="flex items-center justify-between gap-2 flex-wrap">
                                         <span className="text-xs sm:text-sm">{getTypeLabel(type)}</span>
                                         <div className="flex gap-1 flex-shrink-0">
-                                            <Badge variant="outline" className="text-[10px] sm:text-xs">{type === "FC-2" ? "Flexi Core" : type}</Badge>
+                                            <Badge variant="outline" className="text-[10px] sm:text-xs flex items-center gap-1">
+                                                {type === "FC-2" ? "Flexi Core" : type}
+                                                {type === "OE" && <MagnifyingGlassIcon className="size-3" />}
+                                            </Badge>
                                             {isRequired && <Badge variant="default" className="text-[10px] sm:text-xs">Required</Badge>}
                                         </div>
                                     </CardTitle>
@@ -299,7 +306,7 @@ export function SetupModal({
                                                 <SelectValue placeholder={`Select ${getTypeLabel(type)}...`} />
                                             </SelectTrigger>
                                             <SelectContent>
-                                                {options.map((option) => (
+                                                {fc2Options.map((option) => (
                                                     <SelectItem key={option.id} value={option.id}>
                                                         {option.abbreviation} — {option.name}
                                                     </SelectItem>
