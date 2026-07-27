@@ -127,7 +127,9 @@ export function SettingsDialog({
 
     return (
         <AlertDialog open={open} onOpenChange={(open) => !open && onClose()}>
-            <AlertDialogContent className="max-w-sm">
+            {/* Cap the whole dialog (not just the body) so header and footer stay
+                on-screen on mobile; the body is the only scroll container. */}
+            <AlertDialogContent className="max-w-sm max-h-[90dvh] overflow-hidden flex flex-col">
                 <AlertDialogHeader>
                     <AlertDialogTitle className="text-base">Settings</AlertDialogTitle>
                     <AlertDialogDescription>
@@ -135,7 +137,7 @@ export function SettingsDialog({
                     </AlertDialogDescription>
                 </AlertDialogHeader>
 
-                <div className="space-y-3 py-2 max-h-[70vh] overflow-y-auto">
+                <div className="space-y-3 py-2 flex-1 overflow-y-auto">
                     {/* Only surface electives that still need configuring */}
                     {missingTypes.length > 0 && (
                         <>
