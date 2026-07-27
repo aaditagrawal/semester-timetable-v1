@@ -18,6 +18,7 @@ import {
     CalendarIcon,
     CalendarDotsIcon,
     GearIcon,
+    PaletteIcon,
     SunIcon,
     MoonIcon,
 } from "@phosphor-icons/react";
@@ -155,6 +156,14 @@ export function Timetable() {
                                 ) : (
                                     <MoonIcon className="size-4" />
                                 )}
+                            </Button>
+                            <Button
+                                variant="ghost"
+                                size="icon-sm"
+                                onClick={() => setShowAppearance(true)}
+                                aria-label="Appearance"
+                            >
+                                <PaletteIcon className="size-4" />
                             </Button>
                             <Button variant="ghost" size="icon-sm" onClick={() => setShowSettings(true)}>
                                 <GearIcon className="size-4" />
