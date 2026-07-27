@@ -4,7 +4,8 @@ import * as React from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Course, ExamEntry, midSemesterExams } from "@/lib/timetable-data";
+import { Course } from "@/lib/timetable-data";
+import { ExamEntry, endSemesterExams } from "@/archived/lib/exam-data";
 import { UserElectiveSelections } from "@/lib/hooks/use-timetable";
 import { CalendarIcon, ClockIcon, BookOpenIcon } from "@phosphor-icons/react";
 
@@ -49,7 +50,7 @@ function getDaysRemaining(dateStr: string): number {
 
 export function ExamView({ selections, getSelectedElective }: ExamViewProps) {
     const allExams = React.useMemo(() => {
-        return [...midSemesterExams].sort((a, b) => a.date.localeCompare(b.date));
+        return [...endSemesterExams].sort((a, b) => a.date.localeCompare(b.date));
     }, []);
 
     // Compute statuses client-side to avoid hydration mismatch with server-rendered dates

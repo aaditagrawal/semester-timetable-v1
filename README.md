@@ -1,10 +1,10 @@
-# Timetable Viewer - 3rd Year CCE-B
+# Timetable Viewer - 4th Year IT_CCE
 
-A modern, responsive, and personalized timetable management application explicitly designed for **3rd Year Computer & Communication Engineering - Section B** (Semester VI, AY 2025-26) at **Manipal Institute of Technology**.
+A modern, responsive, and personalized timetable management application explicitly designed for **4th Year Information Technology & Computer  Communication Engineering** (Semester VII, AY 2026-27) at **Manipal Institute of Technology**.
 
 ## 🚀 Features
 
-- **Personalized View**: Select your specific electives (PE-1, PE-2, OE, and Flexi Core 2) and lab batches (B1/B2) to generate a timetable tailored exactly to your schedule.
+- **Personalized View**: Pick your specific electives (PE-3 through PE-7 and the Open Elective) from the full published course baskets — including per-section room allocations — to generate a timetable tailored exactly to your schedule.
 - **Day & Week Modes**: Toggle between a focused daily view and a comprehensive weekly overview.
 - **Real-time Tracking**: 
     - **Active Class**: Automatically highlights the current period based on system time.
@@ -67,7 +67,7 @@ The timetable data is centrally managed in `lib/timetable-data.ts`. This include
 
 ## 🤝 Contributing
 
-This project is tailored for CCE-B. If you find any discrepancies in the schedule or have feature requests, feel free to open a PR or an issue!
+This project is tailored for IT_CCE Sem VII. If you find any discrepancies in the schedule or have feature requests, feel free to open a PR or an issue!
 
 ---
 

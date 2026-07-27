@@ -21,15 +21,27 @@ import {
     UserElectiveSelections,
     CustomElective,
 } from "@/lib/hooks/use-timetable";
-import { ElectiveGroup, LabBatch } from "@/lib/timetable-data";
-import { PlusIcon, TrashIcon, XIcon, CheckIcon, MagnifyingGlassIcon, PencilSimpleIcon } from "@phosphor-icons/react";
 import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select";
+    ElectiveGroup,
+    ElectiveType,
+    electiveTypes,
+    electiveTypeLabels,
+} from "@/lib/timetable-data";
+import {
+    HOME_DEPARTMENT,
+    countHomeDepartment,
+    isHomeDepartment,
+    searchOptions,
+} from "@/lib/elective-search";
+import {
+    PlusIcon,
+    TrashIcon,
+    XIcon,
+    CheckIcon,
+    MagnifyingGlassIcon,
+    PencilSimpleIcon,
+    FunnelIcon,
+} from "@phosphor-icons/react";
 
 interface SetupModalProps {
     open: boolean;
@@ -59,9 +71,7 @@ export function SetupModal({
     const [selections, setSelections] = useState<UserElectiveSelections>(
         initialSelections || {}
     );
-    const [showAddCustom, setShowAddCustom] = useState<
-        "PE-1" | "PE-2" | "OE" | "FC-2" | null
-    >(null);
+    const [showAddCustom, setShowAddCustom] = useState<ElectiveType | null>(null);
     const [editingCustomId, setEditingCustomId] = useState<string | null>(null);
     const [customForm, setCustomForm] = useState({
         abbreviation: "",
@@ -71,6 +81,12 @@ export function SetupModal({
         room: "",
     });
     const [searchQueries, setSearchQueries] = useState<Record<string, string>>({});
+    // Per-basket "ICT only" toggle. Absent means on: this section takes ICT
+    // courses for its PEs, so the ~45 other-department options are noise by
+    // default. Explicit `false` opts a basket back into the full catalogue.
+    const [homeOnlyByType, setHomeOnlyByType] = useState<
+        Partial<Record<ElectiveType, boolean>>
+    >({});
 
     // Update selections when initialSelections change
     React.useEffect(() => {
@@ -79,10 +95,7 @@ export function SetupModal({
         }
     }, [initialSelections]);
 
-    const handleSelectionChange = (
-        type: "PE-1" | "PE-2" | "OE" | "FC-2" | "labBatch",
-        value: string
-    ) => {
+    const handleSelectionChange = (type: ElectiveType, value: string) => {
         setSelections((prev) => ({
             ...prev,
             [type]: value,
@@ -169,43 +182,19 @@ export function SetupModal({
         onSave(selections);
     };
 
-    const getOptionsForType = (type: "PE-1" | "PE-2" | "OE" | "FC-2") => {
-        const group = electiveGroups.find((g) => g.type === type);
-        const groupOptions = group?.options || [];
-        const customOptions = customElectives
-            .filter((e) => e.groupType === type)
-            .map(({ groupType, ...rest }) => rest);
-        return [...groupOptions, ...customOptions];
-    };
+    // `electiveGroups` arrives from getAllElectiveGroups(), which has already
+    // merged the user's custom electives into each group. Appending them again
+    // here would render every custom course twice, with a duplicate React key.
+    const getOptionsForType = (type: ElectiveType) =>
+        electiveGroups.find((g) => g.type === type)?.options ?? [];
 
-    const getTypeLabel = (type: string) => {
-        switch (type) {
-            case "PE-1":
-                return "Program Elective 1";
-            case "PE-2":
-                return "Program Elective 2";
-            case "OE":
-                return "Open Elective";
-            case "FC-2":
-                return "Flexi Core 2";
-            default:
-                return type;
-        }
-    };
+    const getTypeLabel = (type: ElectiveType) => electiveTypeLabels[type];
 
-    const isFormComplete = () => {
-        return Boolean(selections.labBatch && selections["FC-2"]);
-    };
-
-    const getSelectedOption = (type: "PE-1" | "PE-2" | "OE" | "FC-2") => {
+    const getSelectedOption = (type: ElectiveType) => {
         const selectedId = selections[type];
         if (!selectedId) return null;
         return getOptionsForType(type).find((opt) => opt.id === selectedId);
     };
-
-    // Memoize dropdown options to prevent scroll reset on parent re-render
-    const fc2Options = React.useMemo(() => getOptionsForType("FC-2"), [electiveGroups, customElectives]);
-    const oeOptions = React.useMemo(() => getOptionsForType("OE"), [electiveGroups, customElectives]);
 
     return (
         <AlertDialog open={open}>
@@ -222,98 +211,67 @@ export function SetupModal({
                         )}
                     </div>
                     <AlertDialogDescription className="text-xs">
-                        Select your lab batch and elective courses.
+                        Pick your elective courses for this semester.
                     </AlertDialogDescription>
                 </AlertDialogHeader>
 
                 <div className="flex-1 overflow-y-auto space-y-3 py-2 -mx-3 sm:-mx-4 px-3 sm:px-4">
-                    {/* Lab Batch Selection */}
-                    <Card size="sm" className="border-primary/20 bg-primary/5">
-                        <CardHeader className="pb-1">
-                            <CardTitle className="flex items-center justify-between gap-2 flex-wrap">
-                                <span className="text-xs sm:text-sm">Lab Batch</span>
-                                <Badge variant="default" className="text-[10px] sm:text-xs">Required</Badge>
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="flex flex-col sm:flex-row gap-2">
-                                <Button
-                                    variant={selections.labBatch === "B1" ? "default" : "outline"}
-                                    className="flex-1 min-w-0 h-auto py-2 px-3"
-                                    size="sm"
-                                    onClick={() => handleSelectionChange("labBatch", "B1")}
-                                >
-                                    <div className="text-left w-full overflow-hidden">
-                                        <div className="font-medium text-xs sm:text-sm">Batch 1 (B1)</div>
-                                        <div className="text-[10px] sm:text-xs opacity-70 truncate">MON: MADL, THU: NDPL</div>
-                                    </div>
-                                </Button>
-                                <Button
-                                    variant={selections.labBatch === "B2" ? "default" : "outline"}
-                                    className="flex-1 min-w-0 h-auto py-2 px-3"
-                                    size="sm"
-                                    onClick={() => handleSelectionChange("labBatch", "B2")}
-                                >
-                                    <div className="text-left w-full overflow-hidden">
-                                        <div className="font-medium text-xs sm:text-sm">Batch 2 (B2)</div>
-                                        <div className="text-[10px] sm:text-xs opacity-70 truncate">MON: NDPL, THU: MADL</div>
-                                    </div>
-                                </Button>
-                            </div>
-                        </CardContent>
-                    </Card>
-
-                    <Separator />
-
                     {/* Elective Groups */}
-                    {(["FC-2", "PE-1", "PE-2", "OE"] as const).map((type) => {
+                    {electiveTypes.map((type) => {
                         const options = getOptionsForType(type);
                         const hasOptions = options.length > 0;
-                        const isRequired = type === "FC-2";
-                        const useDropdown = type === "FC-2";
                         const selectedOption = getSelectedOption(type);
                         const searchQuery = searchQueries[type] || "";
-                        const filteredOptions = searchQuery
-                            ? options.filter(
-                                (opt) =>
-                                    opt.abbreviation.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                                    opt.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                                    opt.code.toLowerCase().includes(searchQuery.toLowerCase())
-                            )
-                            : options.slice(0, 10);
+
+                        const homeCount = countHomeDepartment(options);
+                        // Only offer the filter where it would actually narrow
+                        // things — the OE basket has no ICT courses by design.
+                        const canFilterHome = homeCount > 0 && homeCount < options.length;
+                        const homeOnly = canFilterHome && homeOnlyByType[type] !== false;
+
+                        const scoped = homeOnly ? options.filter(isHomeDepartment) : options;
+                        const filteredOptions = searchOptions(scoped, searchQuery);
+                        // Don't dead-end a search: if the department filter is
+                        // what's hiding the matches, say so and offer a way out.
+                        const hiddenByFilter =
+                            homeOnly && filteredOptions.length === 0
+                                ? searchOptions(options, searchQuery).length
+                                : 0;
 
                         return (
-                            <Card key={type} size="sm" className={isRequired ? "border-primary/20 bg-primary/5" : undefined}>
+                            <Card key={type} size="sm">
                                 <CardHeader className="pb-1">
                                     <CardTitle className="flex items-center justify-between gap-2 flex-wrap">
                                         <span className="text-xs sm:text-sm">{getTypeLabel(type)}</span>
-                                        <div className="flex gap-1 flex-shrink-0">
-                                            <Badge variant="outline" className="text-[10px] sm:text-xs flex items-center gap-1">
-                                                {type === "FC-2" ? "Flexi Core" : type}
-                                                {type === "OE" && <MagnifyingGlassIcon className="size-3" />}
+                                        <div className="flex items-center gap-1 flex-shrink-0">
+                                            {canFilterHome && !selectedOption && (
+                                                <Button
+                                                    variant={homeOnly ? "default" : "outline"}
+                                                    size="xs"
+                                                    className="h-6 px-2 text-[10px] gap-1"
+                                                    aria-pressed={homeOnly}
+                                                    onClick={() =>
+                                                        setHomeOnlyByType((prev) => ({
+                                                            ...prev,
+                                                            [type]: !homeOnly,
+                                                        }))
+                                                    }
+                                                >
+                                                    <FunnelIcon className="size-3" />
+                                                    {HOME_DEPARTMENT} only
+                                                    <span className="opacity-60">
+                                                        {homeOnly ? homeCount : options.length}
+                                                    </span>
+                                                </Button>
+                                            )}
+                                            <Badge variant="outline" className="text-[10px] sm:text-xs">
+                                                {type}
                                             </Badge>
-                                            {isRequired && <Badge variant="default" className="text-[10px] sm:text-xs">Required</Badge>}
                                         </div>
                                     </CardTitle>
                                 </CardHeader>
                                 <CardContent className="space-y-2">
-                                    {useDropdown && hasOptions ? (
-                                        <Select
-                                            value={selections[type] || ""}
-                                            onValueChange={(value) => handleSelectionChange(type, value)}
-                                        >
-                                            <SelectTrigger className="w-full">
-                                                <SelectValue placeholder={`Select ${getTypeLabel(type)}...`} />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                {fc2Options.map((option) => (
-                                                    <SelectItem key={option.id} value={option.id}>
-                                                        {option.abbreviation} — {option.name}
-                                                    </SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
-                                    ) : selectedOption ? (
+                                    {selectedOption ? (
                                         <div className="flex items-center justify-between gap-2 p-2 bg-primary/10 border border-primary/20 rounded-none">
                                             <div className="flex-1 min-w-0">
                                                 <div className="font-medium text-xs sm:text-sm">{selectedOption.abbreviation}</div>
@@ -334,36 +292,59 @@ export function SetupModal({
                                                 <div className="relative">
                                                     <MagnifyingGlassIcon className="absolute left-2 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
                                                     <Input
-                                                        placeholder={`Search ${getTypeLabel(type)}...`}
+                                                        placeholder="Search by abbreviation, code or name..."
                                                         value={searchQuery}
                                                         onChange={(e) => setSearchQueries((prev) => ({ ...prev, [type]: e.target.value }))}
                                                         className="pl-8 text-xs"
                                                     />
                                                 </div>
-                                                {searchQuery && (
-                                                    <div className="mt-2 border border-border rounded-none max-h-48 overflow-y-auto">
-                                                        {filteredOptions.length > 0 ? (
-                                                            filteredOptions.map((option) => (
-                                                                <button
-                                                                    key={option.id}
-                                                                    onClick={() => handleSelectionChange(type, option.id)}
-                                                                    className="w-full flex items-start gap-2 p-2 text-left hover:bg-muted/50 transition-colors border-b border-border last:border-0"
-                                                                >
-                                                                    <div className="flex-1">
-                                                                        <div className="font-medium text-xs">{option.abbreviation}</div>
-                                                                        <div className="text-xs text-muted-foreground">{option.name}</div>
-                                                                        <div className="text-xs text-muted-foreground/70">{option.code}</div>
+                                                {/* Always shown, so the basket reads as a pick-list rather than
+                                                    something you have to fill in yourself. */}
+                                                <div className="mt-2 border border-border rounded-none max-h-48 overflow-y-auto">
+                                                    {filteredOptions.length > 0 ? (
+                                                        filteredOptions.map((option) => (
+                                                            <button
+                                                                key={option.id}
+                                                                onClick={() => handleSelectionChange(type, option.id)}
+                                                                className="w-full flex items-start gap-2 p-2 text-left hover:bg-muted/50 transition-colors border-b border-border last:border-0"
+                                                            >
+                                                                <div className="flex-1">
+                                                                    <div className="font-medium text-xs">
+                                                                        {option.abbreviation}
+                                                                        {option.room && (
+                                                                            <span className="ml-1.5 font-normal text-muted-foreground/70">
+                                                                                {option.room}
+                                                                            </span>
+                                                                        )}
                                                                     </div>
-                                                                    <CheckIcon className="size-3.5 text-muted-foreground shrink-0 mt-1" />
-                                                                </button>
-                                                            ))
-                                                        ) : (
-                                                            <div className="p-3 text-xs text-muted-foreground text-center">
-                                                                No results found
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                )}
+                                                                    <div className="text-xs text-muted-foreground">{option.name}</div>
+                                                                    <div className="text-xs text-muted-foreground/70">{option.code}</div>
+                                                                </div>
+                                                                <CheckIcon className="size-3.5 text-muted-foreground shrink-0 mt-1" />
+                                                            </button>
+                                                        ))
+                                                    ) : hiddenByFilter > 0 ? (
+                                                        <div className="p-3 text-xs text-muted-foreground text-center space-y-1.5">
+                                                            <p>
+                                                                No {HOME_DEPARTMENT} match — {hiddenByFilter} in other
+                                                                department{hiddenByFilter > 1 ? "s" : ""}
+                                                            </p>
+                                                            <Button
+                                                                variant="outline"
+                                                                size="xs"
+                                                                onClick={() =>
+                                                                    setHomeOnlyByType((prev) => ({ ...prev, [type]: false }))
+                                                                }
+                                                            >
+                                                                Search all departments
+                                                            </Button>
+                                                        </div>
+                                                    ) : (
+                                                        <div className="p-3 text-xs text-muted-foreground text-center">
+                                                            No results found
+                                                        </div>
+                                                    )}
+                                                </div>
                                             </div>
                                         </>
                                     ) : (
@@ -505,7 +486,7 @@ export function SetupModal({
                                             className="w-full justify-start"
                                         >
                                             <PlusIcon className="size-3 mr-1" />
-                                            Add custom {type}
+                                            {type} not listed? Add it manually
                                         </Button>
                                     )}
                                 </CardContent>
@@ -521,7 +502,7 @@ export function SetupModal({
                         {isEditing && onClose && (
                             <AlertDialogCancel onClick={onClose} size="sm">Cancel</AlertDialogCancel>
                         )}
-                        <AlertDialogAction onClick={handleSave} disabled={!isFormComplete()} size="sm">
+                        <AlertDialogAction onClick={handleSave} size="sm">
                             {isEditing ? "Save Changes" : "Save & Continue"}
                         </AlertDialogAction>
                     </AlertDialogFooter>

@@ -14,6 +14,7 @@ import {
     isSlotPassed,
     isSlotActive,
     Course,
+    ElectiveType,
     LabBatch,
     timeToMinutes,
 } from "@/lib/timetable-data";
@@ -24,14 +25,14 @@ interface DayViewProps {
     day: Day;
     currentTime: Date;
     selections: UserElectiveSelections;
-    getSelectedElective: (type: "PE-1" | "PE-2" | "OE" | "FC-2") => Course | null;
+    getSelectedElective: (type: ElectiveType) => Course | null;
     labBatch: LabBatch | null;
     onConfigureElective?: () => void;
 }
 
 interface ClassEntry {
     course: Course | null;
-    electiveType?: "PE-1" | "PE-2" | "OE" | "FC-2";
+    electiveType?: ElectiveType;
     isUnconfigured?: boolean;
     timeSlot: string;
     startTime: string;

@@ -56,7 +56,7 @@ export default function NotFound() {
 
         <div className="mt-8 text-center">
           <p className="text-muted-foreground text-xs">
-            MIT Manipal CCE-B Timetable
+            MIT Manipal IT_CCE Timetable
           </p>
         </div>
       </div>

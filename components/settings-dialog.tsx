@@ -17,6 +17,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { UserElectiveSelections, CustomElective } from "@/lib/hooks/use-timetable";
+import { electiveTypes, electiveTypeLabels } from "@/lib/timetable-data";
 import {
     ExportIcon,
     UploadIcon,
@@ -123,34 +124,14 @@ export function SettingsDialog({
                             <CardTitle className="text-xs">Current Configuration</CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-1.5">
-                            <div className="flex items-center justify-between text-xs">
-                                <span className="text-muted-foreground">Lab Batch</span>
-                                <Badge variant="outline">{selections.labBatch || "Not set"}</Badge>
-                            </div>
-                            <div className="flex items-center justify-between text-xs">
-                                <span className="text-muted-foreground">Flexi Core 2</span>
-                                <Badge variant="outline">
-                                    {selections["FC-2"] ? "Selected" : "Not set"}
-                                </Badge>
-                            </div>
-                            <div className="flex items-center justify-between text-xs">
-                                <span className="text-muted-foreground">PE-1</span>
-                                <Badge variant={selections["PE-1"] ? "outline" : "secondary"}>
-                                    {selections["PE-1"] ? "Selected" : "Optional"}
-                                </Badge>
-                            </div>
-                            <div className="flex items-center justify-between text-xs">
-                                <span className="text-muted-foreground">PE-2</span>
-                                <Badge variant={selections["PE-2"] ? "outline" : "secondary"}>
-                                    {selections["PE-2"] ? "Selected" : "Optional"}
-                                </Badge>
-                            </div>
-                            <div className="flex items-center justify-between text-xs">
-                                <span className="text-muted-foreground">OE</span>
-                                <Badge variant={selections["OE"] ? "outline" : "secondary"}>
-                                    {selections["OE"] ? "Selected" : "Optional"}
-                                </Badge>
-                            </div>
+                            {electiveTypes.map((type) => (
+                                <div key={type} className="flex items-center justify-between text-xs">
+                                    <span className="text-muted-foreground">{electiveTypeLabels[type]}</span>
+                                    <Badge variant={selections[type] ? "outline" : "secondary"}>
+                                        {selections[type] ? "Selected" : "Not set"}
+                                    </Badge>
+                                </div>
+                            ))}
                         </CardContent>
                     </Card>
 

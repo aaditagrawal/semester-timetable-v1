@@ -13,6 +13,7 @@ import {
     isSlotPassed,
     isSlotActive,
     Course,
+    ElectiveType,
     LabBatch,
     timeToMinutes,
 } from "@/lib/timetable-data";
@@ -21,7 +22,7 @@ import { UserElectiveSelections } from "@/lib/hooks/use-timetable";
 interface WeekViewProps {
     currentTime: Date;
     selections: UserElectiveSelections;
-    getSelectedElective: (type: "PE-1" | "PE-2" | "OE" | "FC-2") => Course | null;
+    getSelectedElective: (type: ElectiveType) => Course | null;
     labBatch: LabBatch | null;
     onConfigureElective?: () => void;
 }
