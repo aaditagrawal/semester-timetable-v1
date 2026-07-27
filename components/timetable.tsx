@@ -9,6 +9,7 @@ import { DayView } from "@/components/day-view";
 import { WeekView } from "@/components/week-view";
 import { SetupModal } from "@/components/setup-modal";
 import { SettingsDialog } from "@/components/settings-dialog";
+import { AppearanceDialog } from "@/components/appearance-dialog";
 import { CalendarExportLink } from "@/components/calendar-export";
 import { useTimetable } from "@/lib/hooks/use-timetable";
 import { useCurrentTime } from "@/lib/hooks/use-current-time";
@@ -31,6 +32,7 @@ export function Timetable() {
     const [selectedDay, setSelectedDay] = useState<Day | null>(null);
     const [showSettings, setShowSettings] = useState(false);
     const [showEditElectives, setShowEditElectives] = useState(false);
+    const [showAppearance, setShowAppearance] = useState(false);
 
     const {
         selections,
@@ -121,6 +123,15 @@ export function Timetable() {
                     setShowSettings(false);
                     setShowEditElectives(true);
                 }}
+                onEditAppearance={() => {
+                    setShowSettings(false);
+                    setShowAppearance(true);
+                }}
+            />
+
+            <AppearanceDialog
+                open={showAppearance}
+                onClose={() => setShowAppearance(false)}
             />
 
             <div className="max-w-4xl mx-auto px-4 py-6">

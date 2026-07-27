@@ -18,7 +18,6 @@ import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { AppearanceSettings } from "@/components/appearance-settings";
 import { UserElectiveSelections, CustomElective } from "@/lib/hooks/use-timetable";
 import { electiveTypes, electiveTypeLabels } from "@/lib/timetable-data";
 import {
@@ -28,6 +27,7 @@ import {
     GearIcon,
     CopyIcon,
     CheckIcon,
+    PaletteIcon,
 } from "@phosphor-icons/react";
 
 interface SettingsDialogProps {
@@ -41,6 +41,7 @@ interface SettingsDialogProps {
     onImport: (json: string) => boolean;
     onReset: () => void;
     onEditElectives: () => void;
+    onEditAppearance: () => void;
 }
 
 export function SettingsDialog({
@@ -53,6 +54,7 @@ export function SettingsDialog({
     onImport,
     onReset,
     onEditElectives,
+    onEditAppearance,
 }: SettingsDialogProps) {
     const missingTypes = electiveTypes.filter((type) => !selections[type]);
 
@@ -149,10 +151,6 @@ export function SettingsDialog({
                         </>
                     )}
 
-                    <AppearanceSettings />
-
-                    <Separator />
-
                     {/* Display preferences */}
                     <div className="flex items-start justify-between gap-3">
                         <div className="space-y-0.5">
@@ -183,6 +181,16 @@ export function SettingsDialog({
                         >
                             <GearIcon className="size-4 mr-2" />
                             Edit Electives
+                        </Button>
+
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            className="w-full justify-start"
+                            onClick={onEditAppearance}
+                        >
+                            <PaletteIcon className="size-4 mr-2" />
+                            Appearance
                         </Button>
 
                         <Button

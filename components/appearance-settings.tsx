@@ -114,7 +114,7 @@ export function AppearanceSettings() {
     return (
         <div className="space-y-3">
             <div className="flex items-center justify-between gap-2">
-                <Label className="text-xs">Appearance</Label>
+                <Label className="text-xs">Mode</Label>
                 <div className="flex items-center gap-1 bg-muted/30 p-0.5">
                     <Button
                         variant={isDark ? "ghost" : "default"}
