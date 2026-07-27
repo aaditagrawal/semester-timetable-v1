@@ -47,6 +47,8 @@ export function SettingsDialog({
     onReset,
     onEditElectives,
 }: SettingsDialogProps) {
+    const missingTypes = electiveTypes.filter((type) => !selections[type]);
+
     const [showImport, setShowImport] = useState(false);
     const [importText, setImportText] = useState("");
     const [importError, setImportError] = useState<string | null>(null);
@@ -118,24 +120,27 @@ export function SettingsDialog({
                 </AlertDialogHeader>
 
                  <div className="space-y-3 py-2 max-h-[70vh] overflow-y-auto">
-                    {/* Current Config Summary */}
-                    <Card size="sm">
-                        <CardHeader className="pb-2">
-                            <CardTitle className="text-xs">Current Configuration</CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-1.5">
-                            {electiveTypes.map((type) => (
-                                <div key={type} className="flex items-center justify-between text-xs">
-                                    <span className="text-muted-foreground">{electiveTypeLabels[type]}</span>
-                                    <Badge variant={selections[type] ? "outline" : "secondary"}>
-                                        {selections[type] ? "Selected" : "Not set"}
-                                    </Badge>
-                                </div>
-                            ))}
-                        </CardContent>
-                    </Card>
+                    {/* Only surface electives that still need configuring */}
+                    {missingTypes.length > 0 && (
+                        <>
+                            <Card size="sm">
+                                <CardHeader className="pb-2">
+                                    <CardTitle className="text-xs">
+                                        {missingTypes.length} elective{missingTypes.length > 1 ? "s" : ""} not set
+                                    </CardTitle>
+                                </CardHeader>
+                                <CardContent className="flex flex-wrap gap-1.5">
+                                    {missingTypes.map((type) => (
+                                        <Badge key={type} variant="secondary" className="text-[10px]">
+                                            {electiveTypeLabels[type]}
+                                        </Badge>
+                                    ))}
+                                </CardContent>
+                            </Card>
 
-                    <Separator />
+                            <Separator />
+                        </>
+                    )}
 
                     {/* Actions */}
                     <div className="space-y-2">
