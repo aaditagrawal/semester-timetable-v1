@@ -43,6 +43,40 @@ export const electiveTypeLabels: Record<ElectiveType, string> = {
   OE: "Open Elective",
 };
 
+/**
+ * Stored in `selections` where an option id would go, to mean "I'm doing the
+ * student project instead of taking a course in this basket".
+ *
+ * It is deliberately a selection value rather than an entry in the basket: a
+ * project is not a course, has no slot on the section grid, and the point of
+ * choosing it is that those periods go away. Everything that resolves a
+ * selection to a course returns null for it, and the renderers drop the slot
+ * rather than draw an unconfigured placeholder.
+ *
+ * Generated option ids are `<course-code>[-<section>]` and user-added ones are
+ * `custom-…`, so this can never collide with a real course.
+ */
+export const STUDENT_PROJECT_ID = "student-project";
+
+export const STUDENT_PROJECT_LABEL = "Student Project";
+
+/**
+ * Baskets the student project can be taken in place of. Only the open elective
+ * is optional this semester — the five program electives are compulsory.
+ */
+export const projectEligibleTypes: ElectiveType[] = ["OE"];
+
+export function isProjectEligible(type: ElectiveType): boolean {
+  return projectEligibleTypes.includes(type);
+}
+
+/** True when this basket's slots should disappear from the grid entirely. */
+export function isStudentProjectSelection(
+  selectedId: string | undefined,
+): boolean {
+  return selectedId === STUDENT_PROJECT_ID;
+}
+
 export interface ElectiveOption extends Course {
   id: string;
 }

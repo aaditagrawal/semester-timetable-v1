@@ -22,7 +22,12 @@ import {
     CustomElective,
     TileLabelMode,
 } from "@/lib/hooks/use-timetable";
-import { electiveTypes, electiveTypeLabels } from "@/lib/timetable-data";
+import {
+    electiveTypes,
+    electiveTypeLabels,
+    isStudentProjectSelection,
+    STUDENT_PROJECT_LABEL,
+} from "@/lib/timetable-data";
 import {
     ExportIcon,
     UploadIcon,
@@ -31,6 +36,7 @@ import {
     CopyIcon,
     CheckIcon,
     PaletteIcon,
+    FlaskIcon,
 } from "@phosphor-icons/react";
 
 interface SettingsDialogProps {
@@ -64,6 +70,11 @@ export function SettingsDialog({
     onEditAppearance,
 }: SettingsDialogProps) {
     const missingTypes = electiveTypes.filter((type) => !selections[type]);
+    // Baskets swapped for the student project are set, not missing — but they
+    // leave holes in the grid, so say why rather than let it read as a bug.
+    const projectTypes = electiveTypes.filter((type) =>
+        isStudentProjectSelection(selections[type])
+    );
 
     const [showImport, setShowImport] = useState(false);
     const [importText, setImportText] = useState("");
@@ -153,6 +164,34 @@ export function SettingsDialog({
                                             {electiveTypeLabels[type]}
                                         </Badge>
                                     ))}
+                                </CardContent>
+                            </Card>
+
+                            <Separator />
+                        </>
+                    )}
+
+                    {projectTypes.length > 0 && (
+                        <>
+                            <Card size="sm">
+                                <CardHeader className="pb-2">
+                                    <CardTitle className="text-xs flex items-center gap-1.5">
+                                        <FlaskIcon className="size-3.5" />
+                                        {STUDENT_PROJECT_LABEL}
+                                    </CardTitle>
+                                </CardHeader>
+                                <CardContent className="space-y-1.5">
+                                    <div className="flex flex-wrap gap-1.5">
+                                        {projectTypes.map((type) => (
+                                            <Badge key={type} variant="secondary" className="text-[10px]">
+                                                No {electiveTypeLabels[type]}
+                                            </Badge>
+                                        ))}
+                                    </div>
+                                    <p className="text-[10px] text-muted-foreground">
+                                        Those periods are left off your timetable. Change it under Edit
+                                        Electives.
+                                    </p>
                                 </CardContent>
                             </Card>
 

@@ -13,6 +13,7 @@ import {
     Day,
     Course,
     courses,
+    isStudentProjectSelection,
     LabBatch,
 } from "@/lib/timetable-data";
 import { UserElectiveSelections, CustomElective } from "@/lib/hooks/use-timetable";
@@ -88,6 +89,9 @@ function getSelectedElective(
 ): ElectiveOption | null {
     const selectedId = selections[type];
     if (!selectedId) return null;
+    // Doing the student project instead: there is no class to put in the
+    // calendar, so the slot drops out exactly as an unselected one does.
+    if (isStudentProjectSelection(selectedId)) return null;
     const options = getElectiveOptions(type, customElectives);
     return options.find((opt) => opt.id === selectedId) || null;
 }
@@ -156,7 +160,8 @@ function collectEvents(
                     customElectives
                 );
                 if (!elective) {
-                    // Skip unselected electives
+                    // Nothing to put on the calendar — the basket is either
+                    // still unpicked or traded for the student project.
                     continue;
                 }
                 course = elective;

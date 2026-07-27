@@ -23,6 +23,8 @@ interface WeekViewProps {
     currentTime: Date;
     selections: UserElectiveSelections;
     getSelectedElective: (type: ElectiveType) => Course | null;
+    /** Baskets traded for the student project — their cells render as empty. */
+    isStudentProject?: (type: ElectiveType) => boolean;
     labBatch: LabBatch | null;
     onConfigureElective?: () => void;
     showRoom?: boolean;
@@ -63,6 +65,7 @@ export function WeekView({
     currentTime,
     selections,
     getSelectedElective,
+    isStudentProject,
     labBatch,
     onConfigureElective,
     showRoom = false,
@@ -134,6 +137,12 @@ export function WeekView({
                 isLab = true;
             }
         } else if (entry.isElective && entry.electiveType) {
+            // Traded for the student project: render the same blank cell an
+            // unscheduled period gets, not a placeholder inviting a course.
+            if (isStudentProject?.(entry.electiveType)) {
+                return { element: <div className="h-full min-h-[44px] bg-muted/5" />, rowSpan: 1 };
+            }
+
             course = getSelectedElective(entry.electiveType);
             const isPassed = isSlotPassed(endTime, currentTime, day);
 
