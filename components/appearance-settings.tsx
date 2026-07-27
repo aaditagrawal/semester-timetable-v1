@@ -3,6 +3,9 @@
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
+import { TileDisplaySettings } from "@/components/tile-display-settings";
+import { TileLabelMode } from "@/lib/hooks/use-timetable";
 import { useTheme } from "@/lib/theme-provider";
 import {
     ACCENT_PRESETS,
@@ -104,7 +107,19 @@ function SwatchRow({
     );
 }
 
-export function AppearanceSettings() {
+interface AppearanceSettingsProps {
+    tileLabel: TileLabelMode;
+    onTileLabelChange: (value: TileLabelMode) => void;
+    showRoom: boolean;
+    onShowRoomChange: (value: boolean) => void;
+}
+
+export function AppearanceSettings({
+    tileLabel,
+    onTileLabelChange,
+    showRoom,
+    onShowRoomChange,
+}: AppearanceSettingsProps) {
     const { theme, settings, setMode, setAccent, setBackground, applyTemplate, resetTheme } =
         useTheme();
 
@@ -191,6 +206,19 @@ export function AppearanceSettings() {
                 </p>
             </div>
 
+            <Separator />
+
+            <TileDisplaySettings
+                tileLabel={tileLabel}
+                onTileLabelChange={onTileLabelChange}
+                showRoom={showRoom}
+                onShowRoomChange={onShowRoomChange}
+            />
+
+            <Separator />
+
+            {/* Resets the theme only — tile display prefs belong to the timetable
+                settings and are cleared by "Reset All Settings" instead. */}
             <Button
                 variant="outline"
                 size="sm"

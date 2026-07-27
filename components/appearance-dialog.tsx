@@ -10,10 +10,15 @@ import {
     AlertDialogCancel,
 } from "@/components/ui/alert-dialog";
 import { AppearanceSettings } from "@/components/appearance-settings";
+import { TileLabelMode } from "@/lib/hooks/use-timetable";
 
 interface AppearanceDialogProps {
     open: boolean;
     onClose: () => void;
+    tileLabel: TileLabelMode;
+    onTileLabelChange: (value: TileLabelMode) => void;
+    showRoom: boolean;
+    onShowRoomChange: (value: boolean) => void;
 }
 
 /**
@@ -21,7 +26,14 @@ interface AppearanceDialogProps {
  * grid and two swatch rows are taller than everything else in that dialog put
  * together, and they are a once-in-a-while decision.
  */
-export function AppearanceDialog({ open, onClose }: AppearanceDialogProps) {
+export function AppearanceDialog({
+    open,
+    onClose,
+    tileLabel,
+    onTileLabelChange,
+    showRoom,
+    onShowRoomChange,
+}: AppearanceDialogProps) {
     return (
         <AlertDialog open={open} onOpenChange={(next) => !next && onClose()}>
             <AlertDialogContent className="max-w-sm">
@@ -33,7 +45,12 @@ export function AppearanceDialog({ open, onClose }: AppearanceDialogProps) {
                 </AlertDialogHeader>
 
                 <div className="py-2 max-h-[70vh] overflow-y-auto">
-                    <AppearanceSettings />
+                    <AppearanceSettings
+                        tileLabel={tileLabel}
+                        onTileLabelChange={onTileLabelChange}
+                        showRoom={showRoom}
+                        onShowRoomChange={onShowRoomChange}
+                    />
                 </div>
 
                 <AlertDialogFooter>

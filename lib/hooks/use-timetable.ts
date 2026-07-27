@@ -14,6 +14,7 @@ const STORAGE_KEY = "timetable-electives";
 const CUSTOM_ELECTIVES_KEY = "timetable-custom-electives";
 const SETUP_DONE_KEY = "timetable-setup-done";
 const SHOW_ROOM_KEY = "timetable-show-room";
+const TILE_LABEL_KEY = "timetable-tile-label";
 
 /** Bumped for Sem VII: the elective baskets changed, so v1 needs filtering. */
 const EXPORT_VERSION = 2;
@@ -21,6 +22,9 @@ const EXPORT_VERSION = 2;
 export type UserElectiveSelections = Partial<Record<ElectiveType, string>> & {
     labBatch?: LabBatch;
 };
+
+/** What a tile shows as its course label: "HCI [G]" vs "ICT 4403". */
+export type TileLabelMode = "abbreviation" | "code";
 
 export interface CustomElective extends ElectiveOption {
     groupType: ElectiveType;
@@ -32,6 +36,8 @@ export interface TimetableExport {
     customElectives: CustomElective[];
     /** Display preference; absent in older backups, which fall back to off. */
     showRoom?: boolean;
+    /** Display preference; absent in older backups, which fall back to abbreviation. */
+    tileLabel?: TileLabelMode;
     exportedAt: string;
 }
 
@@ -45,12 +51,18 @@ function readShowRoom(): boolean {
     return localStorage.getItem(SHOW_ROOM_KEY) === "1";
 }
 
+function readTileLabel(): TileLabelMode {
+    if (typeof window === "undefined") return "abbreviation";
+    return localStorage.getItem(TILE_LABEL_KEY) === "code" ? "code" : "abbreviation";
+}
+
 export function useTimetable() {
     const [selections, setSelections] = useState<UserElectiveSelections>({});
     const [customElectives, setCustomElectives] = useState<CustomElective[]>([]);
     const [isSetupComplete, setIsSetupComplete] = useState<boolean>(false);
     const [isLoading, setIsLoading] = useState(true);
     const [showRoom, setShowRoomState] = useState<boolean>(readShowRoom);
+    const [tileLabel, setTileLabelState] = useState<TileLabelMode>(readTileLabel);
 
     // Load from localStorage on mount
     useEffect(() => {
@@ -95,6 +107,12 @@ export function useTimetable() {
     const setShowRoom = useCallback((value: boolean) => {
         setShowRoomState(value);
         localStorage.setItem(SHOW_ROOM_KEY, value ? "1" : "0");
+    }, []);
+
+    // Choose whether tiles are labelled with the abbreviation or the course code
+    const setTileLabel = useCallback((value: TileLabelMode) => {
+        setTileLabelState(value);
+        localStorage.setItem(TILE_LABEL_KEY, value);
     }, []);
 
     // Add custom elective
@@ -166,10 +184,12 @@ export function useTimetable() {
         setCustomElectives([]);
         setIsSetupComplete(false);
         setShowRoomState(false);
+        setTileLabelState("abbreviation");
         localStorage.removeItem(STORAGE_KEY);
         localStorage.removeItem(CUSTOM_ELECTIVES_KEY);
         localStorage.removeItem(SETUP_DONE_KEY);
         localStorage.removeItem(SHOW_ROOM_KEY);
+        localStorage.removeItem(TILE_LABEL_KEY);
     }, []);
 
     // Get all elective groups with custom options merged
@@ -187,10 +207,11 @@ export function useTimetable() {
             selections,
             customElectives,
             showRoom,
+            tileLabel,
             exportedAt: new Date().toISOString(),
         };
         return JSON.stringify(exportData, null, 2);
-    }, [selections, customElectives, showRoom]);
+    }, [selections, customElectives, showRoom, tileLabel]);
 
     /**
      * Import settings from JSON.
@@ -233,6 +254,11 @@ export function useTimetable() {
             setShowRoomState(showRoom);
             localStorage.setItem(SHOW_ROOM_KEY, showRoom ? "1" : "0");
 
+            const tileLabel: TileLabelMode =
+                data.tileLabel === "code" ? "code" : "abbreviation";
+            setTileLabelState(tileLabel);
+            localStorage.setItem(TILE_LABEL_KEY, tileLabel);
+
             // A backup that carried nothing usable for this semester leaves the
             // user at the setup modal rather than an empty timetable.
             const usable = Object.keys(selections).length > 0;
@@ -256,6 +282,8 @@ export function useTimetable() {
         isLoading,
         showRoom,
         setShowRoom,
+        tileLabel,
+        setTileLabel,
         saveSelections,
         addCustomElective,
         removeCustomElective,

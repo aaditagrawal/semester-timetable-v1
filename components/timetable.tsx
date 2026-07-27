@@ -42,6 +42,8 @@ export function Timetable() {
         isLoading,
         showRoom,
         setShowRoom,
+        tileLabel,
+        setTileLabel,
         saveSelections,
         addCustomElective,
         removeCustomElective,
@@ -114,6 +116,8 @@ export function Timetable() {
                 customElectives={customElectives}
                 showRoom={showRoom}
                 onShowRoomChange={setShowRoom}
+                tileLabel={tileLabel}
+                onTileLabelChange={setTileLabel}
                 onExport={exportSettings}
                 onImport={importSettings}
                 onReset={() => {
@@ -133,6 +137,10 @@ export function Timetable() {
             <AppearanceDialog
                 open={showAppearance}
                 onClose={() => setShowAppearance(false)}
+                tileLabel={tileLabel}
+                onTileLabelChange={setTileLabel}
+                showRoom={showRoom}
+                onShowRoomChange={setShowRoom}
             />
 
             <div className="max-w-4xl mx-auto px-4 py-6">
@@ -237,6 +245,7 @@ export function Timetable() {
                             labBatch={labBatch}
                             onConfigureElective={() => setShowEditElectives(true)}
                             showRoom={showRoom}
+                            labelMode={tileLabel}
                         />
                     ) : (
                         <WeekView
@@ -246,6 +255,7 @@ export function Timetable() {
                             labBatch={labBatch}
                             onConfigureElective={() => setShowEditElectives(true)}
                             showRoom={showRoom}
+                            labelMode={tileLabel}
                         />
                     )}
                 </main>

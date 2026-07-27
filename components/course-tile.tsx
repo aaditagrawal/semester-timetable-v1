@@ -4,6 +4,7 @@ import * as React from "react";
 import { cn } from "@/lib/utils";
 import { CourseDetail } from "@/components/course-detail";
 import { Course } from "@/lib/timetable-data";
+import { TileLabelMode } from "@/lib/hooks/use-timetable";
 import { Badge } from "@/components/ui/badge";
 
 interface CourseTileProps {
@@ -17,6 +18,8 @@ interface CourseTileProps {
     durationSlots?: number;
     /** Opt-in (settings): append the room to the course label, e.g. "HCI [G] | AB5-311" */
     showRoom?: boolean;
+    /** Settings: label the tile with the abbreviation ("HCI [G]") or the course code ("ICT 4403") */
+    labelMode?: TileLabelMode;
 }
 
 export function CourseTile({
@@ -28,6 +31,7 @@ export function CourseTile({
     className,
     durationSlots = 1,
     showRoom = false,
+    labelMode = "abbreviation",
 }: CourseTileProps) {
     // Base height is 44px per slot, with some extra for multi-slot items
     const heightStyle = durationSlots > 1
@@ -61,7 +65,7 @@ export function CourseTile({
                 style={heightStyle}
             >
                 <span className="font-semibold text-center leading-tight text-balance">
-                    {course.abbreviation}
+                    {labelMode === "code" ? course.code : course.abbreviation}
                     {showRoom && course.room && (
                         <>
                             <span className="mx-1 text-muted-foreground font-normal">|</span>

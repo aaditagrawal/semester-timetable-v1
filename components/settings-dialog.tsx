@@ -15,10 +15,13 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { UserElectiveSelections, CustomElective } from "@/lib/hooks/use-timetable";
+import { TileDisplaySettings } from "@/components/tile-display-settings";
+import {
+    UserElectiveSelections,
+    CustomElective,
+    TileLabelMode,
+} from "@/lib/hooks/use-timetable";
 import { electiveTypes, electiveTypeLabels } from "@/lib/timetable-data";
 import {
     ExportIcon,
@@ -37,6 +40,8 @@ interface SettingsDialogProps {
     customElectives: CustomElective[];
     showRoom: boolean;
     onShowRoomChange: (value: boolean) => void;
+    tileLabel: TileLabelMode;
+    onTileLabelChange: (value: TileLabelMode) => void;
     onExport: () => string;
     onImport: (json: string) => boolean;
     onReset: () => void;
@@ -50,6 +55,8 @@ export function SettingsDialog({
     selections,
     showRoom,
     onShowRoomChange,
+    tileLabel,
+    onTileLabelChange,
     onExport,
     onImport,
     onReset,
@@ -128,7 +135,7 @@ export function SettingsDialog({
                     </AlertDialogDescription>
                 </AlertDialogHeader>
 
-                 <div className="space-y-3 py-2 max-h-[70vh] overflow-y-auto">
+                <div className="space-y-3 py-2 max-h-[70vh] overflow-y-auto">
                     {/* Only surface electives that still need configuring */}
                     {missingTypes.length > 0 && (
                         <>
@@ -152,22 +159,12 @@ export function SettingsDialog({
                     )}
 
                     {/* Display preferences */}
-                    <div className="flex items-start justify-between gap-3">
-                        <div className="space-y-0.5">
-                            <Label htmlFor="show-room" className="text-xs">
-                                Show room on tiles
-                            </Label>
-                            <p className="text-[10px] text-muted-foreground">
-                                Adds the room beside the course in day and week view — e.g. HCI [G] | AB5-311
-                            </p>
-                        </div>
-                        <Switch
-                            id="show-room"
-                            checked={showRoom}
-                            onCheckedChange={onShowRoomChange}
-                            className="mt-0.5 shrink-0"
-                        />
-                    </div>
+                    <TileDisplaySettings
+                        tileLabel={tileLabel}
+                        onTileLabelChange={onTileLabelChange}
+                        showRoom={showRoom}
+                        onShowRoomChange={onShowRoomChange}
+                    />
 
                     <Separator />
 

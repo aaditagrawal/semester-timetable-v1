@@ -18,7 +18,7 @@ import {
     LabBatch,
     timeToMinutes,
 } from "@/lib/timetable-data";
-import { UserElectiveSelections } from "@/lib/hooks/use-timetable";
+import { UserElectiveSelections, TileLabelMode } from "@/lib/hooks/use-timetable";
 import { SunIcon, MoonIcon, PlusIcon, ClockIcon, MapPinIcon } from "@phosphor-icons/react";
 
 interface DayViewProps {
@@ -29,6 +29,7 @@ interface DayViewProps {
     labBatch: LabBatch | null;
     onConfigureElective?: () => void;
     showRoom?: boolean;
+    labelMode?: TileLabelMode;
 }
 
 interface ClassEntry {
@@ -73,6 +74,7 @@ export function DayView({
     labBatch,
     onConfigureElective,
     showRoom = false,
+    labelMode = "abbreviation",
 }: DayViewProps) {
     const daySchedule = weekSchedule[day];
 
@@ -246,6 +248,7 @@ export function DayView({
                                 className="min-h-10"
                                 durationSlots={entry.durationSlots}
                                 showRoom={showRoom}
+                                labelMode={labelMode}
                             />
                         </div>
                         {entry.isActive && (

@@ -17,7 +17,7 @@ import {
     LabBatch,
     timeToMinutes,
 } from "@/lib/timetable-data";
-import { UserElectiveSelections } from "@/lib/hooks/use-timetable";
+import { UserElectiveSelections, TileLabelMode } from "@/lib/hooks/use-timetable";
 
 interface WeekViewProps {
     currentTime: Date;
@@ -26,6 +26,7 @@ interface WeekViewProps {
     labBatch: LabBatch | null;
     onConfigureElective?: () => void;
     showRoom?: boolean;
+    labelMode?: TileLabelMode;
 }
 
 // Calculate how many slots a lab spans based on its timeOverride
@@ -65,6 +66,7 @@ export function WeekView({
     labBatch,
     onConfigureElective,
     showRoom = false,
+    labelMode = "abbreviation",
 }: WeekViewProps) {
     const currentDay = currentTime.getDay();
     const currentDayName = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"][
@@ -176,6 +178,7 @@ export function WeekView({
                     className="h-full"
                     durationSlots={rowSpan}
                     showRoom={showRoom}
+                    labelMode={labelMode}
                 />
             ),
             rowSpan,
