@@ -13,6 +13,7 @@ import {
     Day,
     Course,
     courses,
+    isStudentProject,
     LabBatch,
 } from "@/lib/timetable-data";
 import { UserElectiveSelections, CustomElective } from "@/lib/hooks/use-timetable";
@@ -88,6 +89,8 @@ function getSelectedElective(
 ): ElectiveOption | null {
     const selectedId = selections[type];
     if (!selectedId) return null;
+    // Doing the student project instead: no class, so nothing to export.
+    if (isStudentProject(type, selectedId)) return null;
     const options = getElectiveOptions(type, customElectives);
     return options.find((opt) => opt.id === selectedId) || null;
 }

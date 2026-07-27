@@ -14,6 +14,7 @@ import {
     isSlotActive,
     Course,
     ElectiveType,
+    isStudentProject,
     LabBatch,
     timeToMinutes,
 } from "@/lib/timetable-data";
@@ -137,7 +138,10 @@ export function WeekView({
             course = getSelectedElective(entry.electiveType);
             const isPassed = isSlotPassed(endTime, currentTime, day);
 
-            if (!course) {
+            // Traded for the student project the cell falls through to the same
+            // blank an unscheduled period gets, rather than a dashed
+            // placeholder inviting a course that is never coming.
+            if (!course && !isStudentProject(entry.electiveType, selections[entry.electiveType])) {
                 // Show unconfigured elective placeholder
                 return {
                     element: (

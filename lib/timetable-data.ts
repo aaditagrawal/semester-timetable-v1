@@ -47,6 +47,38 @@ export interface ElectiveOption extends Course {
   id: string;
 }
 
+/**
+ * Offered inside the Open Elective basket for students doing the student
+ * project instead. It is an ordinary option so the existing pick-list, the
+ * selected-course card and search all render it for free, but it resolves to
+ * no course: `getSelectedElective` returns null and the views leave its three
+ * periods off the grid rather than drawing an "not configured" prompt.
+ *
+ * Generated ids are `<course-code>[-<section>]` and user-added ones are
+ * `custom-…`, so this cannot collide with a real course.
+ */
+export const STUDENT_PROJECT_ID = "student-project";
+
+export const studentProjectOption: ElectiveOption = {
+  id: STUDENT_PROJECT_ID,
+  abbreviation: "Student Project",
+  code: "",
+  name: "No open elective — these periods stay off your timetable",
+  faculty: [],
+};
+
+/**
+ * Only the OE can be traded for the project — the five program electives are
+ * compulsory. Scoping the check here means a hand-edited backup that sets the
+ * sentinel on a PE just fails to match, rather than deleting a class.
+ */
+export function isStudentProject(
+  type: ElectiveType,
+  selectedId: string | undefined,
+): boolean {
+  return type === "OE" && selectedId === STUDENT_PROJECT_ID;
+}
+
 export interface ElectiveGroup {
   type: ElectiveType;
   options: ElectiveOption[];

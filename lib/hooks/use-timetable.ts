@@ -7,7 +7,9 @@ import {
     ElectiveGroup,
     ElectiveType,
     electiveTypes,
+    isStudentProject,
     LabBatch,
+    studentProjectOption,
 } from "@/lib/timetable-data";
 
 const STORAGE_KEY = "timetable-electives";
@@ -156,7 +158,10 @@ export function useTimetable() {
                 .filter((e) => e.groupType === type)
                 .map(({ groupType, ...rest }) => rest as ElectiveOption);
 
-            return [...defaultOptions, ...customOptions];
+            // Last, so it never pushes a real course down the pick-list.
+            const projectOption = type === "OE" ? [studentProjectOption] : [];
+
+            return [...defaultOptions, ...customOptions, ...projectOption];
         },
         [customElectives]
     );
@@ -166,6 +171,9 @@ export function useTimetable() {
         (type: ElectiveType): ElectiveOption | null => {
             const selectedId = selections[type];
             if (!selectedId) return null;
+            // A project is not a course. The views read the selection directly
+            // to tell this apart from "not picked yet" — both give null here.
+            if (isStudentProject(type, selectedId)) return null;
 
             const options = getElectiveOptions(type);
             return options.find((opt) => opt.id === selectedId) || null;

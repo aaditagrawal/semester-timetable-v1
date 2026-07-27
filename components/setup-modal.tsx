@@ -317,8 +317,10 @@ export function SetupModal({
                         {step === "start"
                             ? "Start with your registration number, or pick everything yourself."
                             : step === "electives"
-                              ? "Your program electives. Change any of them before continuing."
-                              : "Last one — pick your open elective."}
+                              ? isEditing
+                                  ? "Change any of your electives, then save."
+                                  : "Your program electives. Change any of them before continuing."
+                              : "Last one — pick your open elective, or the student project instead."}
                     </AlertDialogDescription>
                 </AlertDialogHeader>
 
@@ -409,9 +411,14 @@ export function SetupModal({
                         <p className="text-[11px] text-muted-foreground px-1">{lookupMessage}</p>
                     )}
 
-                    {/* Elective Groups, scoped to the current step. */}
+                    {/* Elective Groups, scoped to the current step. Editing has
+                        no wizard to walk and saves straight from this step, so
+                        it lists every basket at once — otherwise the OE would
+                        be unreachable once setup is done. */}
                     {(step === "electives"
-                        ? PROGRAM_ELECTIVES
+                        ? isEditing
+                            ? electiveTypes
+                            : PROGRAM_ELECTIVES
                         : step === "oe"
                           ? (["OE"] as ElectiveType[])
                           : []

@@ -15,6 +15,7 @@ import {
     isSlotActive,
     Course,
     ElectiveType,
+    isStudentProject,
     LabBatch,
     timeToMinutes,
 } from "@/lib/timetable-data";
@@ -132,10 +133,16 @@ export function DayView({
 
         // Handle electives (show even if not configured)
         if (entry.isElective && entry.electiveType) {
-            const course = getSelectedElective(entry.electiveType);
+            const electiveType: ElectiveType = entry.electiveType;
+
+            // Traded for the student project: a free period, so neither a class
+            // nor a gap to prompt about — leave it out of the day entirely.
+            if (isStudentProject(electiveType, selections[electiveType])) return;
+
+            const course = getSelectedElective(electiveType);
             classEntries.push({
                 course,
-                electiveType: entry.electiveType,
+                electiveType,
                 isUnconfigured: !course,
                 timeSlot: `${startTime} - ${endTime}`,
                 startTime,
