@@ -20,14 +20,24 @@
  */
 
 const VERSION = "v1";
+/**
+ * `sw.js` is served unchanged across deploys, so `activate` — and therefore the
+ * cache-name sweep below — effectively runs once ever. That means the hashed
+ * asset cache would otherwise grow by a whole build on every deploy until the
+ * origin hits quota pressure and the browser evicts the app wholesale, taking
+ * offline support with it. Capping entries bounds it regardless of deploy count.
+ */
+const MAX_ASSET_ENTRIES = 120;
 const SHELL_CACHE = `shell-${VERSION}`;
 const ASSET_CACHE = `assets-${VERSION}`;
 const RUNTIME_CACHE = `runtime-${VERSION}`;
 const CURRENT = new Set([SHELL_CACHE, ASSET_CACHE, RUNTIME_CACHE]);
 
-/** Enough to boot the app with no network on first offline launch. */
-const SHELL = [
-  "/",
+/** Without this the installed app cannot open offline at all. */
+const REQUIRED_SHELL = ["/"];
+
+/** Nice to have cached, but not worth failing the install over. */
+const OPTIONAL_SHELL = [
   "/export",
   "/site.webmanifest",
   "/favicon.svg",
@@ -38,13 +48,17 @@ const SHELL = [
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches
-      .open(SHELL_CACHE)
-      // Individually, so one 404 can't fail the whole install.
-      .then((cache) =>
-        Promise.all(SHELL.map((url) => cache.add(url).catch(() => undefined))),
-      )
-      .then(() => self.skipWaiting()),
+    (async () => {
+      const cache = await caches.open(SHELL_CACHE);
+      // Let this reject: activating with no cached document would leave an
+      // installed app that simply doesn't open offline, which is worse than
+      // retrying the install.
+      await cache.addAll(REQUIRED_SHELL);
+      await Promise.all(
+        OPTIONAL_SHELL.map((url) => cache.add(url).catch(() => undefined)),
+      );
+      await self.skipWaiting();
+    })(),
   );
 });
 
@@ -59,13 +73,29 @@ self.addEventListener("activate", (event) => {
   );
 });
 
+/** Oldest-first eviction; Cache API keys() preserves insertion order. */
+async function trim(cache, maxEntries) {
+  const keys = await cache.keys();
+  if (keys.length <= maxEntries) return;
+  await Promise.all(
+    keys.slice(0, keys.length - maxEntries).map((key) => cache.delete(key)),
+  );
+}
+
+// Every write below is awaited, or handed to waitUntil. An un-awaited
+// cache.put() races the worker being terminated once respondWith settles, which
+// silently leaves the cache unpopulated — the exact failure that makes offline
+// support flaky rather than broken, and so the hardest to notice.
 async function cacheFirst(request, cacheName) {
   const cache = await caches.open(cacheName);
   const hit = await cache.match(request);
   if (hit) return hit;
 
   const response = await fetch(request);
-  if (response.ok) cache.put(request, response.clone());
+  if (response.ok) {
+    await cache.put(request, response.clone());
+    await trim(cache, MAX_ASSET_ENTRIES);
+  }
   return response;
 }
 
@@ -73,25 +103,34 @@ async function networkFirst(request) {
   const cache = await caches.open(SHELL_CACHE);
   try {
     const response = await fetch(request);
-    if (response.ok) cache.put(request, response.clone());
+    if (response.ok) await cache.put(request, response.clone());
     return response;
-  } catch (error) {
+  } catch {
     return (await cache.match(request)) ?? (await cache.match("/")) ?? Response.error();
   }
 }
 
-async function staleWhileRevalidate(request) {
+async function staleWhileRevalidate(request, event) {
   const cache = await caches.open(RUNTIME_CACHE);
   const hit = await cache.match(request);
 
-  const update = fetch(request)
-    .then((response) => {
-      if (response.ok) cache.put(request, response.clone());
+  const update = (async () => {
+    try {
+      const response = await fetch(request);
+      if (response.ok) await cache.put(request, response.clone());
       return response;
-    })
-    .catch(() => undefined);
+    } catch {
+      return undefined;
+    }
+  })();
 
-  return hit ?? (await update) ?? Response.error();
+  if (hit) {
+    // Serve now, refresh for next time — but keep the worker alive until the
+    // write lands, or the "revalidate" half never happens.
+    event.waitUntil(update);
+    return hit;
+  }
+  return (await update) ?? Response.error();
 }
 
 self.addEventListener("fetch", (event) => {
@@ -111,7 +150,7 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  event.respondWith(staleWhileRevalidate(request));
+  event.respondWith(staleWhileRevalidate(request, event));
 });
 
 // Lets the page trigger an immediate update instead of waiting for a reload.

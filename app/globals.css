@@ -124,3 +124,15 @@
     @apply bg-background text-foreground;
   }
 }
+/*
+ * `viewportFit: "cover"` plus iOS's black-translucent status bar draws the page
+ * under the notch and home indicator in an installed PWA. Inset the body so the
+ * header and footer clear system UI. These resolve to 0 in a normal browser
+ * tab, so this costs nothing outside standalone mode.
+ */
+body {
+  padding-top: env(safe-area-inset-top);
+  padding-right: env(safe-area-inset-right);
+  padding-bottom: env(safe-area-inset-bottom);
+  padding-left: env(safe-area-inset-left);
+}
