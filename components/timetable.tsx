@@ -49,6 +49,7 @@ export function Timetable() {
         removeCustomElective,
         updateCustomElective,
         getSelectedElective,
+        isStudentProject,
         getLabBatch,
         resetSetup,
         getAllElectiveGroups,
@@ -242,6 +243,7 @@ export function Timetable() {
                             currentTime={currentTime}
                             selections={selections}
                             getSelectedElective={getElective}
+                            isStudentProject={isStudentProject}
                             labBatch={labBatch}
                             onConfigureElective={() => setShowEditElectives(true)}
                             showRoom={showRoom}
@@ -252,6 +254,7 @@ export function Timetable() {
                             currentTime={currentTime}
                             selections={selections}
                             getSelectedElective={getElective}
+                            isStudentProject={isStudentProject}
                             labBatch={labBatch}
                             onConfigureElective={() => setShowEditElectives(true)}
                             showRoom={showRoom}

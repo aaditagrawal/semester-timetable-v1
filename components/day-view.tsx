@@ -26,6 +26,8 @@ interface DayViewProps {
     currentTime: Date;
     selections: UserElectiveSelections;
     getSelectedElective: (type: ElectiveType) => Course | null;
+    /** Baskets traded for the student project — their slots are free periods. */
+    isStudentProject?: (type: ElectiveType) => boolean;
     labBatch: LabBatch | null;
     onConfigureElective?: () => void;
     showRoom?: boolean;
@@ -71,6 +73,7 @@ export function DayView({
     currentTime,
     selections,
     getSelectedElective,
+    isStudentProject,
     labBatch,
     onConfigureElective,
     showRoom = false,
@@ -132,6 +135,10 @@ export function DayView({
 
         // Handle electives (show even if not configured)
         if (entry.isElective && entry.electiveType) {
+            // Traded for the student project: the period is free, so it is not
+            // a class and not a gap to prompt about — leave it out of the day.
+            if (isStudentProject?.(entry.electiveType)) return;
+
             const course = getSelectedElective(entry.electiveType);
             classEntries.push({
                 course,

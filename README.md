@@ -5,6 +5,7 @@ A modern, responsive, and personalized timetable management application explicit
 ## 🚀 Features
 
 - **Personalized View**: Pick your specific electives (PE-3 through PE-7 and the Open Elective) from the full published course baskets — including per-section room allocations — to generate a timetable tailored exactly to your schedule.
+- **Student Project**: Doing the student project instead of an open elective? Choose it in place of the OE and those three periods disappear from the day view, week view and calendar export — no empty "not configured" prompts.
 - **Day & Week Modes**: Toggle between a focused daily view and a comprehensive weekly overview.
 - **Real-time Tracking**: 
     - **Active Class**: Automatically highlights the current period based on system time.

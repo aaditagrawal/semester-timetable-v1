@@ -26,6 +26,10 @@ import {
     ElectiveType,
     electiveTypes,
     electiveTypeLabels,
+    isProjectEligible,
+    isStudentProjectSelection,
+    STUDENT_PROJECT_ID,
+    STUDENT_PROJECT_LABEL,
 } from "@/lib/timetable-data";
 import {
     HOME_DEPARTMENT,
@@ -41,6 +45,7 @@ import {
     MagnifyingGlassIcon,
     PencilSimpleIcon,
     FunnelIcon,
+    FlaskIcon,
 } from "@phosphor-icons/react";
 
 type SetupStep = "start" | "electives" | "oe";
@@ -107,9 +112,11 @@ export function SetupModal({
      * registration number, confirm the program electives it filled, then pick
      * the open elective. The OE is always its own step because the published
      * allocation export covers PE-3..PE-7 only — there is no OE data to fill
-     * from, so it is the one genuinely manual choice.
+     * from, so it is the one genuinely manual choice, and the only basket that
+     * can be traded for the student project.
      *
-     * Editing an existing setup skips straight to the electives.
+     * Editing an existing setup skips straight to the electives, and shows
+     * every basket at once rather than walking the steps again.
      */
     const [step, setStep] = useState<SetupStep>(isEditing ? "electives" : "start");
 
@@ -291,6 +298,10 @@ export function SetupModal({
         return getOptionsForType(type).find((opt) => opt.id === selectedId);
     };
 
+    /** This basket has been traded for the student project. */
+    const isProjectSelected = (type: ElectiveType) =>
+        isStudentProjectSelection(selections[type]);
+
     // Editing skips the start step, so the lookup would otherwise be reachable
     // only on a fresh setup. Offer it here too while something is still unset —
     // it fills the gaps and leaves every deliberate choice alone.
@@ -298,6 +309,21 @@ export function SetupModal({
     const showLookup =
         step === "start" ||
         (isEditing && step === "electives" && unsetProgramElectives.length > 0);
+
+    /**
+     * Which baskets this step shows. The wizard splits them — program electives
+     * first, then the open elective — but editing has no wizard to walk, so it
+     * lists everything at once. Otherwise the OE, and with it the student
+     * project choice, would be unreachable once setup is done.
+     */
+    const visibleTypes: ElectiveType[] =
+        step === "electives"
+            ? isEditing
+                ? electiveTypes
+                : PROGRAM_ELECTIVES
+            : step === "oe"
+              ? ["OE"]
+              : [];
 
     return (
         <AlertDialog open={open}>
@@ -317,8 +343,10 @@ export function SetupModal({
                         {step === "start"
                             ? "Start with your registration number, or pick everything yourself."
                             : step === "electives"
-                              ? "Your program electives. Change any of them before continuing."
-                              : "Last one — pick your open elective."}
+                              ? isEditing
+                                  ? "Change any of your electives, then save."
+                                  : "Your program electives. Change any of them before continuing."
+                              : "Last one — pick your open elective, or take the student project instead."}
                     </AlertDialogDescription>
                 </AlertDialogHeader>
 
@@ -410,15 +438,12 @@ export function SetupModal({
                     )}
 
                     {/* Elective Groups, scoped to the current step. */}
-                    {(step === "electives"
-                        ? PROGRAM_ELECTIVES
-                        : step === "oe"
-                          ? (["OE"] as ElectiveType[])
-                          : []
-                    ).map((type) => {
+                    {visibleTypes.map((type) => {
                         const options = getOptionsForType(type);
                         const hasOptions = options.length > 0;
                         const selectedOption = getSelectedOption(type);
+                        const projectSelected = isProjectSelected(type);
+                        const canChooseProject = isProjectEligible(type);
                         const searchQuery = searchQueries[type] || "";
 
                         const homeCount = countHomeDepartment(options);
@@ -442,7 +467,7 @@ export function SetupModal({
                                     <CardTitle className="flex items-center justify-between gap-2 flex-wrap">
                                         <span className="text-xs sm:text-sm">{getTypeLabel(type)}</span>
                                         <div className="flex items-center gap-1 flex-shrink-0">
-                                            {canFilterHome && !selectedOption && (
+                                            {canFilterHome && !selectedOption && !projectSelected && (
                                                 <Button
                                                     variant={homeOnly ? "default" : "outline"}
                                                     size="xs"
@@ -469,7 +494,29 @@ export function SetupModal({
                                     </CardTitle>
                                 </CardHeader>
                                 <CardContent className="space-y-2">
-                                    {selectedOption ? (
+                                    {projectSelected ? (
+                                        <div className="flex items-center justify-between gap-2 p-2 bg-primary/10 border border-primary/20 rounded-none">
+                                            <div className="flex-1 min-w-0">
+                                                <div className="font-medium text-xs sm:text-sm flex items-center gap-1.5">
+                                                    <FlaskIcon className="size-3.5" />
+                                                    {STUDENT_PROJECT_LABEL}
+                                                </div>
+                                                <div className="text-[10px] sm:text-xs text-muted-foreground">
+                                                    No {getTypeLabel(type).toLowerCase()} — those periods stay off your
+                                                    timetable.
+                                                </div>
+                                            </div>
+                                            <Button
+                                                variant="ghost"
+                                                size="icon-xs"
+                                                className="flex-shrink-0"
+                                                aria-label={`Remove ${STUDENT_PROJECT_LABEL}`}
+                                                onClick={() => handleSelectionChange(type, "")}
+                                            >
+                                                <XIcon className="size-4" />
+                                            </Button>
+                                        </div>
+                                    ) : selectedOption ? (
                                         <div className="flex items-center justify-between gap-2 p-2 bg-primary/10 border border-primary/20 rounded-none">
                                             <div className="flex-1 min-w-0">
                                                 <div className="font-medium text-xs sm:text-sm">{selectedOption.abbreviation}</div>
@@ -551,9 +598,11 @@ export function SetupModal({
                                         </div>
                                     )}
 
-                                    {/* Custom electives list - clickable to select */}
+                                    {/* Custom electives list - clickable to select.
+                                        Hidden once the project replaces the basket:
+                                        there is no course to pick any more. */}
                                     {customElectives
-                                        .filter((e) => e.groupType === type)
+                                        .filter((e) => !projectSelected && e.groupType === type)
                                         .map((custom) => {
                                             const isSelected = selections[type] === custom.id;
                                             return (
@@ -598,7 +647,7 @@ export function SetupModal({
                                             );
                                         })}
 
-                                    {showAddCustom === type ? (
+                                    {projectSelected ? null : showAddCustom === type ? (
                                         <div className="space-y-2 p-2 border border-border bg-muted/30">
                                             <div className="grid grid-cols-2 gap-2">
                                                 <Input
@@ -686,6 +735,30 @@ export function SetupModal({
                                             <PlusIcon className="size-3 mr-1" />
                                             {type} not listed? Add it manually
                                         </Button>
+                                    )}
+
+                                    {/* The one basket you can opt out of: taking the
+                                        student project means no course here at all. */}
+                                    {canChooseProject && !projectSelected && (
+                                        <div className="pt-2 mt-1 border-t border-border/60 space-y-1">
+                                            <Button
+                                                variant="outline"
+                                                size="sm"
+                                                onClick={() =>
+                                                    handleSelectionChange(type, STUDENT_PROJECT_ID)
+                                                }
+                                                className="w-full justify-start"
+                                            >
+                                                <FlaskIcon className="size-3 mr-1" />
+                                                I&apos;m doing the {STUDENT_PROJECT_LABEL.toLowerCase()}{" "}
+                                                instead
+                                            </Button>
+                                            <p className="text-[10px] text-muted-foreground px-0.5">
+                                                Takes the place of the{" "}
+                                                {getTypeLabel(type).toLowerCase()}, so its periods are
+                                                left off your timetable.
+                                            </p>
+                                        </div>
                                     )}
                                 </CardContent>
                             </Card>

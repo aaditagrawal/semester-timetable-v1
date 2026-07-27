@@ -7,6 +7,8 @@ import {
     ElectiveGroup,
     ElectiveType,
     electiveTypes,
+    isProjectEligible,
+    isStudentProjectSelection,
     LabBatch,
 } from "@/lib/timetable-data";
 
@@ -166,11 +168,25 @@ export function useTimetable() {
         (type: ElectiveType): ElectiveOption | null => {
             const selectedId = selections[type];
             if (!selectedId) return null;
+            // The student project is a selection, not a course — there is
+            // nothing to render, and `isStudentProject` is what tells the
+            // views to drop the slot instead of prompting for a course.
+            if (isStudentProjectSelection(selectedId)) return null;
 
             const options = getElectiveOptions(type);
             return options.find((opt) => opt.id === selectedId) || null;
         },
         [selections, getElectiveOptions]
+    );
+
+    /**
+     * Doing the student project in place of this basket. Distinguishes "chose
+     * to have no class here" from "hasn't picked yet" — both resolve to a null
+     * course, but only the latter is a gap worth prompting about.
+     */
+    const isStudentProject = useCallback(
+        (type: ElectiveType): boolean => isStudentProjectSelection(selections[type]),
+        [selections]
     );
 
     // Get lab batch
@@ -221,6 +237,10 @@ export function useTimetable() {
      * accepted but filtered down to keys this semester actually has — keeping
      * whatever still applies without silently marking setup complete on a
      * config that would leave most of the grid empty.
+     *
+     * The student-project sentinel travels as an ordinary selection value, so
+     * no version bump is needed: a build without this feature reads it as an id
+     * it cannot resolve and shows the OE as unset rather than breaking.
      */
     const importSettings = useCallback((jsonString: string): boolean => {
         try {
@@ -236,9 +256,11 @@ export function useTimetable() {
 
             const selections: UserElectiveSelections = {};
             for (const [type, id] of Object.entries(data.selections ?? {})) {
-                if (isKnownType(type) && typeof id === "string" && id) {
-                    selections[type] = id;
-                }
+                if (!isKnownType(type) || typeof id !== "string" || !id) continue;
+                // Only the OE can be traded for the project; a hand-edited
+                // backup must not be able to delete a compulsory PE slot.
+                if (isStudentProjectSelection(id) && !isProjectEligible(type)) continue;
+                selections[type] = id;
             }
 
             const customElectives = (data.customElectives ?? []).filter((e) =>
@@ -290,6 +312,7 @@ export function useTimetable() {
         updateCustomElective,
         getElectiveOptions,
         getSelectedElective,
+        isStudentProject,
         getLabBatch,
         resetSetup,
         getAllElectiveGroups,
