@@ -44,13 +44,31 @@ export const viewport: Viewport = {
   ],
 };
 
+/**
+ * Applies the saved theme before first paint. The custom properties were
+ * serialised by the ThemeProvider when they were last changed, so this replays
+ * a cached string rather than duplicating the palette derivation — without it,
+ * a customised theme flashes the shipped dark palette on every load.
+ */
+const themeBootstrap = `try{var d=document.documentElement,m=localStorage.getItem("theme");d.classList.toggle("dark",m!=="light");var v=localStorage.getItem("timetable-theme-vars");if(v)d.style.cssText=v}catch(e){}`;
+
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // suppressHydrationWarning: the bootstrap script writes class and style on
+  // <html> before React hydrates, which is a mismatch by definition — that is
+  // the whole point of it.
   return (
-    <html lang="en" className={`${jetbrainsMono.variable} dark`}>
+    <html
+      lang="en"
+      className={`${jetbrainsMono.variable} dark`}
+      suppressHydrationWarning
+    >
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeBootstrap }} />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >

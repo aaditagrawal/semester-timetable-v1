@@ -18,6 +18,7 @@ import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { AppearanceSettings } from "@/components/appearance-settings";
 import { UserElectiveSelections, CustomElective } from "@/lib/hooks/use-timetable";
 import { electiveTypes, electiveTypeLabels } from "@/lib/timetable-data";
 import {
@@ -147,6 +148,10 @@ export function SettingsDialog({
                             <Separator />
                         </>
                     )}
+
+                    <AppearanceSettings />
+
+                    <Separator />
 
                     {/* Display preferences */}
                     <div className="flex items-start justify-between gap-3">
