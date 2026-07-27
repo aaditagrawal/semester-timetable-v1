@@ -4,7 +4,8 @@ import * as React from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Course, ExamEntry, midSemesterExams } from "@/lib/timetable-data";
+import { Course } from "@/lib/timetable-data";
+import { ExamEntry, midSemesterExams } from "@/archived/lib/exam-data";
 import { UserElectiveSelections } from "@/lib/hooks/use-timetable";
 import { CalendarIcon, ClockIcon, BookOpenIcon } from "@phosphor-icons/react";
 

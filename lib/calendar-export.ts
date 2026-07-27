@@ -16,7 +16,7 @@ import {
     LabBatch,
 } from "@/lib/timetable-data";
 import { UserElectiveSelections, CustomElective } from "@/lib/hooks/use-timetable";
-import { ElectiveOption, electiveGroups } from "@/lib/timetable-data";
+import { ElectiveOption, ElectiveType, electiveGroups } from "@/lib/timetable-data";
 
 // Generate a unique ID for each event
 function generateUID(): string {
@@ -69,7 +69,7 @@ function getNextWeekday(startDate: Date, dayOffset: number): Date {
 
 // Get elective options including custom ones
 function getElectiveOptions(
-    type: "PE-1" | "PE-2" | "OE" | "FC-2",
+    type: ElectiveType,
     customElectives: CustomElective[]
 ): ElectiveOption[] {
     const group = electiveGroups.find((g) => g.type === type);
@@ -82,7 +82,7 @@ function getElectiveOptions(
 
 // Get selected elective for a type
 function getSelectedElective(
-    type: "PE-1" | "PE-2" | "OE" | "FC-2",
+    type: ElectiveType,
     selections: UserElectiveSelections,
     customElectives: CustomElective[]
 ): ElectiveOption | null {

@@ -195,7 +195,7 @@ export default function ExportPage() {
                 {/* Footer */}
                 <footer className="mt-12 pt-4 border-t border-border/50">
                     <p className="text-center text-[10px] text-muted-foreground">
-                        MIT Manipal • CCE-B • Sem VI
+                        MIT Manipal • IT_CCE • Sem VII
                     </p>
                 </footer>
             </div>

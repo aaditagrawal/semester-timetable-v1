@@ -17,7 +17,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Timetable | MIT Manipal CCE-B",
+  title: "Timetable | MIT Manipal IT_CCE",
   description: "Personal timetable viewer for MIT Manipal School of Computer Engineering",
   icons: {
     icon: [

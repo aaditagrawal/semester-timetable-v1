@@ -5,22 +5,20 @@ import {
     electiveGroups,
     ElectiveOption,
     ElectiveGroup,
+    ElectiveType,
     LabBatch,
 } from "@/lib/timetable-data";
 
 const STORAGE_KEY = "timetable-electives";
 const CUSTOM_ELECTIVES_KEY = "timetable-custom-electives";
+const SETUP_DONE_KEY = "timetable-setup-done";
 
-export interface UserElectiveSelections {
-    "PE-1"?: string;
-    "PE-2"?: string;
-    OE?: string;
-    "FC-2"?: string;
+export type UserElectiveSelections = Partial<Record<ElectiveType, string>> & {
     labBatch?: LabBatch;
-}
+};
 
 export interface CustomElective extends ElectiveOption {
-    groupType: "PE-1" | "PE-2" | "OE" | "FC-2";
+    groupType: ElectiveType;
 }
 
 export interface TimetableExport {
@@ -43,15 +41,16 @@ export function useTimetable() {
 
         if (savedSelections) {
             try {
-                const parsed = JSON.parse(savedSelections);
-                setSelections(parsed);
-                // Check if setup is complete (has labBatch and Flexi Core 2 at minimum)
-                if (parsed.labBatch && parsed["FC-2"]) {
-                    setIsSetupComplete(true);
-                }
+                setSelections(JSON.parse(savedSelections));
             } catch {
                 console.error("Failed to parse saved selections");
             }
+        }
+
+        // Every Sem VII slot is a user-supplied elective, so there is no
+        // required field to infer completion from — it is an explicit flag.
+        if (localStorage.getItem(SETUP_DONE_KEY)) {
+            setIsSetupComplete(true);
         }
 
         if (savedCustomElectives) {
@@ -70,6 +69,7 @@ export function useTimetable() {
     const saveSelections = useCallback((newSelections: UserElectiveSelections) => {
         setSelections(newSelections);
         localStorage.setItem(STORAGE_KEY, JSON.stringify(newSelections));
+        localStorage.setItem(SETUP_DONE_KEY, "1");
         setIsSetupComplete(true);
     }, []);
 
@@ -107,7 +107,7 @@ export function useTimetable() {
 
     // Get all elective options for a type (including custom ones)
     const getElectiveOptions = useCallback(
-        (type: "PE-1" | "PE-2" | "OE" | "FC-2"): ElectiveOption[] => {
+        (type: ElectiveType): ElectiveOption[] => {
             const group = electiveGroups.find((g) => g.type === type);
             const defaultOptions = group?.options || [];
             const customOptions = customElectives
@@ -121,7 +121,7 @@ export function useTimetable() {
 
     // Get selected elective for a type
     const getSelectedElective = useCallback(
-        (type: "PE-1" | "PE-2" | "OE" | "FC-2"): ElectiveOption | null => {
+        (type: ElectiveType): ElectiveOption | null => {
             const selectedId = selections[type];
             if (!selectedId) return null;
 
@@ -143,6 +143,7 @@ export function useTimetable() {
         setIsSetupComplete(false);
         localStorage.removeItem(STORAGE_KEY);
         localStorage.removeItem(CUSTOM_ELECTIVES_KEY);
+        localStorage.removeItem(SETUP_DONE_KEY);
     }, []);
 
     // Get all elective groups with custom options merged
@@ -184,6 +185,7 @@ export function useTimetable() {
                 localStorage.setItem(CUSTOM_ELECTIVES_KEY, JSON.stringify(data.customElectives));
             }
 
+            localStorage.setItem(SETUP_DONE_KEY, "1");
             setIsSetupComplete(true);
             return true;
         } catch (error) {
