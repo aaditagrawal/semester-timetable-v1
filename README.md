@@ -1,6 +1,6 @@
 # Timetable Viewer - 4th Year IT_CCE
 
-A modern, responsive, and personalized timetable management application explicitly designed for **4th Year Information Technology & Computer  Communication Engineering** (Semester VII, AY 2025-26) at **Manipal Institute of Technology**.
+A modern, responsive, and personalized timetable management application explicitly designed for **4th Year Information Technology & Computer  Communication Engineering** (Semester VII, AY 2026-27) at **Manipal Institute of Technology**.
 
 ## 🚀 Features
 

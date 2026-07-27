@@ -27,7 +27,21 @@ import {
     electiveTypes,
     electiveTypeLabels,
 } from "@/lib/timetable-data";
-import { PlusIcon, TrashIcon, XIcon, CheckIcon, MagnifyingGlassIcon, PencilSimpleIcon } from "@phosphor-icons/react";
+import {
+    HOME_DEPARTMENT,
+    countHomeDepartment,
+    isHomeDepartment,
+    searchOptions,
+} from "@/lib/elective-search";
+import {
+    PlusIcon,
+    TrashIcon,
+    XIcon,
+    CheckIcon,
+    MagnifyingGlassIcon,
+    PencilSimpleIcon,
+    FunnelIcon,
+} from "@phosphor-icons/react";
 
 interface SetupModalProps {
     open: boolean;
@@ -67,6 +81,12 @@ export function SetupModal({
         room: "",
     });
     const [searchQueries, setSearchQueries] = useState<Record<string, string>>({});
+    // Per-basket "ICT only" toggle. Absent means on: this section takes ICT
+    // courses for its PEs, so the ~45 other-department options are noise by
+    // default. Explicit `false` opts a basket back into the full catalogue.
+    const [homeOnlyByType, setHomeOnlyByType] = useState<
+        Partial<Record<ElectiveType, boolean>>
+    >({});
 
     // Update selections when initialSelections change
     React.useEffect(() => {
@@ -162,14 +182,11 @@ export function SetupModal({
         onSave(selections);
     };
 
-    const getOptionsForType = (type: ElectiveType) => {
-        const group = electiveGroups.find((g) => g.type === type);
-        const groupOptions = group?.options || [];
-        const customOptions = customElectives
-            .filter((e) => e.groupType === type)
-            .map(({ groupType, ...rest }) => rest);
-        return [...groupOptions, ...customOptions];
-    };
+    // `electiveGroups` arrives from getAllElectiveGroups(), which has already
+    // merged the user's custom electives into each group. Appending them again
+    // here would render every custom course twice, with a duplicate React key.
+    const getOptionsForType = (type: ElectiveType) =>
+        electiveGroups.find((g) => g.type === type)?.options ?? [];
 
     const getTypeLabel = (type: ElectiveType) => electiveTypeLabels[type];
 
@@ -205,23 +222,52 @@ export function SetupModal({
                         const hasOptions = options.length > 0;
                         const selectedOption = getSelectedOption(type);
                         const searchQuery = searchQueries[type] || "";
-                        const filteredOptions = searchQuery
-                            ? options.filter(
-                                (opt) =>
-                                    opt.abbreviation.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                                    opt.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                                    opt.code.toLowerCase().includes(searchQuery.toLowerCase())
-                            )
-                            : options;
+
+                        const homeCount = countHomeDepartment(options);
+                        // Only offer the filter where it would actually narrow
+                        // things — the OE basket has no ICT courses by design.
+                        const canFilterHome = homeCount > 0 && homeCount < options.length;
+                        const homeOnly = canFilterHome && homeOnlyByType[type] !== false;
+
+                        const scoped = homeOnly ? options.filter(isHomeDepartment) : options;
+                        const filteredOptions = searchOptions(scoped, searchQuery);
+                        // Don't dead-end a search: if the department filter is
+                        // what's hiding the matches, say so and offer a way out.
+                        const hiddenByFilter =
+                            homeOnly && filteredOptions.length === 0
+                                ? searchOptions(options, searchQuery).length
+                                : 0;
 
                         return (
                             <Card key={type} size="sm">
                                 <CardHeader className="pb-1">
                                     <CardTitle className="flex items-center justify-between gap-2 flex-wrap">
                                         <span className="text-xs sm:text-sm">{getTypeLabel(type)}</span>
-                                        <Badge variant="outline" className="text-[10px] sm:text-xs flex-shrink-0">
-                                            {type}
-                                        </Badge>
+                                        <div className="flex items-center gap-1 flex-shrink-0">
+                                            {canFilterHome && !selectedOption && (
+                                                <Button
+                                                    variant={homeOnly ? "default" : "outline"}
+                                                    size="xs"
+                                                    className="h-6 px-2 text-[10px] gap-1"
+                                                    aria-pressed={homeOnly}
+                                                    onClick={() =>
+                                                        setHomeOnlyByType((prev) => ({
+                                                            ...prev,
+                                                            [type]: !homeOnly,
+                                                        }))
+                                                    }
+                                                >
+                                                    <FunnelIcon className="size-3" />
+                                                    {HOME_DEPARTMENT} only
+                                                    <span className="opacity-60">
+                                                        {homeOnly ? homeCount : options.length}
+                                                    </span>
+                                                </Button>
+                                            )}
+                                            <Badge variant="outline" className="text-[10px] sm:text-xs">
+                                                {type}
+                                            </Badge>
+                                        </div>
                                     </CardTitle>
                                 </CardHeader>
                                 <CardContent className="space-y-2">
@@ -246,7 +292,7 @@ export function SetupModal({
                                                 <div className="relative">
                                                     <MagnifyingGlassIcon className="absolute left-2 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
                                                     <Input
-                                                        placeholder={`Search ${getTypeLabel(type)}...`}
+                                                        placeholder="Search by abbreviation, code or name..."
                                                         value={searchQuery}
                                                         onChange={(e) => setSearchQueries((prev) => ({ ...prev, [type]: e.target.value }))}
                                                         className="pl-8 text-xs"
@@ -277,6 +323,22 @@ export function SetupModal({
                                                                 <CheckIcon className="size-3.5 text-muted-foreground shrink-0 mt-1" />
                                                             </button>
                                                         ))
+                                                    ) : hiddenByFilter > 0 ? (
+                                                        <div className="p-3 text-xs text-muted-foreground text-center space-y-1.5">
+                                                            <p>
+                                                                No {HOME_DEPARTMENT} match — {hiddenByFilter} in other
+                                                                department{hiddenByFilter > 1 ? "s" : ""}
+                                                            </p>
+                                                            <Button
+                                                                variant="outline"
+                                                                size="xs"
+                                                                onClick={() =>
+                                                                    setHomeOnlyByType((prev) => ({ ...prev, [type]: false }))
+                                                                }
+                                                            >
+                                                                Search all departments
+                                                            </Button>
+                                                        </div>
                                                     ) : (
                                                         <div className="p-3 text-xs text-muted-foreground text-center">
                                                             No results found

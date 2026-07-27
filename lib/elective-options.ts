@@ -5,6 +5,9 @@
 // from the School of Computer Engineering room allocation sheet.
 //
 // Ordered ICT-first within each basket, then by course code.
+//
+// Generated file - do not edit by hand.
+// Regenerate: python3 scripts/generate-elective-options.py <dataset.json>
 
 // Type-only import: erased at compile time, so no runtime cycle with timetable-data.
 import type { ElectiveOption, ElectiveType } from "@/lib/timetable-data";
@@ -109,7 +112,7 @@ export const electiveOptions: Record<ElectiveType, ElectiveOption[]> = {
       id: "che-4405",
       abbreviation: "CHE 4405",
       code: "CHE 4405",
-      name: "Industrial Waste Water Engineering (Theory & Lab)",
+      name: "Industrial Waste Water Engineering (theory & Lab)",
       faculty: [{ name: "TBD" }],
     },
     {
@@ -137,7 +140,7 @@ export const electiveOptions: Record<ElectiveType, ElectiveOption[]> = {
       id: "cie-4419",
       abbreviation: "CIE 4419",
       code: "CIE 4419",
-      name: "Building Information Modelling in Construction(L&T)",
+      name: "Building Information Modelling in Construction(l&t)",
       faculty: [{ name: "TBD" }],
     },
     {
@@ -158,7 +161,7 @@ export const electiveOptions: Record<ElectiveType, ElectiveOption[]> = {
       id: "cra-4411",
       abbreviation: "CRA 4411",
       code: "CRA 4411",
-      name: "Data Science - Part Ii",
+      name: "Data Science - Part II",
       faculty: [{ name: "TBD" }],
     },
     {
@@ -214,7 +217,7 @@ export const electiveOptions: Record<ElectiveType, ElectiveOption[]> = {
       id: "ece-4408",
       abbreviation: "ECE 4408",
       code: "ECE 4408",
-      name: "Analog Ic Design",
+      name: "Analog IC Design",
       faculty: [{ name: "TBD" }],
     },
     {
@@ -249,7 +252,7 @@ export const electiveOptions: Record<ElectiveType, ElectiveOption[]> = {
       id: "ele-4417",
       abbreviation: "ELE 4417",
       code: "ELE 4417",
-      name: "Ev Vehicle Design & Analysis",
+      name: "EV Vehicle Design & Analysis",
       faculty: [{ name: "TBD" }],
     },
     {
@@ -291,7 +294,7 @@ export const electiveOptions: Record<ElectiveType, ElectiveOption[]> = {
       id: "mat-4406",
       abbreviation: "MAT 4406",
       code: "MAT 4406",
-      name: "Non-Linear Optimi Ation",
+      name: "Non-linear Optimi Ation",
       faculty: [{ name: "TBD" }],
     },
     {
@@ -437,7 +440,7 @@ export const electiveOptions: Record<ElectiveType, ElectiveOption[]> = {
       id: "aae-4426",
       abbreviation: "AAE 4426",
       code: "AAE 4426",
-      name: "Ev Fea Analysis",
+      name: "EV FEA Analysis",
       faculty: [{ name: "TBD" }],
     },
     {
@@ -528,7 +531,7 @@ export const electiveOptions: Record<ElectiveType, ElectiveOption[]> = {
       id: "cra-4412",
       abbreviation: "CRA 4412",
       code: "CRA 4412",
-      name: "Advanced Data Science - Part Iii",
+      name: "Advanced Data Science - Part III",
       faculty: [{ name: "TBD" }],
     },
     {
@@ -598,7 +601,7 @@ export const electiveOptions: Record<ElectiveType, ElectiveOption[]> = {
       id: "ece-4459",
       abbreviation: "ECE 4459",
       code: "ECE 4459",
-      name: "Neuromorphic Vlsi Circuits",
+      name: "Neuromorphic VLSI Circuits",
       faculty: [{ name: "TBD" }],
     },
     {
@@ -612,7 +615,7 @@ export const electiveOptions: Record<ElectiveType, ElectiveOption[]> = {
       id: "ele-4418",
       abbreviation: "ELE 4418",
       code: "ELE 4418",
-      name: "Ev Data Analytics & Cyber Security",
+      name: "EV Data Analytics & Cyber Security",
       faculty: [{ name: "TBD" }],
     },
     {
@@ -795,7 +798,7 @@ export const electiveOptions: Record<ElectiveType, ElectiveOption[]> = {
       id: "ict-4451-e",
       abbreviation: "CVA [E]",
       code: "ICT 4451",
-      name: "Computer Vision-Algorithms & Application",
+      name: "Computer Vision-algorithms & Application",
       faculty: [{ name: "TBD" }],
       room: "AB5-315",
     },
@@ -915,7 +918,7 @@ export const electiveOptions: Record<ElectiveType, ElectiveOption[]> = {
       id: "ece-4445",
       abbreviation: "ECE 4445",
       code: "ECE 4445",
-      name: "Cmos Mixed Signal Vlsi Design",
+      name: "CMOS Mixed Signal VLSI Design",
       faculty: [{ name: "TBD" }],
     },
     {
@@ -1034,7 +1037,7 @@ export const electiveOptions: Record<ElectiveType, ElectiveOption[]> = {
       id: "mie-4462",
       abbreviation: "MIE 4462",
       code: "MIE 4462",
-      name: "Business Process Re-Engineering",
+      name: "Business Process Re-engineering",
       faculty: [{ name: "TBD" }],
     },
     {
@@ -1281,14 +1284,14 @@ export const electiveOptions: Record<ElectiveType, ElectiveOption[]> = {
       id: "ece-4463",
       abbreviation: "ECE 4463",
       code: "ECE 4463",
-      name: "Pcb and System Design",
+      name: "PCB and System Design",
       faculty: [{ name: "TBD" }],
     },
     {
       id: "ece-4510",
       abbreviation: "ECE 4510",
       code: "ECE 4510",
-      name: "Low Power Vlsi Circuit Design",
+      name: "Low Power VLSI Circuit Design",
       faculty: [{ name: "TBD" }],
     },
     {
@@ -1309,7 +1312,7 @@ export const electiveOptions: Record<ElectiveType, ElectiveOption[]> = {
       id: "ele-4454",
       abbreviation: "ELE 4454",
       code: "ELE 4454",
-      name: "Introduction to Vlsi Design",
+      name: "Introduction to VLSI Design",
       faculty: [{ name: "TBD" }],
     },
     {
@@ -1358,14 +1361,14 @@ export const electiveOptions: Record<ElectiveType, ElectiveOption[]> = {
       id: "mie-4447",
       abbreviation: "MIE 4447",
       code: "MIE 4447",
-      name: "Industrial Automation & Iot",
+      name: "Industrial Automation & IOT",
       faculty: [{ name: "TBD" }],
     },
     {
       id: "mie-4450",
       abbreviation: "MIE 4450",
       code: "MIE 4450",
-      name: "Non-Destructive Testing of Materials",
+      name: "Non-destructive Testing of Materials",
       faculty: [{ name: "TBD" }],
     },
     {
@@ -1440,7 +1443,7 @@ export const electiveOptions: Record<ElectiveType, ElectiveOption[]> = {
       id: "ict-4444-e",
       abbreviation: "XAI [E]",
       code: "ICT 4444",
-      name: "Explainable Ai",
+      name: "Explainable AI",
       faculty: [{ name: "TBD" }],
       room: "AB5-312",
     },
@@ -1448,7 +1451,7 @@ export const electiveOptions: Record<ElectiveType, ElectiveOption[]> = {
       id: "ict-4444-f",
       abbreviation: "XAI [F]",
       code: "ICT 4444",
-      name: "Explainable Ai",
+      name: "Explainable AI",
       faculty: [{ name: "TBD" }],
       room: "AB5-313",
     },
@@ -1456,7 +1459,7 @@ export const electiveOptions: Record<ElectiveType, ElectiveOption[]> = {
       id: "ict-4444-g",
       abbreviation: "XAI [G]",
       code: "ICT 4444",
-      name: "Explainable Ai",
+      name: "Explainable AI",
       faculty: [{ name: "TBD" }],
       room: "AB5-314",
     },
@@ -1528,7 +1531,7 @@ export const electiveOptions: Record<ElectiveType, ElectiveOption[]> = {
       id: "cie-4451",
       abbreviation: "CIE 4451",
       code: "CIE 4451",
-      name: "Non-Destructive Testing of Concrete Structures",
+      name: "Non-destructive Testing of Concrete Structures",
       faculty: [{ name: "TBD" }],
     },
     {
@@ -1591,7 +1594,7 @@ export const electiveOptions: Record<ElectiveType, ElectiveOption[]> = {
       id: "ece-4441",
       abbreviation: "ECE 4441",
       code: "ECE 4441",
-      name: "5G: Fundamentals and Architectures",
+      name: "5g: Fundamentals and Architectures",
       faculty: [{ name: "TBD" }],
     },
     {
@@ -1619,7 +1622,7 @@ export const electiveOptions: Record<ElectiveType, ElectiveOption[]> = {
       id: "ece-4471",
       abbreviation: "ECE 4471",
       code: "ECE 4471",
-      name: "Vlsi Process Technology",
+      name: "VLSI Process Technology",
       faculty: [{ name: "TBD" }],
     },
     {
@@ -1675,7 +1678,7 @@ export const electiveOptions: Record<ElectiveType, ElectiveOption[]> = {
       id: "mie-4449",
       abbreviation: "MIE 4449",
       code: "MIE 4449",
-      name: "Mems and Nano Technology",
+      name: "MEMS and Nano Technology",
       faculty: [{ name: "TBD" }],
     },
     {
@@ -1803,7 +1806,7 @@ export const electiveOptions: Record<ElectiveType, ElectiveOption[]> = {
       id: "cie-4315",
       abbreviation: "CIE 4315",
       code: "CIE 4315",
-      name: "Introduction to Remote Sensing and Gis",
+      name: "Introduction to Remote Sensing and GIS",
       faculty: [{ name: "TBD" }],
     },
     {
@@ -1950,7 +1953,7 @@ export const electiveOptions: Record<ElectiveType, ElectiveOption[]> = {
       id: "mte-4314",
       abbreviation: "MTE 4314",
       code: "MTE 4314",
-      name: "Industrial Iot",
+      name: "Industrial IOT",
       faculty: [{ name: "TBD" }],
     },
     {

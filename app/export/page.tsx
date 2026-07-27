@@ -19,15 +19,38 @@ import { UserElectiveSelections, CustomElective } from "@/lib/hooks/use-timetabl
 const STORAGE_KEY = "timetable-electives";
 const CUSTOM_ELECTIVES_KEY = "timetable-custom-electives";
 
+/** Rough length of a teaching term, used only for the default export range. */
+const SEMESTER_WEEKS = 16;
+
+/** Format a Date as the YYYY-MM-DD an <input type="date"> expects, in local time. */
+function toDateInput(date: Date): string {
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${date.getFullYear()}-${month}-${day}`;
+}
+
+function addWeeks(date: Date, weeks: number): Date {
+    const result = new Date(date);
+    result.setDate(result.getDate() + weeks * 7);
+    return result;
+}
+
 export default function ExportPage() {
     const [selections, setSelections] = useState<UserElectiveSelections>({});
     const [customElectives, setCustomElectives] = useState<CustomElective[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [downloaded, setDownloaded] = useState(false);
 
-    // Default semester dates: Jan 3 - Apr 27, 2026
-    const [semesterStartDate, setSemesterStartDate] = useState("2026-01-03");
-    const [semesterEndDate, setSemesterEndDate] = useState("2026-04-27");
+    // Default to "today through ~16 weeks out" rather than a hard-coded term.
+    // A stale literal silently exports the whole timetable into a term that has
+    // already ended, and weekly recurrence is on by default, so a wrong default
+    // is worse than an approximate one. Both fields stay user-editable.
+    const [semesterStartDate, setSemesterStartDate] = useState(() =>
+        toDateInput(new Date())
+    );
+    const [semesterEndDate, setSemesterEndDate] = useState(() =>
+        toDateInput(addWeeks(new Date(), SEMESTER_WEEKS))
+    );
     const [includeRecurrence, setIncludeRecurrence] = useState(true);
 
     // Load settings from localStorage

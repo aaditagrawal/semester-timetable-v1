@@ -1,7 +1,11 @@
 import { electiveOptions } from "@/lib/elective-options";
 
 // Timetable data structure for MIT Manipal - School of Computer Engineering
-// Semester VII BTECH[IT_CCE], AY 2025-26
+// Semester VII BTECH[IT_CCE], AY 2026-27
+//
+// The section timetable sheet is headed "AY 2025-26", but that header is stale:
+// this cohort sat its Sem VI end-semester exams in May 2026, and the elective
+// allocation data these courses come from is published for AY 2026-27.
 
 export interface Faculty {
   name: string;
@@ -65,6 +69,12 @@ export interface ScheduleEntry {
   courseAbbreviation: string; // Reference to course abbreviation or elective type
   isElective?: boolean;
   electiveType?: ElectiveType;
+  /**
+   * Lab scaffolding is unused this semester — Sem VII's grid is entirely
+   * electives — but is kept because labs recur most semesters and the renderers
+   * in day-view/week-view/calendar-export already handle them. The branches are
+   * inert while no entry sets `isLab`, not dead in the delete-me sense.
+   */
   isLab?: boolean;
   labInfo?: {
     // Batch-specific lab assignments
@@ -232,12 +242,14 @@ export function isSlotPassed(
 
   // If it's a different day of the week
   if (currentDay !== targetDayIndex) {
-    // For this week's comparison
+    // Sunday sits between two weeks. The views show the *coming* week (the day
+    // selector falls back to Monday), so nothing on it has happened yet —
+    // treating it as passed would grey out every class and hide "NEXT UP".
+    if (currentDay === 0) {
+      return false;
+    }
     if (currentDay > targetDayIndex) {
       return true; // Day has passed this week
-    }
-    if (currentDay === 0) {
-      return true; // Sunday - all weekdays from last week are passed
     }
     return false; // Day hasn't come yet this week
   }

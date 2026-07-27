@@ -6,12 +6,16 @@ import {
     ElectiveOption,
     ElectiveGroup,
     ElectiveType,
+    electiveTypes,
     LabBatch,
 } from "@/lib/timetable-data";
 
 const STORAGE_KEY = "timetable-electives";
 const CUSTOM_ELECTIVES_KEY = "timetable-custom-electives";
 const SETUP_DONE_KEY = "timetable-setup-done";
+
+/** Bumped for Sem VII: the elective baskets changed, so v1 needs filtering. */
+const EXPORT_VERSION = 2;
 
 export type UserElectiveSelections = Partial<Record<ElectiveType, string>> & {
     labBatch?: LabBatch;
@@ -22,7 +26,7 @@ export interface CustomElective extends ElectiveOption {
 }
 
 export interface TimetableExport {
-    version: 1;
+    version: number;
     selections: UserElectiveSelections;
     customElectives: CustomElective[];
     exportedAt: string;
@@ -157,7 +161,7 @@ export function useTimetable() {
     // Export settings as JSON
     const exportSettings = useCallback((): string => {
         const exportData: TimetableExport = {
-            version: 1,
+            version: EXPORT_VERSION,
             selections,
             customElectives,
             exportedAt: new Date().toISOString(),
@@ -165,28 +169,52 @@ export function useTimetable() {
         return JSON.stringify(exportData, null, 2);
     }, [selections, customElectives]);
 
-    // Import settings from JSON
+    /**
+     * Import settings from JSON.
+     *
+     * Version 1 backups came from the Sem VI app, whose baskets were PE-1,
+     * PE-2, OE and FC-2. Only OE survives into Sem VII, so those payloads are
+     * accepted but filtered down to keys this semester actually has — keeping
+     * whatever still applies without silently marking setup complete on a
+     * config that would leave most of the grid empty.
+     */
     const importSettings = useCallback((jsonString: string): boolean => {
         try {
             const data = JSON.parse(jsonString) as TimetableExport;
 
-            if (data.version !== 1) {
+            if (data.version !== 1 && data.version !== EXPORT_VERSION) {
                 console.error("Unsupported export version");
                 return false;
             }
 
-            if (data.selections) {
-                setSelections(data.selections);
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(data.selections));
+            const isKnownType = (t: string): t is ElectiveType =>
+                (electiveTypes as string[]).includes(t);
+
+            const selections: UserElectiveSelections = {};
+            for (const [type, id] of Object.entries(data.selections ?? {})) {
+                if (isKnownType(type) && typeof id === "string" && id) {
+                    selections[type] = id;
+                }
             }
 
-            if (data.customElectives) {
-                setCustomElectives(data.customElectives);
-                localStorage.setItem(CUSTOM_ELECTIVES_KEY, JSON.stringify(data.customElectives));
-            }
+            const customElectives = (data.customElectives ?? []).filter((e) =>
+                isKnownType(e.groupType)
+            );
 
-            localStorage.setItem(SETUP_DONE_KEY, "1");
-            setIsSetupComplete(true);
+            setSelections(selections);
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(selections));
+            setCustomElectives(customElectives);
+            localStorage.setItem(CUSTOM_ELECTIVES_KEY, JSON.stringify(customElectives));
+
+            // A backup that carried nothing usable for this semester leaves the
+            // user at the setup modal rather than an empty timetable.
+            const usable = Object.keys(selections).length > 0;
+            if (usable) {
+                localStorage.setItem(SETUP_DONE_KEY, "1");
+            } else {
+                localStorage.removeItem(SETUP_DONE_KEY);
+            }
+            setIsSetupComplete(usable);
             return true;
         } catch (error) {
             console.error("Failed to import settings:", error);
