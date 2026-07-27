@@ -1,7 +1,8 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono, JetBrains_Mono } from "next/font/google";
 import Script from "next/script";
 import { ThemeProvider } from "@/lib/theme-provider";
+import { ServiceWorker } from "@/components/service-worker";
 import "./globals.css";
 
 const jetbrainsMono = JetBrains_Mono({ subsets: ['latin'], variable: '--font-sans' });
@@ -28,6 +29,19 @@ export const metadata: Metadata = {
     apple: { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
   },
   manifest: "/site.webmanifest",
+  appleWebApp: { capable: true, statusBarStyle: "black-translucent", title: "Timetable" },
+  applicationName: "Timetable",
+};
+
+/** Standalone PWA sizing: fill notched screens and match the app's chrome. */
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
+    { media: "(prefers-color-scheme: dark)", color: "#000000" },
+  ],
 };
 
 export default function RootLayout({
@@ -42,6 +56,7 @@ export default function RootLayout({
       >
         <Script defer src="https://stat.sys256.com/script.js" strategy="afterInteractive" />
         <ThemeProvider>{children}</ThemeProvider>
+        <ServiceWorker />
       </body>
     </html>
   );
