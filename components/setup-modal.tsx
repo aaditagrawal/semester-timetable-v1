@@ -87,6 +87,13 @@ export function SetupModal({
     const [homeOnlyByType, setHomeOnlyByType] = useState<
         Partial<Record<ElectiveType, boolean>>
     >({});
+    // Held in component state only — the registration number is sent to the
+    // lookup route and deliberately never persisted anywhere.
+    const [regInput, setRegInput] = useState("");
+    const [lookupState, setLookupState] = useState<
+        "idle" | "loading" | "done" | "empty" | "error"
+    >("idle");
+    const [lookupMessage, setLookupMessage] = useState<string | null>(null);
 
     // Update selections when initialSelections change
     React.useEffect(() => {
@@ -182,6 +189,52 @@ export function SetupModal({
         onSave(selections);
     };
 
+    /**
+     * Prefill PE-3..PE-7 from the published allocations. The registration
+     * number is sent to the lookup route and not stored — only the resulting
+     * option ids end up in state, and the user still has to press Save.
+     */
+    const handleLookup = async () => {
+        const reg = regInput.trim();
+        if (!reg || lookupState === "loading") return;
+
+        setLookupState("loading");
+        setLookupMessage(null);
+        try {
+            // Lazily imported so the ~41 KiB index is only fetched by people who
+            // actually use the lookup, not on every page load.
+            const { lookupAllocation, normalizeRegistration } = await import(
+                "@/lib/allocation-lookup"
+            );
+
+            const normalized = normalizeRegistration(reg);
+            const allocations = normalized === null ? null : lookupAllocation(normalized);
+            const found = Object.entries(allocations ?? {});
+
+            if (found.length === 0) {
+                setLookupState("empty");
+                setLookupMessage(
+                    "No allocation found for that number. Check it, or pick your courses below."
+                );
+                return;
+            }
+
+            // Merge rather than replace: never clobber a choice already made.
+            setSelections((prev) => {
+                const next = { ...prev };
+                for (const [type, id] of found) next[type as ElectiveType] = id;
+                return next;
+            });
+            setLookupState("done");
+            setLookupMessage(
+                `Filled ${found.length} elective${found.length > 1 ? "s" : ""}. Check them below, then save.`
+            );
+        } catch {
+            setLookupState("error");
+            setLookupMessage("Lookup failed. Pick your courses below instead.");
+        }
+    };
+
     // `electiveGroups` arrives from getAllElectiveGroups(), which has already
     // merged the user's custom electives into each group. Appending them again
     // here would render every custom course twice, with a duplicate React key.
@@ -216,6 +269,52 @@ export function SetupModal({
                 </AlertDialogHeader>
 
                 <div className="flex-1 overflow-y-auto space-y-3 py-2 -mx-3 sm:-mx-4 px-3 sm:px-4">
+                    {/* Optional prefill. Everything below still works untouched
+                        if the lookup is skipped or finds nothing. */}
+                    <Card size="sm" className="border-primary/20 bg-primary/5">
+                        <CardHeader className="pb-1">
+                            <CardTitle className="flex items-center justify-between gap-2 flex-wrap">
+                                <span className="text-xs sm:text-sm">Fill from registration number</span>
+                                <Badge variant="secondary" className="text-[10px] flex-shrink-0">
+                                    Optional
+                                </Badge>
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-2">
+                            <div className="flex gap-2">
+                                <Input
+                                    value={regInput}
+                                    onChange={(e) => setRegInput(e.target.value)}
+                                    onKeyDown={(e) => {
+                                        if (e.key === "Enter") {
+                                            e.preventDefault();
+                                            void handleLookup();
+                                        }
+                                    }}
+                                    placeholder="e.g. 230953001"
+                                    inputMode="numeric"
+                                    autoComplete="off"
+                                    className="text-xs"
+                                    aria-label="Registration number"
+                                />
+                                <Button
+                                    size="sm"
+                                    onClick={() => void handleLookup()}
+                                    disabled={lookupState === "loading" || !regInput.trim()}
+                                    className="flex-shrink-0"
+                                >
+                                    {lookupState === "loading" ? "Looking..." : "Fill"}
+                                </Button>
+                            </div>
+                            <p className="text-[10px] text-muted-foreground">
+                                {lookupMessage ??
+                                    "Fills PE-3 to PE-7 from the published allocations. Check them before saving — the Open Elective is always chosen manually."}
+                            </p>
+                        </CardContent>
+                    </Card>
+
+                    <Separator />
+
                     {/* Elective Groups */}
                     {electiveTypes.map((type) => {
                         const options = getOptionsForType(type);
