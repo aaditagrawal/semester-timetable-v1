@@ -62,19 +62,19 @@ export function CourseDetail({
                         </div>
                     </div>
 
-                    {/* Time slot */}
-                    {timeSlot && (
-                        <div className="flex items-center gap-2">
-                            <ClockIcon className="size-4 text-muted-foreground shrink-0" />
-                            <p className="text-xs">{timeSlot}</p>
-                        </div>
-                    )}
-
                     {/* Room */}
                     {course.room && (
                         <div className="flex items-center gap-2">
                             <MapPinIcon className="size-4 text-muted-foreground shrink-0" />
                             <p className="text-xs">{course.room}</p>
+                        </div>
+                    )}
+
+                    {/* Time slot */}
+                    {timeSlot && (
+                        <div className="flex items-center gap-2">
+                            <ClockIcon className="size-4 text-muted-foreground shrink-0" />
+                            <p className="text-xs">{timeSlot}</p>
                         </div>
                     )}
 
