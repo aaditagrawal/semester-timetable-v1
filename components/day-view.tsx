@@ -28,6 +28,7 @@ interface DayViewProps {
     getSelectedElective: (type: ElectiveType) => Course | null;
     labBatch: LabBatch | null;
     onConfigureElective?: () => void;
+    showRoom?: boolean;
 }
 
 interface ClassEntry {
@@ -71,6 +72,7 @@ export function DayView({
     getSelectedElective,
     labBatch,
     onConfigureElective,
+    showRoom = false,
 }: DayViewProps) {
     const daySchedule = weekSchedule[day];
 
@@ -243,6 +245,7 @@ export function DayView({
                                 isLab={entry.isLab}
                                 className="min-h-10"
                                 durationSlots={entry.durationSlots}
+                                showRoom={showRoom}
                             />
                         </div>
                         {entry.isActive && (

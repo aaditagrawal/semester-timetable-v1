@@ -25,6 +25,7 @@ interface WeekViewProps {
     getSelectedElective: (type: ElectiveType) => Course | null;
     labBatch: LabBatch | null;
     onConfigureElective?: () => void;
+    showRoom?: boolean;
 }
 
 // Calculate how many slots a lab spans based on its timeOverride
@@ -63,6 +64,7 @@ export function WeekView({
     getSelectedElective,
     labBatch,
     onConfigureElective,
+    showRoom = false,
 }: WeekViewProps) {
     const currentDay = currentTime.getDay();
     const currentDayName = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"][
@@ -173,6 +175,7 @@ export function WeekView({
                     isLab={isLab}
                     className="h-full"
                     durationSlots={rowSpan}
+                    showRoom={showRoom}
                 />
             ),
             rowSpan,

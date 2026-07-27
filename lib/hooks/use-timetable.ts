@@ -13,6 +13,7 @@ import {
 const STORAGE_KEY = "timetable-electives";
 const CUSTOM_ELECTIVES_KEY = "timetable-custom-electives";
 const SETUP_DONE_KEY = "timetable-setup-done";
+const SHOW_ROOM_KEY = "timetable-show-room";
 
 /** Bumped for Sem VII: the elective baskets changed, so v1 needs filtering. */
 const EXPORT_VERSION = 2;
@@ -29,7 +30,19 @@ export interface TimetableExport {
     version: number;
     selections: UserElectiveSelections;
     customElectives: CustomElective[];
+    /** Display preference; absent in older backups, which fall back to off. */
+    showRoom?: boolean;
     exportedAt: string;
+}
+
+/**
+ * Read on first render rather than in an effect: the grid is gated behind
+ * `isLoading`, so nothing that depends on this is in the server-rendered
+ * output and hydration still matches.
+ */
+function readShowRoom(): boolean {
+    if (typeof window === "undefined") return false;
+    return localStorage.getItem(SHOW_ROOM_KEY) === "1";
 }
 
 export function useTimetable() {
@@ -37,6 +50,7 @@ export function useTimetable() {
     const [customElectives, setCustomElectives] = useState<CustomElective[]>([]);
     const [isSetupComplete, setIsSetupComplete] = useState<boolean>(false);
     const [isLoading, setIsLoading] = useState(true);
+    const [showRoom, setShowRoomState] = useState<boolean>(readShowRoom);
 
     // Load from localStorage on mount
     useEffect(() => {
@@ -75,6 +89,12 @@ export function useTimetable() {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(newSelections));
         localStorage.setItem(SETUP_DONE_KEY, "1");
         setIsSetupComplete(true);
+    }, []);
+
+    // Toggle "show room beside the course on each tile"
+    const setShowRoom = useCallback((value: boolean) => {
+        setShowRoomState(value);
+        localStorage.setItem(SHOW_ROOM_KEY, value ? "1" : "0");
     }, []);
 
     // Add custom elective
@@ -145,9 +165,11 @@ export function useTimetable() {
         setSelections({});
         setCustomElectives([]);
         setIsSetupComplete(false);
+        setShowRoomState(false);
         localStorage.removeItem(STORAGE_KEY);
         localStorage.removeItem(CUSTOM_ELECTIVES_KEY);
         localStorage.removeItem(SETUP_DONE_KEY);
+        localStorage.removeItem(SHOW_ROOM_KEY);
     }, []);
 
     // Get all elective groups with custom options merged
@@ -164,10 +186,11 @@ export function useTimetable() {
             version: EXPORT_VERSION,
             selections,
             customElectives,
+            showRoom,
             exportedAt: new Date().toISOString(),
         };
         return JSON.stringify(exportData, null, 2);
-    }, [selections, customElectives]);
+    }, [selections, customElectives, showRoom]);
 
     /**
      * Import settings from JSON.
@@ -206,6 +229,10 @@ export function useTimetable() {
             setCustomElectives(customElectives);
             localStorage.setItem(CUSTOM_ELECTIVES_KEY, JSON.stringify(customElectives));
 
+            const showRoom = data.showRoom === true;
+            setShowRoomState(showRoom);
+            localStorage.setItem(SHOW_ROOM_KEY, showRoom ? "1" : "0");
+
             // A backup that carried nothing usable for this semester leaves the
             // user at the setup modal rather than an empty timetable.
             const usable = Object.keys(selections).length > 0;
@@ -227,6 +254,8 @@ export function useTimetable() {
         customElectives,
         isSetupComplete,
         isLoading,
+        showRoom,
+        setShowRoom,
         saveSelections,
         addCustomElective,
         removeCustomElective,

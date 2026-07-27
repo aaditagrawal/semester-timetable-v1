@@ -15,6 +15,8 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { UserElectiveSelections, CustomElective } from "@/lib/hooks/use-timetable";
 import { electiveTypes, electiveTypeLabels } from "@/lib/timetable-data";
@@ -32,6 +34,8 @@ interface SettingsDialogProps {
     onClose: () => void;
     selections: UserElectiveSelections;
     customElectives: CustomElective[];
+    showRoom: boolean;
+    onShowRoomChange: (value: boolean) => void;
     onExport: () => string;
     onImport: (json: string) => boolean;
     onReset: () => void;
@@ -42,6 +46,8 @@ export function SettingsDialog({
     open,
     onClose,
     selections,
+    showRoom,
+    onShowRoomChange,
     onExport,
     onImport,
     onReset,
@@ -141,6 +147,26 @@ export function SettingsDialog({
                             <Separator />
                         </>
                     )}
+
+                    {/* Display preferences */}
+                    <div className="flex items-start justify-between gap-3">
+                        <div className="space-y-0.5">
+                            <Label htmlFor="show-room" className="text-xs">
+                                Show room on tiles
+                            </Label>
+                            <p className="text-[10px] text-muted-foreground">
+                                Adds the room beside the course in day and week view — e.g. HCI [G] | AB5-311
+                            </p>
+                        </div>
+                        <Switch
+                            id="show-room"
+                            checked={showRoom}
+                            onCheckedChange={onShowRoomChange}
+                            className="mt-0.5 shrink-0"
+                        />
+                    </div>
+
+                    <Separator />
 
                     {/* Actions */}
                     <div className="space-y-2">

@@ -15,6 +15,8 @@ interface CourseTileProps {
     className?: string;
     /** Number of time slots this class spans - affects height proportionally */
     durationSlots?: number;
+    /** Opt-in (settings): append the room to the course label, e.g. "HCI [G] | AB5-311" */
+    showRoom?: boolean;
 }
 
 export function CourseTile({
@@ -25,6 +27,7 @@ export function CourseTile({
     isLab = false,
     className,
     durationSlots = 1,
+    showRoom = false,
 }: CourseTileProps) {
     // Base height is 44px per slot, with some extra for multi-slot items
     const heightStyle = durationSlots > 1
@@ -57,7 +60,15 @@ export function CourseTile({
                 className={cn(baseClasses, stateClasses, "flex-col gap-0.5")}
                 style={heightStyle}
             >
-                <span className="font-semibold">{course.abbreviation}</span>
+                <span className="font-semibold text-center leading-tight text-balance">
+                    {course.abbreviation}
+                    {showRoom && course.room && (
+                        <>
+                            <span className="mx-1 text-muted-foreground font-normal">|</span>
+                            <span className="font-normal">{course.room}</span>
+                        </>
+                    )}
+                </span>
                 {isLab && (
                     <Badge variant="secondary" className="text-[9px] h-3.5 px-1">
                         LAB

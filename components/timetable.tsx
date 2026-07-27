@@ -37,6 +37,8 @@ export function Timetable() {
         customElectives,
         isSetupComplete,
         isLoading,
+        showRoom,
+        setShowRoom,
         saveSelections,
         addCustomElective,
         removeCustomElective,
@@ -107,6 +109,8 @@ export function Timetable() {
                 onClose={() => setShowSettings(false)}
                 selections={selections}
                 customElectives={customElectives}
+                showRoom={showRoom}
+                onShowRoomChange={setShowRoom}
                 onExport={exportSettings}
                 onImport={importSettings}
                 onReset={() => {
@@ -212,6 +216,7 @@ export function Timetable() {
                             getSelectedElective={getElective}
                             labBatch={labBatch}
                             onConfigureElective={() => setShowEditElectives(true)}
+                            showRoom={showRoom}
                         />
                     ) : (
                         <WeekView
@@ -220,6 +225,7 @@ export function Timetable() {
                             getSelectedElective={getElective}
                             labBatch={labBatch}
                             onConfigureElective={() => setShowEditElectives(true)}
+                            showRoom={showRoom}
                         />
                     )}
                 </main>
