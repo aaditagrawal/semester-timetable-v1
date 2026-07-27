@@ -291,6 +291,14 @@ export function SetupModal({
         return getOptionsForType(type).find((opt) => opt.id === selectedId);
     };
 
+    // Editing skips the start step, so the lookup would otherwise be reachable
+    // only on a fresh setup. Offer it here too while something is still unset —
+    // it fills the gaps and leaves every deliberate choice alone.
+    const unsetProgramElectives = PROGRAM_ELECTIVES.filter((type) => !selections[type]);
+    const showLookup =
+        step === "start" ||
+        (isEditing && step === "electives" && unsetProgramElectives.length > 0);
+
     return (
         <AlertDialog open={open}>
             <AlertDialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-md md:max-w-lg p-3 sm:p-4 max-h-[90dvh] overflow-hidden flex flex-col">
@@ -315,7 +323,7 @@ export function SetupModal({
                 </AlertDialogHeader>
 
                 <div className="flex-1 overflow-y-auto space-y-3 py-2 -mx-3 sm:-mx-4 px-3 sm:px-4">
-                    {step === "start" && (
+                    {showLookup && (
                         <Card size="sm" className="border-primary/20 bg-primary/5">
                             <CardHeader className="pb-1">
                                 <CardTitle className="text-xs sm:text-sm">
@@ -324,8 +332,22 @@ export function SetupModal({
                             </CardHeader>
                             <CardContent className="space-y-2">
                                 <p className="text-[11px] text-muted-foreground">
-                                    Auto-fills your five program electives, with the right
-                                    section and room. You&apos;ll get to check them next.
+                                    {step === "start" ? (
+                                        <>
+                                            Auto-fills your five program electives, with the
+                                            right section and room. You&apos;ll get to check
+                                            them next.
+                                        </>
+                                    ) : (
+                                        <>
+                                            {unsetProgramElectives.length} program elective
+                                            {unsetProgramElectives.length > 1 ? "s are" : " is"}{" "}
+                                            still unset. Fill{" "}
+                                            {unsetProgramElectives.length > 1 ? "them" : "it"} from
+                                            your registration number — anything you have already
+                                            chosen is kept.
+                                        </>
+                                    )}
                                 </p>
                                 <div className="flex gap-2">
                                     <Input
@@ -340,7 +362,7 @@ export function SetupModal({
                                         placeholder="e.g. 230953001"
                                         inputMode="numeric"
                                         autoComplete="off"
-                                        autoFocus
+                                        autoFocus={step === "start"}
                                         disabled={lookupState === "loading"}
                                         className="text-xs"
                                         aria-label="Registration number"
@@ -351,25 +373,34 @@ export function SetupModal({
                                         disabled={lookupState === "loading" || !regInput.trim()}
                                         className="flex-shrink-0"
                                     >
-                                        {lookupState === "loading" ? "Looking..." : "Continue"}
+                                        {lookupState === "loading"
+                                            ? "Looking..."
+                                            : step === "start"
+                                              ? "Continue"
+                                              : "Fill"}
                                     </Button>
                                 </div>
-                                {lookupMessage && (
+                                {/* On later steps the message renders above the baskets
+                                    instead, so it survives this card disappearing once
+                                    everything is filled. */}
+                                {step === "start" && lookupMessage && (
                                     <p className="text-[10px] text-muted-foreground">
                                         {lookupMessage}
                                     </p>
                                 )}
-                                <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="w-full justify-center text-[11px]"
-                                    onClick={() => {
-                                        setLookupMessage(null);
-                                        setStep("electives");
-                                    }}
-                                >
-                                    Pick everything manually instead
-                                </Button>
+                                {step === "start" && (
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        className="w-full justify-center text-[11px]"
+                                        onClick={() => {
+                                            setLookupMessage(null);
+                                            setStep("electives");
+                                        }}
+                                    >
+                                        Pick everything manually instead
+                                    </Button>
+                                )}
                             </CardContent>
                         </Card>
                     )}
