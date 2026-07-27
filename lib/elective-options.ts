@@ -1076,7 +1076,7 @@ export const electiveOptions: Record<ElectiveType, ElectiveOption[]> = {
       code: "ICT 4447",
       name: "Human Computer Interaction",
       faculty: [{ name: "TBD" }],
-      room: "AB5-310A",
+      room: "AB5-310B",
     },
     {
       id: "ict-4447-f",
@@ -1084,7 +1084,7 @@ export const electiveOptions: Record<ElectiveType, ElectiveOption[]> = {
       code: "ICT 4447",
       name: "Human Computer Interaction",
       faculty: [{ name: "TBD" }],
-      room: "AB5-310B",
+      room: "AB5-310A",
     },
     {
       id: "ict-4447-g",
