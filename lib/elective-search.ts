@@ -1,26 +1,14 @@
-// Search and filtering for the elective pick-lists.
+// Search for the elective pick-lists.
 //
-// Baskets run to ~50 options each, most of them from other departments, so the
-// two things that make picking fast are (a) narrowing to your own department
-// and (b) being able to type the abbreviation you actually know the course by
-// ("DL", "HCI", "XAI") rather than its catalogue code.
+// Baskets run to ~50 options each, so people can type the abbreviation they
+// actually know the course by ("DL", "HCI", "XAI") rather than its catalogue
+// code.
 
 import type { ElectiveOption } from "@/lib/timetable-data";
-
-/** The department whose offerings this section actually takes. */
-export const HOME_DEPARTMENT = "ICT";
 
 /** Strip case and separators so "ict4442", "ICT 4442" and "ICT-4442" all match. */
 function normalize(value: string): string {
   return value.toLowerCase().replace(/[^a-z0-9]/g, "");
-}
-
-export function isHomeDepartment(option: ElectiveOption): boolean {
-  return normalize(option.code).startsWith(normalize(HOME_DEPARTMENT));
-}
-
-export function countHomeDepartment(options: ElectiveOption[]): number {
-  return options.filter(isHomeDepartment).length;
 }
 
 /**
