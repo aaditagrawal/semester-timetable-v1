@@ -27,13 +27,12 @@ import {
     electiveTypes,
     electiveTypeLabels,
 } from "@/lib/timetable-data";
-import { searchOptions } from "@/lib/elective-search";
+import { ElectivePicker } from "@/components/elective-picker";
 import {
     PlusIcon,
     TrashIcon,
     XIcon,
     CheckIcon,
-    MagnifyingGlassIcon,
     PencilSimpleIcon,
 } from "@phosphor-icons/react";
 
@@ -79,7 +78,6 @@ export function SetupModal({
         faculty: "",
         room: "",
     });
-    const [searchQueries, setSearchQueries] = useState<Record<string, string>>({});
     // Component state only. The registration number is never persisted and
     // never leaves the device — the lookup runs against a local index.
     const [regInput, setRegInput] = useState("");
@@ -108,13 +106,27 @@ export function SetupModal({
         }
     }, [initialSelections]);
 
-    const handleSelectionChange = (type: ElectiveType, value: string) => {
+    /**
+     * Kept here rather than inside each picker: this component never unmounts —
+     * `open` only decides whether Radix draws the dialog's content — so a query
+     * owned by the picker would be lost on close, which the shared object it
+     * replaced was not.
+     */
+    const [searchQueries, setSearchQueries] = useState<Record<string, string>>({});
+
+    /** Stable, so the five baskets not being typed into stay memoised out. */
+    const handleQueryChange = React.useCallback((type: ElectiveType, query: string) => {
+        setSearchQueries((prev) => ({ ...prev, [type]: query }));
+    }, []);
+
+    /** Stable, so the pick-lists and their rows can memoise on it. */
+    const handleSelectionChange = React.useCallback((type: ElectiveType, value: string) => {
         setSelections((prev) => ({
             ...prev,
             [type]: value,
         }));
         setSearchQueries((prev) => ({ ...prev, [type]: "" }));
-    };
+    }, []);
 
     const handleAddCustom = () => {
         if (showAddCustom && customForm.name) {
@@ -414,9 +426,7 @@ export function SetupModal({
                         const options = getOptionsForType(type);
                         const hasOptions = options.length > 0;
                         const selectedOption = getSelectedOption(type);
-                        const searchQuery = searchQueries[type] || "";
 
-                        const filteredOptions = searchOptions(options, searchQuery);
 
                         return (
                             <Card key={type} size="sm">
@@ -445,50 +455,13 @@ export function SetupModal({
                                             </Button>
                                         </div>
                                     ) : hasOptions ? (
-                                        <>
-                                            <div className="relative">
-                                                <div className="relative">
-                                                    <MagnifyingGlassIcon className="absolute left-2 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
-                                                    <Input
-                                                        placeholder="Search by abbreviation, code or name..."
-                                                        value={searchQuery}
-                                                        onChange={(e) => setSearchQueries((prev) => ({ ...prev, [type]: e.target.value }))}
-                                                        className="pl-8 text-xs"
-                                                    />
-                                                </div>
-                                                {/* Always shown, so the basket reads as a pick-list rather than
-                                                    something you have to fill in yourself. */}
-                                                <div className="mt-2 border border-border rounded-none max-h-48 overflow-y-auto">
-                                                    {filteredOptions.length > 0 ? (
-                                                        filteredOptions.map((option) => (
-                                                            <button
-                                                                key={option.id}
-                                                                onClick={() => handleSelectionChange(type, option.id)}
-                                                                className="w-full flex items-start gap-2 p-2 text-left hover:bg-muted/50 transition-colors border-b border-border last:border-0"
-                                                            >
-                                                                <div className="flex-1">
-                                                                    <div className="font-medium text-xs">
-                                                                        {option.abbreviation}
-                                                                        {option.room && (
-                                                                            <span className="ml-1.5 font-normal text-muted-foreground/70">
-                                                                                {option.room}
-                                                                            </span>
-                                                                        )}
-                                                                    </div>
-                                                                    <div className="text-xs text-muted-foreground">{option.name}</div>
-                                                                    <div className="text-xs text-muted-foreground/70">{option.code}</div>
-                                                                </div>
-                                                                <CheckIcon className="size-3.5 text-muted-foreground shrink-0 mt-1" />
-                                                            </button>
-                                                        ))
-                                                    ) : (
-                                                        <div className="p-3 text-xs text-muted-foreground text-center">
-                                                            No results found
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        </>
+                                        <ElectivePicker
+                                            type={type}
+                                            options={options}
+                                            query={searchQueries[type] ?? ""}
+                                            onQueryChange={handleQueryChange}
+                                            onSelect={handleSelectionChange}
+                                        />
                                     ) : (
                                         <div className="text-[10px] sm:text-xs text-muted-foreground py-2 text-center bg-muted/30 rounded-none">
                                             No courses added yet. Add your own below.

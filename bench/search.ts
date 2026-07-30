@@ -2,13 +2,15 @@
  * Elective search, per keystroke.
  *
  * This is the one path in the app with a real N: 275 catalogue options, and the
- * edit view renders all six baskets at once, so a single keystroke re-scores
- * every option in every basket. scoreOption normalises the query once *per
- * option* and re-normalises each option's abbreviation, code and name every
- * time, each with a regex and a toLowerCase — so the work is ~4 string
- * allocations per option per keystroke, thrown away immediately.
+ * edit view has all six baskets on screen at once.
  *
- * Typing is the workload, not a single query: measure the whole word.
+ * The old `scoreOption` normalised the query once *per option* and rebuilt each
+ * option's abbreviation, code and name every time it was asked — four throwaway
+ * strings per option per keystroke — then ranked the survivors with a
+ * comparison sort over `{option, index, score}` wrappers.
+ *
+ * Typing is the workload, not a single query, so that is what this measures.
+ * The "after" case is the shipped `searchOptions`, not a stand-in.
  */
 
 import { bench } from "./harness";
@@ -20,106 +22,99 @@ const BASKETS = Object.values(electiveOptions) as ElectiveOption[][];
 const ALL = BASKETS.flat();
 const TOTAL = ALL.length;
 
-// Typing a query one character at a time, which is what actually happens.
-const TYPED = ["d", "de", "dee", "deep"];
-const TYPED_CODE = ["i", "ic", "ict", "ict4", "ict44"];
-
-function typeAcrossAllBaskets(chars: string[]) {
-  let sink = 0;
-  for (const q of chars) {
-    for (const basket of BASKETS) sink += searchOptions(basket, q).length;
-  }
-  return sink;
-}
-
 /* -------------------------------------------------------------------------- */
-/* What a precomputed index would cost                                        */
+/* The implementation being replaced, copied verbatim                          */
 /* -------------------------------------------------------------------------- */
-
-interface Indexed {
-  option: ElectiveOption;
-  abbreviation: string;
-  code: string;
-  name: string;
-}
 
 function normalize(value: string): string {
   return value.toLowerCase().replace(/[^a-z0-9]/g, "");
 }
 
-const INDEX = new Map<ElectiveOption[], Indexed[]>();
-for (const basket of BASKETS) {
-  INDEX.set(
-    basket,
-    basket.map((option) => ({
-      option,
-      abbreviation: normalize(option.abbreviation.replace(/\s*\[.*\]\s*$/, "")),
-      code: normalize(option.code),
-      name: normalize(option.name),
-    })),
-  );
-}
-
-function scoreIndexed(e: Indexed, q: string): number {
-  if (e.abbreviation === q) return 0;
-  if (e.abbreviation.startsWith(q)) return 1;
-  if (e.code.startsWith(q)) return 2;
-  if (e.abbreviation.includes(q)) return 3;
-  if (e.code.includes(q)) return 4;
-  if (e.name.startsWith(q)) return 5;
-  if (e.name.includes(q)) return 6;
-  return -1;
-}
-
-/** Counting sort into the 7 score buckets — no comparison sort needed. */
-function searchIndexed(basket: ElectiveOption[], query: string): ElectiveOption[] {
+function beforeScoreOption(option: ElectiveOption, query: string): number | null {
   const q = normalize(query);
-  if (!q) return basket;
-  const entries = INDEX.get(basket)!;
-  const buckets: ElectiveOption[][] = [[], [], [], [], [], [], []];
-  for (let i = 0; i < entries.length; i += 1) {
-    const score = scoreIndexed(entries[i], q);
-    if (score >= 0) buckets[score].push(entries[i].option);
-  }
-  return buckets.flat();
+  if (!q) return 0;
+
+  const bareAbbreviation = option.abbreviation.replace(/\s*\[.*\]\s*$/, "");
+  const abbreviation = normalize(bareAbbreviation);
+  const code = normalize(option.code);
+  const name = normalize(option.name);
+
+  if (abbreviation === q) return 0;
+  if (abbreviation.startsWith(q)) return 1;
+  if (code.startsWith(q)) return 2;
+  if (abbreviation.includes(q)) return 3;
+  if (code.includes(q)) return 4;
+  if (name.startsWith(q)) return 5;
+  if (name.includes(q)) return 6;
+  return null;
 }
 
-function typeIndexed(chars: string[]) {
-  let sink = 0;
-  for (const q of chars) {
-    for (const basket of BASKETS) sink += searchIndexed(basket, q).length;
-  }
-  return sink;
+function beforeSearchOptions(options: ElectiveOption[], query: string): ElectiveOption[] {
+  if (!query.trim()) return options;
+
+  return options
+    .map((option, index) => ({ option, index, score: beforeScoreOption(option, query) }))
+    .filter(
+      (entry): entry is { option: ElectiveOption; index: number; score: number } =>
+        entry.score !== null,
+    )
+    .sort((a, b) => a.score - b.score || a.index - b.index)
+    .map((entry) => entry.option);
 }
 
 /* -------------------------------------------------------------------------- */
 
-// Correctness gate: the fast path must return exactly the current results.
-for (const q of [...TYPED, ...TYPED_CODE, "ml", "hci", "zzz", ""]) {
+// Typing a query one character at a time, which is what actually happens.
+const TYPED = ["d", "de", "dee", "deep"];
+const TYPED_CODE = ["i", "ic", "ict", "ict4", "ict44"];
+
+function typeAcrossAllBaskets(
+  search: (options: ElectiveOption[], query: string) => ElectiveOption[],
+  chars: string[],
+) {
+  let sink = 0;
+  for (const q of chars) {
+    for (const basket of BASKETS) sink += search(basket, q).length;
+  }
+  return sink;
+}
+
+// Parity gate: the fast path must return exactly the results it replaces.
+for (const q of [...TYPED, ...TYPED_CODE, "ml", "hci", "zzz", "", "  "]) {
   for (const basket of BASKETS) {
-    const a = searchOptions(basket, q).map((o) => o.id).join(",");
-    const b = searchIndexed(basket, q).map((o) => o.id).join(",");
+    const a = beforeSearchOptions(basket, q).map((o) => o.id).join(",");
+    const b = searchOptions(basket, q).map((o) => o.id).join(",");
     if (a !== b) throw new Error(`mismatch for ${JSON.stringify(q)}:\n  ${a}\n  ${b}`);
   }
 }
 console.log(`parity check passed over ${TOTAL} options in ${BASKETS.length} baskets`);
 
 bench(`typing "deep" across all 6 baskets (${TOTAL} options x 4 keystrokes)`, [
-  { name: "current", fn: () => typeAcrossAllBaskets(TYPED), unitsPerOp: TOTAL * 4 },
-  { name: "precomputed index + counting sort", fn: () => typeIndexed(TYPED), unitsPerOp: TOTAL * 4 },
+  { name: "before", fn: () => typeAcrossAllBaskets(beforeSearchOptions, TYPED), unitsPerOp: TOTAL * 4 },
+  { name: "after: cached fields + counting sort", fn: () => typeAcrossAllBaskets(searchOptions, TYPED), unitsPerOp: TOTAL * 4 },
 ]);
 
 bench(`typing "ict44" across all 6 baskets (${TOTAL} options x 5 keystrokes)`, [
-  { name: "current", fn: () => typeAcrossAllBaskets(TYPED_CODE), unitsPerOp: TOTAL * 5 },
-  { name: "precomputed index + counting sort", fn: () => typeIndexed(TYPED_CODE), unitsPerOp: TOTAL * 5 },
+  { name: "before", fn: () => typeAcrossAllBaskets(beforeSearchOptions, TYPED_CODE), unitsPerOp: TOTAL * 5 },
+  { name: "after: cached fields + counting sort", fn: () => typeAcrossAllBaskets(searchOptions, TYPED_CODE), unitsPerOp: TOTAL * 5 },
 ]);
 
 bench("one keystroke, one basket (PE-3)", [
-  { name: "current", fn: () => searchOptions(BASKETS[0], "deep"), unitsPerOp: BASKETS[0].length },
-  { name: "precomputed index", fn: () => searchIndexed(BASKETS[0], "deep"), unitsPerOp: BASKETS[0].length },
+  { name: "before", fn: () => beforeSearchOptions(BASKETS[0], "deep"), unitsPerOp: BASKETS[0].length },
+  { name: "after", fn: () => searchOptions(BASKETS[0], "deep"), unitsPerOp: BASKETS[0].length },
 ]);
 
 bench("scoreOption, single option", [
-  { name: "current (4 allocations)", fn: () => scoreOption(ALL[0], "deep") },
-  { name: "indexed (0 allocations)", fn: () => scoreIndexed(INDEX.get(BASKETS[0])![0], "deep") },
+  { name: "before (4 string allocations)", fn: () => beforeScoreOption(ALL[0], "deep") },
+  { name: "after (cached fields)", fn: () => scoreOption(ALL[0], "deep") },
 ]);
+
+/**
+ * What the modal used to re-render per keystroke. The query lived in one object
+ * on `SetupModal`, so typing in any basket re-reconciled every basket's rows;
+ * the picker now owns its own query and the other five are memoised out.
+ */
+console.log(
+  `\noption rows re-rendered per keystroke in the edit view: ${TOTAL} -> ${BASKETS[0].length}` +
+    ` (only the basket being typed into)`,
+);
