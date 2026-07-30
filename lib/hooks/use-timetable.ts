@@ -1,16 +1,19 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import {
     electiveGroups,
     ElectiveOption,
     ElectiveGroup,
     ElectiveType,
     electiveTypes,
-    isStudentProject,
     LabBatch,
-    studentProjectOption,
 } from "@/lib/timetable-data";
+import {
+    buildOptionIndex,
+    buildOptionsByType,
+    resolveSelections,
+} from "@/lib/elective-index";
 
 const STORAGE_KEY = "timetable-electives";
 const CUSTOM_ELECTIVES_KEY = "timetable-custom-electives";
@@ -66,6 +69,16 @@ export function useTimetable() {
     const [showRoom, setShowRoomState] = useState<boolean>(readShowRoom);
     const [tileLabel, setTileLabelState] = useState<TileLabelMode>(readTileLabel);
 
+    /**
+     * Mirror of `customElectives`, so the add/remove/update callbacks can derive
+     * the next list without taking the current one as a dependency. Keeping them
+     * out of the dependency array is what lets them keep one identity for the
+     * lifetime of the hook: they are passed down to the setup modal, and a
+     * callback that changes on every edit invalidates everything holding it.
+     * (Same shape as the refs in `theme-provider.tsx`, for the same reason.)
+     */
+    const customElectivesRef = useRef(customElectives);
+
     // Load from localStorage on mount
     useEffect(() => {
         const savedSelections = localStorage.getItem(STORAGE_KEY);
@@ -88,6 +101,7 @@ export function useTimetable() {
         if (savedCustomElectives) {
             try {
                 const parsed = JSON.parse(savedCustomElectives);
+                customElectivesRef.current = parsed;
                 setCustomElectives(parsed);
             } catch {
                 console.error("Failed to parse custom electives");
@@ -117,78 +131,75 @@ export function useTimetable() {
         localStorage.setItem(TILE_LABEL_KEY, value);
     }, []);
 
+    const commitCustomElectives = useCallback((updated: CustomElective[]) => {
+        customElectivesRef.current = updated;
+        setCustomElectives(updated);
+        localStorage.setItem(CUSTOM_ELECTIVES_KEY, JSON.stringify(updated));
+    }, []);
+
     // Add custom elective
     const addCustomElective = useCallback(
-        (elective: CustomElective) => {
-            const updated = [...customElectives, elective];
-            setCustomElectives(updated);
-            localStorage.setItem(CUSTOM_ELECTIVES_KEY, JSON.stringify(updated));
-        },
-        [customElectives]
+        (elective: CustomElective) =>
+            commitCustomElectives([...customElectivesRef.current, elective]),
+        [commitCustomElectives]
     );
 
     // Remove custom elective
     const removeCustomElective = useCallback(
-        (electiveId: string) => {
-            const updated = customElectives.filter((e) => e.id !== electiveId);
-            setCustomElectives(updated);
-            localStorage.setItem(CUSTOM_ELECTIVES_KEY, JSON.stringify(updated));
-        },
-        [customElectives]
+        (electiveId: string) =>
+            commitCustomElectives(
+                customElectivesRef.current.filter((e) => e.id !== electiveId)
+            ),
+        [commitCustomElectives]
     );
 
     // Update custom elective
     const updateCustomElective = useCallback(
-        (elective: CustomElective) => {
-            const updated = customElectives.map((e) =>
-                e.id === elective.id ? elective : e
-            );
-            setCustomElectives(updated);
-            localStorage.setItem(CUSTOM_ELECTIVES_KEY, JSON.stringify(updated));
-        },
+        (elective: CustomElective) =>
+            commitCustomElectives(
+                customElectivesRef.current.map((e) =>
+                    e.id === elective.id ? elective : e
+                )
+            ),
+        [commitCustomElectives]
+    );
+
+    // Each of these rebuilds only when the data underneath it actually changes,
+    // rather than once per cell per render. See lib/elective-index.ts.
+    const optionsByType = useMemo(
+        () => buildOptionsByType(customElectives),
         [customElectives]
+    );
+
+    const optionIndex = useMemo(() => buildOptionIndex(optionsByType), [optionsByType]);
+
+    /** Every basket's chosen course, resolved once per change of selection. */
+    const selectedElectives = useMemo(
+        () => resolveSelections(selections, optionIndex),
+        [selections, optionIndex]
     );
 
     // Get all elective options for a type (including custom ones)
     const getElectiveOptions = useCallback(
-        (type: ElectiveType): ElectiveOption[] => {
-            const group = electiveGroups.find((g) => g.type === type);
-            const defaultOptions = group?.options || [];
-            const customOptions = customElectives
-                .filter((e) => e.groupType === type)
-                .map(({ groupType, ...rest }) => rest as ElectiveOption);
-
-            // Last, so it never pushes a real course down the pick-list.
-            const projectOption = type === "OE" ? [studentProjectOption] : [];
-
-            return [...defaultOptions, ...customOptions, ...projectOption];
-        },
-        [customElectives]
+        (type: ElectiveType): ElectiveOption[] => optionsByType[type],
+        [optionsByType]
     );
 
     // Get selected elective for a type
     const getSelectedElective = useCallback(
-        (type: ElectiveType): ElectiveOption | null => {
-            const selectedId = selections[type];
-            if (!selectedId) return null;
-            // A project is not a course. The views read the selection directly
-            // to tell this apart from "not picked yet" — both give null here.
-            if (isStudentProject(type, selectedId)) return null;
-
-            const options = getElectiveOptions(type);
-            return options.find((opt) => opt.id === selectedId) || null;
-        },
-        [selections, getElectiveOptions]
+        (type: ElectiveType): ElectiveOption | null => selectedElectives[type],
+        [selectedElectives]
     );
 
+    const labBatch = selections.labBatch ?? null;
+
     // Get lab batch
-    const getLabBatch = useCallback((): LabBatch | null => {
-        return selections.labBatch || null;
-    }, [selections]);
+    const getLabBatch = useCallback((): LabBatch | null => labBatch, [labBatch]);
 
     // Reset all settings
     const resetSetup = useCallback(() => {
         setSelections({});
+        customElectivesRef.current = [];
         setCustomElectives([]);
         setIsSetupComplete(false);
         setShowRoomState(false);
@@ -200,13 +211,27 @@ export function useTimetable() {
         localStorage.removeItem(TILE_LABEL_KEY);
     }, []);
 
-    // Get all elective groups with custom options merged
-    const getAllElectiveGroups = useCallback((): ElectiveGroup[] => {
-        return electiveGroups.map((group) => ({
-            ...group,
-            options: getElectiveOptions(group.type),
-        }));
-    }, [getElectiveOptions]);
+    /**
+     * Elective groups with the user's own courses merged in.
+     *
+     * `components/timetable.tsx` renders two `SetupModal`s and passes this to
+     * both, so as a function it rebuilt all six groups twice per render — for
+     * modals that are usually closed. As a memo it is built once per change to
+     * the custom electives, and both modals get the same object.
+     */
+    const allElectiveGroups = useMemo<ElectiveGroup[]>(
+        () =>
+            electiveGroups.map((group) => ({
+                ...group,
+                options: optionsByType[group.type],
+            })),
+        [optionsByType]
+    );
+
+    const getAllElectiveGroups = useCallback(
+        (): ElectiveGroup[] => allElectiveGroups,
+        [allElectiveGroups]
+    );
 
     // Export settings as JSON
     const exportSettings = useCallback((): string => {
@@ -255,6 +280,7 @@ export function useTimetable() {
 
             setSelections(selections);
             localStorage.setItem(STORAGE_KEY, JSON.stringify(selections));
+            customElectivesRef.current = customElectives;
             setCustomElectives(customElectives);
             localStorage.setItem(CUSTOM_ELECTIVES_KEY, JSON.stringify(customElectives));
 
@@ -303,5 +329,14 @@ export function useTimetable() {
         getAllElectiveGroups,
         exportSettings,
         importSettings,
+        /**
+         * The memoised forms of the three getters above. Prefer these in
+         * anything that renders: they hold one identity until their inputs
+         * actually change, so a component can be memoised on them, which the
+         * getters — recreated on each render of this hook — cannot support.
+         */
+        selectedElectives,
+        allElectiveGroups,
+        labBatch,
     };
 }
