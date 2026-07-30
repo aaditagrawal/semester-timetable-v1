@@ -56,13 +56,12 @@ export function Timetable() {
         importSettings,
     } = useTimetable();
 
-    const { currentTime, getCurrentDay, getFormattedTime, getFormattedDate } =
-        useCurrentTime();
+    const { currentTime, currentDay, formattedTime, formattedDate } = useCurrentTime();
 
     const { theme, toggleTheme } = useTheme();
 
     // Determine which day to show
-    const currentDayName = getCurrentDay();
+    const currentDayName = currentDay;
     const displayDay =
         selectedDay ||
         (days.includes(currentDayName as Day) ? (currentDayName as Day) : "MON");
@@ -181,9 +180,9 @@ export function Timetable() {
 
                     <div className="flex items-center gap-3">
                         <Badge variant="secondary" className="font-mono text-xs">
-                            {getFormattedTime()}
+                            {formattedTime}
                         </Badge>
-                        <span className="text-xs text-muted-foreground">{getFormattedDate()}</span>
+                        <span className="text-xs text-muted-foreground">{formattedDate}</span>
                     </div>
 
                     <Separator />
