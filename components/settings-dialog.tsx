@@ -49,7 +49,7 @@ interface SettingsDialogProps {
     onEditAppearance: () => void;
 }
 
-export function SettingsDialog({
+function SettingsDialogImpl({
     open,
     onClose,
     selections,
@@ -291,3 +291,13 @@ export function SettingsDialog({
         </AlertDialog>
     );
 }
+
+/**
+ * Mounted permanently behind `open`, so it re-ran on every tick for a dialog
+ * that is almost always closed.
+ *
+ * Every callback this takes is wrapped in `useCallback` at the call site in
+ * `components/timetable.tsx` — one inline arrow left unwrapped would make this
+ * memo pure overhead.
+ */
+export const SettingsDialog = React.memo(SettingsDialogImpl);

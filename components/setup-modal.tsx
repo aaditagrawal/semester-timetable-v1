@@ -54,7 +54,7 @@ interface SetupModalProps {
     isEditing?: boolean;
 }
 
-export function SetupModal({
+function SetupModalImpl({
     open,
     electiveGroups,
     customElectives,
@@ -642,3 +642,14 @@ export function SetupModal({
         </AlertDialog>
     );
 }
+
+/**
+ * A tick re-renders `Timetable`, and both of these stay mounted with
+ * `open={false}`. Without this the modal body re-ran every minute — including
+ * while it is open and someone is typing in it.
+ *
+ * Every callback this takes is wrapped in `useCallback` at the call site in
+ * `components/timetable.tsx` — one inline arrow left unwrapped would make this
+ * memo pure overhead.
+ */
+export const SetupModal = React.memo(SetupModalImpl);

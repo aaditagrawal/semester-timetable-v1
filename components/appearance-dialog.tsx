@@ -1,5 +1,7 @@
 "use client";
 
+import * as React from "react";
+
 import {
     AlertDialog,
     AlertDialogContent,
@@ -26,7 +28,7 @@ interface AppearanceDialogProps {
  * grid and two swatch rows are taller than everything else in that dialog put
  * together, and they are a once-in-a-while decision.
  */
-export function AppearanceDialog({
+function AppearanceDialogImpl({
     open,
     onClose,
     tileLabel,
@@ -62,3 +64,13 @@ export function AppearanceDialog({
         </AlertDialog>
     );
 }
+
+/**
+ * Mounted permanently behind `open`, so it re-ran on every tick for a dialog
+ * that is almost always closed.
+ *
+ * Every callback this takes is wrapped in `useCallback` at the call site in
+ * `components/timetable.tsx` — one inline arrow left unwrapped would make this
+ * memo pure overhead.
+ */
+export const AppearanceDialog = React.memo(AppearanceDialogImpl);
