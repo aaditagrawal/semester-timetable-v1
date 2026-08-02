@@ -11,7 +11,7 @@ import { SetupModal } from "@/components/setup-modal";
 import { SettingsDialog } from "@/components/settings-dialog";
 import { AppearanceDialog } from "@/components/appearance-dialog";
 import { CalendarExportLink } from "@/components/calendar-export";
-import { useTimetable } from "@/lib/hooks/use-timetable";
+import { useTimetable, type UserElectiveSelections } from "@/lib/hooks/use-timetable";
 import { useCurrentTime } from "@/lib/hooks/use-current-time";
 import { days, Day } from "@/lib/timetable-data";
 import {
@@ -61,11 +61,42 @@ export function Timetable() {
     const { theme, toggleTheme } = useTheme();
 
     /**
-     * Stable, because both views take it into the dependency list of the memo
-     * that builds their grid. An inline arrow would be a new value on every
-     * render and would defeat the memo entirely.
+     * Every callback handed to a memoised child is wrapped, and all of them are
+     * — the views take `onConfigureElective` into the dependency list of the
+     * memo that builds their grid, and the three dialogs below are `React.memo`
+     * components. A single inline arrow anywhere in this set is a new value on
+     * every render, which would silently turn every one of those memos from a
+     * saving into pure overhead.
      */
     const openElectiveEditor = useCallback(() => setShowEditElectives(true), []);
+    const closeElectiveEditor = useCallback(() => setShowEditElectives(false), []);
+    const closeSettings = useCallback(() => setShowSettings(false), []);
+    const closeAppearance = useCallback(() => setShowAppearance(false), []);
+    const openAppearance = useCallback(() => setShowAppearance(true), []);
+    const openSettings = useCallback(() => setShowSettings(true), []);
+
+    const saveAndCloseEditor = useCallback(
+        (newSelections: UserElectiveSelections) => {
+            saveSelections(newSelections);
+            setShowEditElectives(false);
+        },
+        [saveSelections]
+    );
+
+    const resetAndCloseSettings = useCallback(() => {
+        resetSetup();
+        setShowSettings(false);
+    }, [resetSetup]);
+
+    const editElectivesFromSettings = useCallback(() => {
+        setShowSettings(false);
+        setShowEditElectives(true);
+    }, []);
+
+    const editAppearanceFromSettings = useCallback(() => {
+        setShowSettings(false);
+        setShowAppearance(true);
+    }, []);
 
     // Determine which day to show
     const currentDayName = currentDay;
@@ -98,20 +129,17 @@ export function Timetable() {
                 electiveGroups={allElectiveGroups}
                 customElectives={customElectives}
                 initialSelections={selections}
-                onSave={(newSelections) => {
-                    saveSelections(newSelections);
-                    setShowEditElectives(false);
-                }}
+                onSave={saveAndCloseEditor}
                 onAddCustom={addCustomElective}
                 onRemoveCustom={removeCustomElective}
                 onUpdateCustom={updateCustomElective}
-                onClose={() => setShowEditElectives(false)}
+                onClose={closeElectiveEditor}
                 isEditing
             />
 
             <SettingsDialog
                 open={showSettings}
-                onClose={() => setShowSettings(false)}
+                onClose={closeSettings}
                 selections={selections}
                 customElectives={customElectives}
                 showRoom={showRoom}
@@ -120,23 +148,14 @@ export function Timetable() {
                 onTileLabelChange={setTileLabel}
                 onExport={exportSettings}
                 onImport={importSettings}
-                onReset={() => {
-                    resetSetup();
-                    setShowSettings(false);
-                }}
-                onEditElectives={() => {
-                    setShowSettings(false);
-                    setShowEditElectives(true);
-                }}
-                onEditAppearance={() => {
-                    setShowSettings(false);
-                    setShowAppearance(true);
-                }}
+                onReset={resetAndCloseSettings}
+                onEditElectives={editElectivesFromSettings}
+                onEditAppearance={editAppearanceFromSettings}
             />
 
             <AppearanceDialog
                 open={showAppearance}
-                onClose={() => setShowAppearance(false)}
+                onClose={closeAppearance}
                 tileLabel={tileLabel}
                 onTileLabelChange={setTileLabel}
                 showRoom={showRoom}
@@ -168,12 +187,12 @@ export function Timetable() {
                             <Button
                                 variant="ghost"
                                 size="icon-sm"
-                                onClick={() => setShowAppearance(true)}
+                                onClick={openAppearance}
                                 aria-label="Appearance"
                             >
                                 <PaletteIcon className="size-4" />
                             </Button>
-                            <Button variant="ghost" size="icon-sm" onClick={() => setShowSettings(true)}>
+                            <Button variant="ghost" size="icon-sm" onClick={openSettings}>
                                 <GearIcon className="size-4" />
                             </Button>
                         </div>
