@@ -9,24 +9,29 @@ import { CourseTile } from "@/components/course-tile";
 import {
     timeSlots,
     weekSchedule,
+    daySchedules,
+    dayIndex,
     Day,
     courses,
-    isSlotPassed,
-    isSlotActive,
+    isPeriodPassed,
+    isPeriodActive,
     Course,
     ElectiveType,
     isStudentProject,
     LabBatch,
     timeToMinutes,
+    type NowSnapshot,
 } from "@/lib/timetable-data";
 import { UserElectiveSelections, TileLabelMode } from "@/lib/hooks/use-timetable";
 import { SunIcon, MoonIcon, PlusIcon, ClockIcon, MapPinIcon } from "@phosphor-icons/react";
 
 interface DayViewProps {
     day: Day;
-    currentTime: Date;
+    /** The clock reduced to a weekday and a minute-of-day; see `snapshotNow`. */
+    now: NowSnapshot;
     selections: UserElectiveSelections;
-    getSelectedElective: (type: ElectiveType) => Course | null;
+    /** Every basket's resolved course, already looked up. */
+    selectedElectives: Record<ElectiveType, Course | null>;
     labBatch: LabBatch | null;
     onConfigureElective?: () => void;
     showRoom?: boolean;
@@ -40,6 +45,8 @@ interface ClassEntry {
     timeSlot: string;
     startTime: string;
     endTime: string;
+    /** Start, in minutes from midnight — what the ordering and the day split use. */
+    startMin: number;
     isActive: boolean;
     isPassed: boolean;
     isLab: boolean;
@@ -48,18 +55,16 @@ interface ClassEntry {
 }
 
 // Calculate how many slots a class spans based on its end time
-function calculateDurationSlots(startSlotIndex: number, endTime: string): number {
-    const endMinutes = timeToMinutes(endTime);
+function calculateDurationSlots(startSlotIndex: number, endMin: number): number {
     let slots = 1;
 
     for (let i = startSlotIndex + 1; i < timeSlots.length; i++) {
-        const slotEndMinutes = timeToMinutes(timeSlots[i].end);
         // If the class ends at or after this slot's end, include it
-        if (endMinutes >= timeToMinutes(timeSlots[i].start)) {
+        if (endMin >= timeSlots[i].startMin) {
             slots++;
         }
         // If the class ends before or at this slot's end, stop
-        if (endMinutes <= slotEndMinutes) {
+        if (endMin <= timeSlots[i].endMin) {
             break;
         }
     }
@@ -67,133 +72,140 @@ function calculateDurationSlots(startSlotIndex: number, endTime: string): number
     return slots;
 }
 
+/** Noon, in minutes from midnight — where the day splits into morning and afternoon. */
+const NOON = 12 * 60;
+
 export function DayView({
     day,
-    currentTime,
+    now,
     selections,
-    getSelectedElective,
+    selectedElectives,
     labBatch,
     onConfigureElective,
     showRoom = false,
     labelMode = "abbreviation",
 }: DayViewProps) {
-    const daySchedule = weekSchedule[day];
+    /**
+     * The day's classes, derived only when something that shapes them moves.
+     *
+     * This ran on every render — and under the old one-second clock, that meant
+     * every second. It walked `weekSchedule[day]` with `Object.entries`,
+     * `parseInt`-ed each key back into the number it started as, then sorted the
+     * result with a comparator that re-split both time strings on every single
+     * comparison. `daySchedules` is already the non-empty periods in slot order,
+     * so the walk is direct and the sort has nothing left to do for the ordinary
+     * case; it stays only because a lab's `timeOverride` can move a period out
+     * of slot order, and it now sorts on an integer the entry already carries.
+     */
+    const { morningClasses, afternoonClasses, activeClass, nextClass, unconfiguredCount, hasClasses } =
+        React.useMemo(() => {
+            const index = dayIndex[day];
+            const classEntries: ClassEntry[] = [];
+            const processedSlots = new Set<number>();
 
-    // Build list of classes for the day
-    const classEntries: ClassEntry[] = [];
-    const processedSlots = new Set<number>();
+            for (const { slotIndex, slot, entry } of daySchedules[day]) {
+                if (processedSlots.has(slotIndex)) continue;
 
-    Object.entries(daySchedule).forEach(([slotIndexStr, entry]) => {
-        const slotIndex = parseInt(slotIndexStr);
+                let startTime = slot.start;
+                let endTime = slot.end;
+                let startMin = slot.startMin;
+                let endMin = slot.endMin;
 
-        if (!entry || processedSlots.has(slotIndex)) return;
+                // Handle labs with batch-specific assignment
+                if (entry.isLab && entry.labInfo && labBatch) {
+                    if (entry.labInfo.timeOverride) {
+                        startTime = entry.labInfo.timeOverride.start;
+                        endTime = entry.labInfo.timeOverride.end;
+                        startMin = timeToMinutes(startTime);
+                        endMin = timeToMinutes(endTime);
+                    }
 
-        const slot = timeSlots[slotIndex];
-        let startTime = slot.start;
-        let endTime = slot.end;
+                    // Get the lab for user's batch
+                    const batchLab = entry.labInfo[labBatch];
+                    const labCourse = courses[batchLab.course];
 
-        // Handle labs with batch-specific assignment
-        if (entry.isLab && entry.labInfo && labBatch) {
-            if (entry.labInfo.timeOverride) {
-                startTime = entry.labInfo.timeOverride.start;
-                endTime = entry.labInfo.timeOverride.end;
-            }
+                    if (labCourse) {
+                        classEntries.push({
+                            course: { ...labCourse, room: batchLab.room },
+                            timeSlot: `${startTime} - ${endTime}`,
+                            startTime,
+                            endTime,
+                            startMin,
+                            isActive: isPeriodActive(startMin, endMin, now, index),
+                            isPassed: isPeriodPassed(endMin, now, index),
+                            isLab: true,
+                            room: batchLab.room,
+                            durationSlots: calculateDurationSlots(slotIndex, endMin),
+                        });
+                    }
 
-            // Get the lab for user's batch
-            const batchLab = entry.labInfo[labBatch];
-            const labCourse = courses[batchLab.course];
+                    // Mark subsequent lab slots as processed
+                    for (let i = slotIndex + 1; i < timeSlots.length; i++) {
+                        if (
+                            timeSlots[i].startMin < endMin ||
+                            (weekSchedule[day][i] === null && i < slotIndex + 3)
+                        ) {
+                            processedSlots.add(i);
+                        }
+                    }
+                    continue;
+                }
 
-            if (labCourse) {
-                const durationSlots = calculateDurationSlots(slotIndex, endTime);
-                classEntries.push({
-                    course: { ...labCourse, room: batchLab.room },
-                    timeSlot: `${startTime} - ${endTime}`,
-                    startTime,
-                    endTime,
-                    isActive: isSlotActive(startTime, endTime, currentTime, day),
-                    isPassed: isSlotPassed(endTime, currentTime, day),
-                    isLab: true,
-                    room: batchLab.room,
-                    durationSlots,
-                });
-            }
+                // Handle electives (show even if not configured)
+                if (entry.isElective && entry.electiveType) {
+                    const electiveType: ElectiveType = entry.electiveType;
 
-            // Mark subsequent lab slots as processed
-            for (let i = slotIndex + 1; i < timeSlots.length; i++) {
-                const nextSlot = timeSlots[i];
-                if (
-                    nextSlot.start < endTime ||
-                    (daySchedule[i] === null && i < slotIndex + 3)
-                ) {
-                    processedSlots.add(i);
+                    // Traded for the student project: a free period, so neither a class
+                    // nor a gap to prompt about — leave it out of the day entirely.
+                    if (isStudentProject(electiveType, selections[electiveType])) continue;
+
+                    const course = selectedElectives[electiveType];
+                    classEntries.push({
+                        course,
+                        electiveType,
+                        isUnconfigured: !course,
+                        timeSlot: `${startTime} - ${endTime}`,
+                        startTime,
+                        endTime,
+                        startMin,
+                        isActive: course ? isPeriodActive(startMin, endMin, now, index) : false,
+                        isPassed: isPeriodPassed(endMin, now, index),
+                        isLab: false,
+                    });
+                    continue;
+                }
+
+                // Handle regular courses
+                const course = courses[entry.courseAbbreviation];
+                if (course) {
+                    classEntries.push({
+                        course,
+                        timeSlot: `${startTime} - ${endTime}`,
+                        startTime,
+                        endTime,
+                        startMin,
+                        isActive: isPeriodActive(startMin, endMin, now, index),
+                        isPassed: isPeriodPassed(endMin, now, index),
+                        isLab: false,
+                    });
                 }
             }
-            return;
-        }
 
-        // Handle electives (show even if not configured)
-        if (entry.isElective && entry.electiveType) {
-            const electiveType: ElectiveType = entry.electiveType;
+            // Sort by start time
+            classEntries.sort((a, b) => a.startMin - b.startMin);
 
-            // Traded for the student project: a free period, so neither a class
-            // nor a gap to prompt about — leave it out of the day entirely.
-            if (isStudentProject(electiveType, selections[electiveType])) return;
-
-            const course = getSelectedElective(electiveType);
-            classEntries.push({
-                course,
-                electiveType,
-                isUnconfigured: !course,
-                timeSlot: `${startTime} - ${endTime}`,
-                startTime,
-                endTime,
-                isActive: course ? isSlotActive(startTime, endTime, currentTime, day) : false,
-                isPassed: isSlotPassed(endTime, currentTime, day),
-                isLab: false,
-            });
-            return;
-        }
-
-        // Handle regular courses
-        const course = courses[entry.courseAbbreviation];
-        if (course) {
-            classEntries.push({
-                course,
-                timeSlot: `${startTime} - ${endTime}`,
-                startTime,
-                endTime,
-                isActive: isSlotActive(startTime, endTime, currentTime, day),
-                isPassed: isSlotPassed(endTime, currentTime, day),
-                isLab: false,
-            });
-        }
-    });
-
-    // Sort by start time
-    classEntries.sort((a, b) => {
-        const aMinutes =
-            parseInt(a.startTime.split(":")[0]) * 60 +
-            parseInt(a.startTime.split(":")[1]);
-        const bMinutes =
-            parseInt(b.startTime.split(":")[0]) * 60 +
-            parseInt(b.startTime.split(":")[1]);
-        return aMinutes - bMinutes;
-    });
-
-    const morningClasses = classEntries.filter((c) => {
-        const hour = parseInt(c.startTime.split(":")[0]);
-        return hour < 12;
-    });
-
-    const afternoonClasses = classEntries.filter((c) => {
-        const hour = parseInt(c.startTime.split(":")[0]);
-        return hour >= 12;
-    });
-
-    const hasClasses = classEntries.length > 0;
-    const activeClass = classEntries.find((c) => c.isActive && c.course);
-    const nextClass = classEntries.find((c) => !c.isPassed && !c.isActive && c.course);
-    const unconfiguredCount = classEntries.filter((c) => c.isUnconfigured).length;
+            return {
+                morningClasses: classEntries.filter((c) => c.startMin < NOON),
+                afternoonClasses: classEntries.filter((c) => c.startMin >= NOON),
+                hasClasses: classEntries.length > 0,
+                activeClass: classEntries.find((c) => c.isActive && c.course),
+                nextClass: classEntries.find((c) => !c.isPassed && !c.isActive && c.course),
+                unconfiguredCount: classEntries.reduce(
+                    (count, c) => count + (c.isUnconfigured ? 1 : 0),
+                    0,
+                ),
+            };
+        }, [day, now, selections, selectedElectives, labBatch]);
 
     const renderClassCard = (entry: ClassEntry, idx: number) => {
         if (entry.isUnconfigured && entry.electiveType) {

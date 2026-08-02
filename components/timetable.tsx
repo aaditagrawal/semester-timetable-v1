@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -48,17 +48,24 @@ export function Timetable() {
         addCustomElective,
         removeCustomElective,
         updateCustomElective,
-        getSelectedElective,
         resetSetup,
         exportSettings,
         importSettings,
         allElectiveGroups,
+        selectedElectives,
         labBatch,
     } = useTimetable();
 
-    const { currentTime, currentDay, formattedTime, formattedDate } = useCurrentTime();
+    const { now, currentDay, formattedTime, formattedDate } = useCurrentTime();
 
     const { theme, toggleTheme } = useTheme();
+
+    /**
+     * Stable, because both views take it into the dependency list of the memo
+     * that builds their grid. An inline arrow would be a new value on every
+     * render and would defeat the memo entirely.
+     */
+    const openElectiveEditor = useCallback(() => setShowEditElectives(true), []);
 
     // Determine which day to show
     const currentDayName = currentDay;
@@ -232,21 +239,21 @@ export function Timetable() {
                     {viewMode === "day" ? (
                         <DayView
                             day={displayDay}
-                            currentTime={currentTime}
+                            now={now}
                             selections={selections}
-                            getSelectedElective={getSelectedElective}
+                            selectedElectives={selectedElectives}
                             labBatch={labBatch}
-                            onConfigureElective={() => setShowEditElectives(true)}
+                            onConfigureElective={openElectiveEditor}
                             showRoom={showRoom}
                             labelMode={tileLabel}
                         />
                     ) : (
                         <WeekView
-                            currentTime={currentTime}
+                            now={now}
                             selections={selections}
-                            getSelectedElective={getSelectedElective}
+                            selectedElectives={selectedElectives}
                             labBatch={labBatch}
-                            onConfigureElective={() => setShowEditElectives(true)}
+                            onConfigureElective={openElectiveEditor}
                             showRoom={showRoom}
                             labelMode={tileLabel}
                         />
