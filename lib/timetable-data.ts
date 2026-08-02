@@ -88,6 +88,16 @@ export interface TimeSlot {
   start: string; // HH:MM format
   end: string; // HH:MM format
   label: string;
+  /**
+   * `start`/`end` as minutes from midnight, derived once at module load.
+   *
+   * Every "is this slot active / already over" question is an integer
+   * comparison; without these it was a `split(":")` and a `map(Number)` — two
+   * throwaway arrays — on each side of each comparison, for each of the 54
+   * grid cells, on each render.
+   */
+  startMin: number;
+  endMin: number;
 }
 
 export type LabBatch = "B1" | "B2";
@@ -124,6 +134,12 @@ export interface WeekSchedule {
   [day: string]: DaySchedule;
 }
 
+// Helper to parse time string to minutes from midnight
+export function timeToMinutes(time: string): number {
+  const [hours, minutes] = time.split(":").map(Number);
+  return hours * 60 + minutes;
+}
+
 // Time slots for the timetable
 export const timeSlots: TimeSlot[] = [
   { start: "08:00", end: "09:00", label: "8:00-9:00" },
@@ -135,11 +151,44 @@ export const timeSlots: TimeSlot[] = [
   { start: "14:00", end: "15:00", label: "14:00-15:00" },
   { start: "15:00", end: "15:30", label: "15:00-15:30" },
   { start: "15:30", end: "16:30", label: "15:30-16:30" },
-];
+].map((slot) => ({
+  ...slot,
+  startMin: timeToMinutes(slot.start),
+  endMin: timeToMinutes(slot.end),
+}));
 
 // Day labels
 export const days = ["MON", "TUE", "WED", "THU", "FRI", "SAT"] as const;
 export type Day = (typeof days)[number];
+
+/**
+ * `Day` -> its position in `days`, so the predicates below stop doing a linear
+ * `days.indexOf` per call. Small either way at six entries; the point is that
+ * it is a property read rather than a scan in a loop that runs per cell.
+ */
+export const dayIndex: Record<Day, number> = Object.fromEntries(
+  days.map((day, index) => [day, index]),
+) as Record<Day, number>;
+
+/**
+ * Minutes-from-midnight for every "HH:MM" the schedule actually contains.
+ *
+ * The string-taking predicates are kept for callers that still hold a time
+ * string (lab `timeOverride`s), and this turns their parse into a map hit.
+ */
+const MINUTES_BY_TIME = new Map<string, number>();
+for (const slot of timeSlots) {
+  MINUTES_BY_TIME.set(slot.start, slot.startMin);
+  MINUTES_BY_TIME.set(slot.end, slot.endMin);
+}
+
+function minutesOf(time: string): number {
+  const cached = MINUTES_BY_TIME.get(time);
+  if (cached !== undefined) return cached;
+  const parsed = timeToMinutes(time);
+  MINUTES_BY_TIME.set(time, parsed);
+  return parsed;
+}
 
 /**
  * Core (non-elective) courses. Sem VII has none — every slot in the grid is an
@@ -225,92 +274,115 @@ export const weekSchedule: WeekSchedule = {
   },
 };
 
-// Helper function to get course details
-export function getCourseByAbbreviation(
-  abbreviation: string,
-  selectedElectives?: Record<string, string>,
-): Course | null {
-  // First check core courses
-  if (courses[abbreviation]) {
-    return courses[abbreviation];
-  }
-
-  // Then check electives
-  for (const group of electiveGroups) {
-    if (group.type === abbreviation && selectedElectives?.[group.type]) {
-      const selectedOption = group.options.find(
-        (opt) => opt.id === selectedElectives[group.type],
-      );
-      if (selectedOption) {
-        return selectedOption;
-      }
-    }
-    // Also check by ID
-    for (const option of group.options) {
-      if (option.id === abbreviation || option.abbreviation === abbreviation) {
-        return option;
-      }
-    }
-  }
-
-  return null;
+/** A period that is actually scheduled, paired with the slot it sits in. */
+export interface ScheduledPeriod {
+  slotIndex: number;
+  slot: TimeSlot;
+  entry: ScheduleEntry;
 }
 
-// Helper to parse time string to minutes from midnight
-export function timeToMinutes(time: string): number {
-  const [hours, minutes] = time.split(":").map(Number);
-  return hours * 60 + minutes;
+/**
+ * Every day's scheduled periods, in slot order, with the empty slots dropped.
+ *
+ * `weekSchedule` is authored as a slot-indexed object with explicit nulls,
+ * which reads well next to the printed sheet but means each render had to
+ * `Object.entries` it, `parseInt` every key back into a number and re-sort the
+ * result. The schedule is a build-time constant, so all of that is done once
+ * here instead — 18 scheduled periods across the week, found by walking the
+ * slots in order rather than by sorting.
+ */
+export const daySchedules: Record<Day, ScheduledPeriod[]> = Object.fromEntries(
+  days.map((day) => {
+    const schedule = weekSchedule[day];
+    const periods: ScheduledPeriod[] = [];
+    for (let slotIndex = 0; slotIndex < timeSlots.length; slotIndex += 1) {
+      const entry = schedule?.[slotIndex];
+      if (entry) periods.push({ slotIndex, slot: timeSlots[slotIndex], entry });
+    }
+    return [day, periods];
+  }),
+) as Record<Day, ScheduledPeriod[]>;
+
+/**
+ * The current instant reduced to the only two numbers the grid asks about.
+ *
+ * Taken once per render and passed down, so a tick reads the `Date` once
+ * instead of four times per cell — and, more usefully, so the predicates below
+ * are pure integer comparisons that a memoised cell can be keyed on.
+ */
+export interface NowSnapshot {
+  /** 0 = Sunday, matching `Date#getDay`. */
+  dayOfWeek: number;
+  /** Minutes from midnight. */
+  minutes: number;
 }
 
-// Helper to check if a time slot is in the past
+export function snapshotNow(currentTime: Date): NowSnapshot {
+  return {
+    dayOfWeek: currentTime.getDay(),
+    minutes: currentTime.getHours() * 60 + currentTime.getMinutes(),
+  };
+}
+
+/**
+ * Has this period already finished?
+ *
+ * `index` is the day's position in `days` (0 = Monday), which is one less than
+ * the same day's `Date#getDay` value.
+ */
+export function isPeriodPassed(
+  slotEndMin: number,
+  now: NowSnapshot,
+  index: number,
+): boolean {
+  const targetDayIndex = index + 1;
+
+  if (now.dayOfWeek !== targetDayIndex) {
+    // Sunday sits between two weeks. The views show the *coming* week (the day
+    // selector falls back to Monday), so nothing on it has happened yet —
+    // treating it as passed would grey out every class and hide "NEXT UP".
+    if (now.dayOfWeek === 0) return false;
+    return now.dayOfWeek > targetDayIndex;
+  }
+
+  return now.minutes > slotEndMin;
+}
+
+export function isPeriodActive(
+  slotStartMin: number,
+  slotEndMin: number,
+  now: NowSnapshot,
+  index: number,
+): boolean {
+  if (now.dayOfWeek !== index + 1) return false;
+  return now.minutes >= slotStartMin && now.minutes < slotEndMin;
+}
+
+/**
+ * String/`Date` forms of the two predicates above.
+ *
+ * Kept because lab periods carry their times as strings (`labInfo.timeOverride`)
+ * rather than as slot indices, so there is still a caller that has nothing but
+ * an "HH:MM". Everything on the per-cell path should use the numeric pair.
+ */
 export function isSlotPassed(
   slotEnd: string,
   currentTime: Date,
   day: Day,
 ): boolean {
-  const currentDay = currentTime.getDay(); // 0 = Sunday
-  const dayIndex = days.indexOf(day);
-  const targetDayIndex = dayIndex + 1; // days array is 0-indexed starting Monday
-
-  // If it's a different day of the week
-  if (currentDay !== targetDayIndex) {
-    // Sunday sits between two weeks. The views show the *coming* week (the day
-    // selector falls back to Monday), so nothing on it has happened yet —
-    // treating it as passed would grey out every class and hide "NEXT UP".
-    if (currentDay === 0) {
-      return false;
-    }
-    if (currentDay > targetDayIndex) {
-      return true; // Day has passed this week
-    }
-    return false; // Day hasn't come yet this week
-  }
-
-  // Same day - compare times
-  const currentMinutes = currentTime.getHours() * 60 + currentTime.getMinutes();
-  const slotEndMinutes = timeToMinutes(slotEnd);
-
-  return currentMinutes > slotEndMinutes;
+  return isPeriodPassed(minutesOf(slotEnd), snapshotNow(currentTime), dayIndex[day]);
 }
 
-// Helper to check if a time slot is currently active
 export function isSlotActive(
   slotStart: string,
   slotEnd: string,
   currentTime: Date,
   day: Day,
 ): boolean {
-  const currentDay = currentTime.getDay();
-  const dayIndex = days.indexOf(day);
-  const targetDayIndex = dayIndex + 1;
-
-  if (currentDay !== targetDayIndex) {
-    return false;
-  }
-
-  const currentMinutes = currentTime.getHours() * 60 + currentTime.getMinutes();
-  const slotStartMinutes = timeToMinutes(slotStart);
-  const slotEndMinutes = timeToMinutes(slotEnd);
-
-  return currentMinutes >= slotStartMinutes && currentMinutes < slotEndMinutes;
+  return isPeriodActive(
+    minutesOf(slotStart),
+    minutesOf(slotEnd),
+    snapshotNow(currentTime),
+    dayIndex[day],
+  );
 }
