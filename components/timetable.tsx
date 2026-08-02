@@ -13,7 +13,7 @@ import { AppearanceDialog } from "@/components/appearance-dialog";
 import { CalendarExportLink } from "@/components/calendar-export";
 import { useTimetable } from "@/lib/hooks/use-timetable";
 import { useCurrentTime } from "@/lib/hooks/use-current-time";
-import { days, Day, Course, ElectiveType } from "@/lib/timetable-data";
+import { days, Day } from "@/lib/timetable-data";
 import {
     CalendarIcon,
     CalendarDotsIcon,
@@ -49,11 +49,11 @@ export function Timetable() {
         removeCustomElective,
         updateCustomElective,
         getSelectedElective,
-        getLabBatch,
         resetSetup,
-        getAllElectiveGroups,
         exportSettings,
         importSettings,
+        allElectiveGroups,
+        labBatch,
     } = useTimetable();
 
     const { currentTime, currentDay, formattedTime, formattedDate } = useCurrentTime();
@@ -65,12 +65,6 @@ export function Timetable() {
     const displayDay =
         selectedDay ||
         (days.includes(currentDayName as Day) ? (currentDayName as Day) : "MON");
-
-    const getElective = (type: ElectiveType): Course | null => {
-        return getSelectedElective(type) as Course | null;
-    };
-
-    const labBatch = getLabBatch();
 
     if (isLoading) {
         return (
@@ -84,7 +78,7 @@ export function Timetable() {
         <div className="min-h-screen bg-background">
             <SetupModal
                 open={!isSetupComplete && !isLoading}
-                electiveGroups={getAllElectiveGroups()}
+                electiveGroups={allElectiveGroups}
                 customElectives={customElectives}
                 onSave={saveSelections}
                 onAddCustom={addCustomElective}
@@ -94,7 +88,7 @@ export function Timetable() {
 
             <SetupModal
                 open={showEditElectives}
-                electiveGroups={getAllElectiveGroups()}
+                electiveGroups={allElectiveGroups}
                 customElectives={customElectives}
                 initialSelections={selections}
                 onSave={(newSelections) => {
@@ -240,7 +234,7 @@ export function Timetable() {
                             day={displayDay}
                             currentTime={currentTime}
                             selections={selections}
-                            getSelectedElective={getElective}
+                            getSelectedElective={getSelectedElective}
                             labBatch={labBatch}
                             onConfigureElective={() => setShowEditElectives(true)}
                             showRoom={showRoom}
@@ -250,7 +244,7 @@ export function Timetable() {
                         <WeekView
                             currentTime={currentTime}
                             selections={selections}
-                            getSelectedElective={getElective}
+                            getSelectedElective={getSelectedElective}
                             labBatch={labBatch}
                             onConfigureElective={() => setShowEditElectives(true)}
                             showRoom={showRoom}
