@@ -14,7 +14,6 @@ import {
   Course,
   courses,
   isStudentProject,
-  LabBatch,
 } from "@/lib/timetable-data";
 import { UserElectiveSelections, CustomElective } from "@/lib/hooks/use-timetable";
 import { ElectiveOption, ElectiveType, electiveGroups } from "@/lib/timetable-data";
@@ -77,7 +76,7 @@ function getElectiveOptions(
   const defaultOptions = group?.options || [];
   const customOptions = customElectives
     .filter((e) => e.groupType === type)
-    .map(({ groupType, ...rest }) => rest as ElectiveOption);
+    .map(({ groupType: _groupType, ...rest }) => rest as ElectiveOption);
   return [...defaultOptions, ...customOptions];
 }
 
