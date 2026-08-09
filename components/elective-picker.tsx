@@ -7,17 +7,17 @@ import type { ElectiveOption, ElectiveType } from "@/lib/timetable-data";
 import { CheckIcon, MagnifyingGlassIcon } from "@phosphor-icons/react";
 
 interface ElectivePickerProps {
-    type: ElectiveType;
-    options: ElectiveOption[];
-    query: string;
-    onQueryChange: (type: ElectiveType, query: string) => void;
-    onSelect: (type: ElectiveType, optionId: string) => void;
+  type: ElectiveType;
+  options: ElectiveOption[];
+  query: string;
+  onQueryChange: (type: ElectiveType, query: string) => void;
+  onSelect: (type: ElectiveType, optionId: string) => void;
 }
 
 interface OptionRowProps {
-    option: ElectiveOption;
-    type: ElectiveType;
-    onSelect: (type: ElectiveType, optionId: string) => void;
+  option: ElectiveOption;
+  type: ElectiveType;
+  onSelect: (type: ElectiveType, optionId: string) => void;
 }
 
 /**
@@ -27,26 +27,24 @@ interface OptionRowProps {
  * props new on every keystroke and the memo could never hold.
  */
 const OptionRow = React.memo(function OptionRow({ option, type, onSelect }: OptionRowProps) {
-    return (
-        <button
-            onClick={() => onSelect(type, option.id)}
-            className="w-full flex items-start gap-2 p-2 text-left hover:bg-muted/50 transition-colors border-b border-border last:border-0"
-        >
-            <div className="flex-1">
-                <div className="font-medium text-xs">
-                    {option.abbreviation}
-                    {option.room && (
-                        <span className="ml-1.5 font-normal text-muted-foreground/70">
-                            {option.room}
-                        </span>
-                    )}
-                </div>
-                <div className="text-xs text-muted-foreground">{option.name}</div>
-                <div className="text-xs text-muted-foreground/70">{option.code}</div>
-            </div>
-            <CheckIcon className="size-3.5 text-muted-foreground shrink-0 mt-1" />
-        </button>
-    );
+  return (
+    <button
+      onClick={() => onSelect(type, option.id)}
+      className="w-full flex items-start gap-2 p-2 text-left hover:bg-muted/50 transition-colors border-b border-border last:border-0"
+    >
+      <div className="flex-1">
+        <div className="font-medium text-xs">
+          {option.abbreviation}
+          {option.room && (
+            <span className="ml-1.5 font-normal text-muted-foreground/70">{option.room}</span>
+          )}
+        </div>
+        <div className="text-xs text-muted-foreground">{option.name}</div>
+        <div className="text-xs text-muted-foreground/70">{option.code}</div>
+      </div>
+      <CheckIcon className="size-3.5 text-muted-foreground shrink-0 mt-1" />
+    </button>
+  );
 });
 
 /**
@@ -65,46 +63,39 @@ const OptionRow = React.memo(function OptionRow({ option, type, onSelect }: Opti
  * change, and this commit is not supposed to have any.
  */
 export const ElectivePicker = React.memo(function ElectivePicker({
-    type,
-    options,
-    query,
-    onQueryChange,
-    onSelect,
+  type,
+  options,
+  query,
+  onQueryChange,
+  onSelect,
 }: ElectivePickerProps) {
-    // `searchOptions` returns the same array for an empty query, so the rows
-    // below keep their identity until something is actually typed.
-    const filteredOptions = React.useMemo(() => searchOptions(options, query), [options, query]);
+  // `searchOptions` returns the same array for an empty query, so the rows
+  // below keep their identity until something is actually typed.
+  const filteredOptions = React.useMemo(() => searchOptions(options, query), [options, query]);
 
-    return (
-        <div className="relative">
-            <div className="relative">
-                <MagnifyingGlassIcon className="absolute left-2 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
-                <Input
-                    placeholder="Search by abbreviation, code or name..."
-                    value={query}
-                    onChange={(e) => onQueryChange(type, e.target.value)}
-                    className="pl-8 text-xs"
-                    aria-label={`Search ${type} courses`}
-                />
-            </div>
-            {/* Always shown, so the basket reads as a pick-list rather than
+  return (
+    <div className="relative">
+      <div className="relative">
+        <MagnifyingGlassIcon className="absolute left-2 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+        <Input
+          placeholder="Search by abbreviation, code or name..."
+          value={query}
+          onChange={(e) => onQueryChange(type, e.target.value)}
+          className="pl-8 text-xs"
+          aria-label={`Search ${type} courses`}
+        />
+      </div>
+      {/* Always shown, so the basket reads as a pick-list rather than
                 something you have to fill in yourself. */}
-            <div className="mt-2 border border-border rounded-none max-h-48 overflow-y-auto">
-                {filteredOptions.length > 0 ? (
-                    filteredOptions.map((option) => (
-                        <OptionRow
-                            key={option.id}
-                            option={option}
-                            type={type}
-                            onSelect={onSelect}
-                        />
-                    ))
-                ) : (
-                    <div className="p-3 text-xs text-muted-foreground text-center">
-                        No results found
-                    </div>
-                )}
-            </div>
-        </div>
-    );
+      <div className="mt-2 border border-border rounded-none max-h-48 overflow-y-auto">
+        {filteredOptions.length > 0 ? (
+          filteredOptions.map((option) => (
+            <OptionRow key={option.id} option={option} type={type} onSelect={onSelect} />
+          ))
+        ) : (
+          <div className="p-3 text-xs text-muted-foreground text-center">No results found</div>
+        )}
+      </div>
+    </div>
+  );
 });

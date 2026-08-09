@@ -132,14 +132,11 @@ export function lookupAllocation(reg: number): AllocationResult | null {
 
     const sectionIndex = PAYLOAD[base + slot * 2 + 1];
     const type = SLOT_ORDER[slot];
-    const section =
-      sectionIndex === NONE ? "" : String.fromCharCode(65 + sectionIndex);
+    const section = sectionIndex === NONE ? "" : String.fromCharCode(65 + sectionIndex);
 
     // Sectioned options (ICT) carry the section in their id; the rest have a
     // single entry per code.
-    const id =
-      OPTION_IDS.get(`${type}|${code}|${section}`) ??
-      OPTION_IDS.get(`${type}|${code}|`);
+    const id = OPTION_IDS.get(`${type}|${code}|${section}`) ?? OPTION_IDS.get(`${type}|${code}|`);
     if (id !== undefined) result[type] = id;
   }
 

@@ -8,7 +8,7 @@
 
 export const RECORD_COUNT = 2250;
 export const PAYLOAD_BYTES = 10;
-export const NONE = 0xFF;
+export const NONE = 0xff;
 
 /** PE-3..PE-7, matching the pair order within each payload. */
 export const SLOT_ORDER = ["PE-3", "PE-4", "PE-5", "PE-6", "PE-7"] as const;

@@ -5,7 +5,7 @@ import { ThemeProvider } from "@/lib/theme-provider";
 import { ServiceWorker } from "@/components/service-worker";
 import "./globals.css";
 
-const jetbrainsMono = JetBrains_Mono({ subsets: ['latin'], variable: '--font-sans' });
+const jetbrainsMono = JetBrains_Mono({ subsets: ["latin"], variable: "--font-sans" });
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -61,17 +61,11 @@ export default function RootLayout({
   // <html> before React hydrates, which is a mismatch by definition — that is
   // the whole point of it.
   return (
-    <html
-      lang="en"
-      className={`${jetbrainsMono.variable} dark`}
-      suppressHydrationWarning
-    >
+    <html lang="en" className={`${jetbrainsMono.variable} dark`} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeBootstrap }} />
       </head>
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <Script defer src="https://stat.sys256.com/script.js" strategy="afterInteractive" />
         <ThemeProvider>{children}</ThemeProvider>
         <ServiceWorker />

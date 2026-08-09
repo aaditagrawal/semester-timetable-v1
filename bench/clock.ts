@@ -40,7 +40,8 @@ console.log(`parity check passed: ${after}`);
 bench("header strings, once per render", [
   {
     name: "before: toLocaleTimeString + toLocaleDateString with options",
-    fn: () => NOW.toLocaleTimeString("en-US", TIME_OPTIONS) + NOW.toLocaleDateString("en-US", DATE_OPTIONS),
+    fn: () =>
+      NOW.toLocaleTimeString("en-US", TIME_OPTIONS) + NOW.toLocaleDateString("en-US", DATE_OPTIONS),
   },
   {
     name: "after: getHours/getMinutes + zone-checked date formatter",

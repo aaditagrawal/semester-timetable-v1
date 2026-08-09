@@ -60,9 +60,7 @@ function referenceIsSlotActive(
   if (currentDay !== targetDayIndex) return false;
 
   const currentMinutes = currentTime.getHours() * 60 + currentTime.getMinutes();
-  return (
-    currentMinutes >= timeToMinutes(slotStart) && currentMinutes < timeToMinutes(slotEnd)
-  );
+  return currentMinutes >= timeToMinutes(slotStart) && currentMinutes < timeToMinutes(slotEnd);
 }
 
 /* -------------------------------------------------------------------------- */

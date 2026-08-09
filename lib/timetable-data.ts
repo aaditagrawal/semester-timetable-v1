@@ -25,14 +25,7 @@ export interface Course {
  */
 export type ElectiveType = "PE-3" | "PE-4" | "PE-5" | "PE-6" | "PE-7" | "OE";
 
-export const electiveTypes: ElectiveType[] = [
-  "PE-3",
-  "PE-4",
-  "PE-5",
-  "PE-6",
-  "PE-7",
-  "OE",
-];
+export const electiveTypes: ElectiveType[] = ["PE-3", "PE-4", "PE-5", "PE-6", "PE-7", "OE"];
 
 export const electiveTypeLabels: Record<ElectiveType, string> = {
   "PE-3": "Program Elective 3",
@@ -72,10 +65,7 @@ export const studentProjectOption: ElectiveOption = {
  * compulsory. Scoping the check here means a hand-edited backup that sets the
  * sentinel on a PE just fails to match, rather than deleting a class.
  */
-export function isStudentProject(
-  type: ElectiveType,
-  selectedId: string | undefined,
-): boolean {
+export function isStudentProject(type: ElectiveType, selectedId: string | undefined): boolean {
   return type === "OE" && selectedId === STUDENT_PROJECT_ID;
 }
 
@@ -330,11 +320,7 @@ export function snapshotNow(currentTime: Date): NowSnapshot {
  * `index` is the day's position in `days` (0 = Monday), which is one less than
  * the same day's `Date#getDay` value.
  */
-export function isPeriodPassed(
-  slotEndMin: number,
-  now: NowSnapshot,
-  index: number,
-): boolean {
+export function isPeriodPassed(slotEndMin: number, now: NowSnapshot, index: number): boolean {
   const targetDayIndex = index + 1;
 
   if (now.dayOfWeek !== targetDayIndex) {
@@ -365,11 +351,7 @@ export function isPeriodActive(
  * rather than as slot indices, so there is still a caller that has nothing but
  * an "HH:MM". Everything on the per-cell path should use the numeric pair.
  */
-export function isSlotPassed(
-  slotEnd: string,
-  currentTime: Date,
-  day: Day,
-): boolean {
+export function isSlotPassed(slotEnd: string, currentTime: Date, day: Day): boolean {
   return isPeriodPassed(minutesOf(slotEnd), snapshotNow(currentTime), dayIndex[day]);
 }
 

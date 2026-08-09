@@ -105,10 +105,7 @@ export function scoreOption(option: ElectiveOption, query: string): number | nul
  * order within a bucket, and that *is* the index tie-break. No comparator, and
  * no `{option, index, score}` wrapper allocated per candidate.
  */
-export function searchOptions(
-  options: ElectiveOption[],
-  query: string,
-): ElectiveOption[] {
+export function searchOptions(options: ElectiveOption[], query: string): ElectiveOption[] {
   const q = normalize(query);
   // The same array back for an empty query, so a memoised list can skip re-rendering.
   if (!q) return options;

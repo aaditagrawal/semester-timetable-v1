@@ -1733,7 +1733,7 @@ export const electiveOptions: Record<ElectiveType, ElectiveOption[]> = {
       faculty: [{ name: "TBD" }],
     },
   ],
-  "OE": [
+  OE: [
     {
       id: "aae-4312",
       abbreviation: "IANS",

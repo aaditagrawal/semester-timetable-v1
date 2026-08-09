@@ -2,7 +2,16 @@ import Link from "next/link";
 
 function HomeIcon({ className }: { className?: string }) {
   return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
       <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
       <polyline points="9 22 9 12 15 12 15 22" />
     </svg>
@@ -11,7 +20,16 @@ function HomeIcon({ className }: { className?: string }) {
 
 function ArrowLeftIcon({ className }: { className?: string }) {
   return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
       <path d="m12 19-7-7 7-7" />
       <path d="M19 12H5" />
     </svg>
@@ -27,7 +45,7 @@ export default function NotFound() {
             <div className="text-muted-foreground text-xs font-mono tracking-widest uppercase">
               404
             </div>
-            
+
             <div className="flex flex-col gap-2 items-center">
               <h1 className="text-2xl font-medium">Page Not Found</h1>
               <p className="text-muted-foreground text-sm max-w-[280px]">
@@ -55,9 +73,7 @@ export default function NotFound() {
         </div>
 
         <div className="mt-8 text-center">
-          <p className="text-muted-foreground text-xs">
-            MIT Manipal IT_CCE Timetable
-          </p>
+          <p className="text-muted-foreground text-xs">MIT Manipal IT_CCE Timetable</p>
         </div>
       </div>
     </main>

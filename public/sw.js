@@ -54,9 +54,7 @@ self.addEventListener("install", (event) => {
       // installed app that simply doesn't open offline, which is worse than
       // retrying the install.
       await cache.addAll(REQUIRED_SHELL);
-      await Promise.all(
-        OPTIONAL_SHELL.map((url) => cache.add(url).catch(() => undefined)),
-      );
+      await Promise.all(OPTIONAL_SHELL.map((url) => cache.add(url).catch(() => undefined)));
       await self.skipWaiting();
     })(),
   );
@@ -66,9 +64,7 @@ self.addEventListener("activate", (event) => {
   event.waitUntil(
     caches
       .keys()
-      .then((keys) =>
-        Promise.all(keys.filter((k) => !CURRENT.has(k)).map((k) => caches.delete(k))),
-      )
+      .then((keys) => Promise.all(keys.filter((k) => !CURRENT.has(k)).map((k) => caches.delete(k))))
       .then(() => self.clients.claim()),
   );
 });
@@ -77,9 +73,7 @@ self.addEventListener("activate", (event) => {
 async function trim(cache, maxEntries) {
   const keys = await cache.keys();
   if (keys.length <= maxEntries) return;
-  await Promise.all(
-    keys.slice(0, keys.length - maxEntries).map((key) => cache.delete(key)),
-  );
+  await Promise.all(keys.slice(0, keys.length - maxEntries).map((key) => cache.delete(key)));
 }
 
 // Every write below is awaited, or handed to waitUntil. An un-awaited

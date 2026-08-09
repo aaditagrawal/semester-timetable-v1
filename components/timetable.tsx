@@ -15,12 +15,12 @@ import { useTimetable, type UserElectiveSelections } from "@/lib/hooks/use-timet
 import { useCurrentTime } from "@/lib/hooks/use-current-time";
 import { days, Day } from "@/lib/timetable-data";
 import {
-    CalendarIcon,
-    CalendarDotsIcon,
-    GearIcon,
-    PaletteIcon,
-    SunIcon,
-    MoonIcon,
+  CalendarIcon,
+  CalendarDotsIcon,
+  GearIcon,
+  PaletteIcon,
+  SunIcon,
+  MoonIcon,
 } from "@phosphor-icons/react";
 import { useTheme } from "@/lib/theme-provider";
 
@@ -29,262 +29,259 @@ import { useTheme } from "@/lib/theme-provider";
 type ViewMode = "day" | "week";
 
 export function Timetable() {
-    const [viewMode, setViewMode] = useState<ViewMode>("day");
-    const [selectedDay, setSelectedDay] = useState<Day | null>(null);
-    const [showSettings, setShowSettings] = useState(false);
-    const [showEditElectives, setShowEditElectives] = useState(false);
-    const [showAppearance, setShowAppearance] = useState(false);
+  const [viewMode, setViewMode] = useState<ViewMode>("day");
+  const [selectedDay, setSelectedDay] = useState<Day | null>(null);
+  const [showSettings, setShowSettings] = useState(false);
+  const [showEditElectives, setShowEditElectives] = useState(false);
+  const [showAppearance, setShowAppearance] = useState(false);
 
-    const {
-        selections,
-        customElectives,
-        isSetupComplete,
-        isLoading,
-        showRoom,
-        setShowRoom,
-        tileLabel,
-        setTileLabel,
-        saveSelections,
-        addCustomElective,
-        removeCustomElective,
-        updateCustomElective,
-        resetSetup,
-        exportSettings,
-        importSettings,
-        allElectiveGroups,
-        selectedElectives,
-        labBatch,
-    } = useTimetable();
+  const {
+    selections,
+    customElectives,
+    isSetupComplete,
+    isLoading,
+    showRoom,
+    setShowRoom,
+    tileLabel,
+    setTileLabel,
+    saveSelections,
+    addCustomElective,
+    removeCustomElective,
+    updateCustomElective,
+    resetSetup,
+    exportSettings,
+    importSettings,
+    allElectiveGroups,
+    selectedElectives,
+    labBatch,
+  } = useTimetable();
 
-    const { now, currentDay, formattedTime, formattedDate } = useCurrentTime();
+  const { now, currentDay, formattedTime, formattedDate } = useCurrentTime();
 
-    const { theme, toggleTheme } = useTheme();
+  const { theme, toggleTheme } = useTheme();
 
-    /**
-     * Every callback handed to a memoised child is wrapped, and all of them are
-     * — the views take `onConfigureElective` into the dependency list of the
-     * memo that builds their grid, and the three dialogs below are `React.memo`
-     * components. A single inline arrow anywhere in this set is a new value on
-     * every render, which would silently turn every one of those memos from a
-     * saving into pure overhead.
-     */
-    const openElectiveEditor = useCallback(() => setShowEditElectives(true), []);
-    const closeElectiveEditor = useCallback(() => setShowEditElectives(false), []);
-    const closeSettings = useCallback(() => setShowSettings(false), []);
-    const closeAppearance = useCallback(() => setShowAppearance(false), []);
-    const openAppearance = useCallback(() => setShowAppearance(true), []);
-    const openSettings = useCallback(() => setShowSettings(true), []);
+  /**
+   * Every callback handed to a memoised child is wrapped, and all of them are
+   * — the views take `onConfigureElective` into the dependency list of the
+   * memo that builds their grid, and the three dialogs below are `React.memo`
+   * components. A single inline arrow anywhere in this set is a new value on
+   * every render, which would silently turn every one of those memos from a
+   * saving into pure overhead.
+   */
+  const openElectiveEditor = useCallback(() => setShowEditElectives(true), []);
+  const closeElectiveEditor = useCallback(() => setShowEditElectives(false), []);
+  const closeSettings = useCallback(() => setShowSettings(false), []);
+  const closeAppearance = useCallback(() => setShowAppearance(false), []);
+  const openAppearance = useCallback(() => setShowAppearance(true), []);
+  const openSettings = useCallback(() => setShowSettings(true), []);
 
-    const saveAndCloseEditor = useCallback(
-        (newSelections: UserElectiveSelections) => {
-            saveSelections(newSelections);
-            setShowEditElectives(false);
-        },
-        [saveSelections]
-    );
+  const saveAndCloseEditor = useCallback(
+    (newSelections: UserElectiveSelections) => {
+      saveSelections(newSelections);
+      setShowEditElectives(false);
+    },
+    [saveSelections],
+  );
 
-    const resetAndCloseSettings = useCallback(() => {
-        resetSetup();
-        setShowSettings(false);
-    }, [resetSetup]);
+  const resetAndCloseSettings = useCallback(() => {
+    resetSetup();
+    setShowSettings(false);
+  }, [resetSetup]);
 
-    const editElectivesFromSettings = useCallback(() => {
-        setShowSettings(false);
-        setShowEditElectives(true);
-    }, []);
+  const editElectivesFromSettings = useCallback(() => {
+    setShowSettings(false);
+    setShowEditElectives(true);
+  }, []);
 
-    const editAppearanceFromSettings = useCallback(() => {
-        setShowSettings(false);
-        setShowAppearance(true);
-    }, []);
+  const editAppearanceFromSettings = useCallback(() => {
+    setShowSettings(false);
+    setShowAppearance(true);
+  }, []);
 
-    // Determine which day to show
-    const currentDayName = currentDay;
-    const displayDay =
-        selectedDay ||
-        (days.includes(currentDayName as Day) ? (currentDayName as Day) : "MON");
+  // Determine which day to show
+  const currentDayName = currentDay;
+  const displayDay =
+    selectedDay || (days.includes(currentDayName as Day) ? (currentDayName as Day) : "MON");
 
-    if (isLoading) {
-        return (
-            <div className="min-h-screen flex items-center justify-center bg-background">
-                <div className="text-muted-foreground text-sm">Loading...</div>
-            </div>
-        );
-    }
-
+  if (isLoading) {
     return (
-        <div className="min-h-screen bg-background">
-            <SetupModal
-                open={!isSetupComplete && !isLoading}
-                electiveGroups={allElectiveGroups}
-                customElectives={customElectives}
-                onSave={saveSelections}
-                onAddCustom={addCustomElective}
-                onRemoveCustom={removeCustomElective}
-                onUpdateCustom={updateCustomElective}
-            />
-
-            <SetupModal
-                open={showEditElectives}
-                electiveGroups={allElectiveGroups}
-                customElectives={customElectives}
-                initialSelections={selections}
-                onSave={saveAndCloseEditor}
-                onAddCustom={addCustomElective}
-                onRemoveCustom={removeCustomElective}
-                onUpdateCustom={updateCustomElective}
-                onClose={closeElectiveEditor}
-                isEditing
-            />
-
-            <SettingsDialog
-                open={showSettings}
-                onClose={closeSettings}
-                selections={selections}
-                customElectives={customElectives}
-                showRoom={showRoom}
-                onShowRoomChange={setShowRoom}
-                tileLabel={tileLabel}
-                onTileLabelChange={setTileLabel}
-                onExport={exportSettings}
-                onImport={importSettings}
-                onReset={resetAndCloseSettings}
-                onEditElectives={editElectivesFromSettings}
-                onEditAppearance={editAppearanceFromSettings}
-            />
-
-            <AppearanceDialog
-                open={showAppearance}
-                onClose={closeAppearance}
-                tileLabel={tileLabel}
-                onTileLabelChange={setTileLabel}
-                showRoom={showRoom}
-                onShowRoomChange={setShowRoom}
-            />
-
-            <div className="max-w-4xl mx-auto px-4 py-6">
-                <header className="space-y-4 mb-6">
-                    <div className="flex items-start justify-between">
-                        <div>
-                            <h1 className="text-lg font-semibold tracking-tight">Timetable</h1>
-                            <p className="text-xs text-muted-foreground mt-0.5">
-                                MIT Manipal • IT_CCE • Sem VII
-                                {labBatch && (
-                                    <Badge variant="outline" className="ml-2 text-[10px]">
-                                        {labBatch}
-                                    </Badge>
-                                )}
-                            </p>
-                        </div>
-                        <div className="flex items-center gap-1">
-                            <Button variant="ghost" size="icon-sm" onClick={toggleTheme}>
-                                {theme === "dark" ? (
-                                    <SunIcon className="size-4" />
-                                ) : (
-                                    <MoonIcon className="size-4" />
-                                )}
-                            </Button>
-                            <Button
-                                variant="ghost"
-                                size="icon-sm"
-                                onClick={openAppearance}
-                                aria-label="Appearance"
-                            >
-                                <PaletteIcon className="size-4" />
-                            </Button>
-                            <Button variant="ghost" size="icon-sm" onClick={openSettings}>
-                                <GearIcon className="size-4" />
-                            </Button>
-                        </div>
-                    </div>
-
-                    <div className="flex items-center gap-3">
-                        <Badge variant="secondary" className="font-mono text-xs">
-                            {formattedTime}
-                        </Badge>
-                        <span className="text-xs text-muted-foreground">{formattedDate}</span>
-                    </div>
-
-                    <Separator />
-
-                    {/* View toggle */}
-                    <div className="flex items-center justify-between gap-2">
-                        <div className="flex items-center gap-1 p-1 bg-muted/30 rounded-none">
-                            <Button
-                                variant={viewMode === "day" ? "default" : "ghost"}
-                                size="sm"
-                                onClick={() => setViewMode("day")}
-                                className="gap-1.5"
-                            >
-                                <CalendarIcon className="size-3.5" />
-                                <span className="hidden sm:inline">Day</span>
-                            </Button>
-                            <Button
-                                variant={viewMode === "week" ? "default" : "ghost"}
-                                size="sm"
-                                onClick={() => setViewMode("week")}
-                                className="gap-1.5"
-                            >
-                                <CalendarDotsIcon className="size-3.5" />
-                                <span className="hidden sm:inline">Week</span>
-                            </Button>
-                        </div>
-
-                        {/* Day selector (only in day view) */}
-                        {viewMode === "day" && (
-                            <div className="flex items-center gap-0.5 overflow-x-auto">
-                                {days.map((day) => (
-                                    <Button
-                                        key={day}
-                                        variant={displayDay === day ? "default" : "ghost"}
-                                        size="xs"
-                                        onClick={() => setSelectedDay(day)}
-                                        className={cn(
-                                            "min-w-8 px-2",
-                                            currentDayName === day &&
-                                            displayDay !== day &&
-                                            "ring-1 ring-primary/50"
-                                        )}
-                                    >
-                                        {day.slice(0, 2)}
-                                    </Button>
-                                ))}
-                            </div>
-                        )}
-                    </div>
-                </header>
-
-                <main>
-                    {viewMode === "day" ? (
-                        <DayView
-                            day={displayDay}
-                            now={now}
-                            selections={selections}
-                            selectedElectives={selectedElectives}
-                            labBatch={labBatch}
-                            onConfigureElective={openElectiveEditor}
-                            showRoom={showRoom}
-                            labelMode={tileLabel}
-                        />
-                    ) : (
-                        <WeekView
-                            now={now}
-                            selections={selections}
-                            selectedElectives={selectedElectives}
-                            labBatch={labBatch}
-                            onConfigureElective={openElectiveEditor}
-                            showRoom={showRoom}
-                            labelMode={tileLabel}
-                        />
-                    )}
-                </main>
-
-                <footer className="mt-8 pt-4 border-t border-border/50">
-                    <p className="text-center text-[10px] text-muted-foreground">
-                        Tap/click course for details • <CalendarExportLink />
-                    </p>
-                </footer>
-            </div>
-        </div>
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="text-muted-foreground text-sm">Loading...</div>
+      </div>
     );
+  }
+
+  return (
+    <div className="min-h-screen bg-background">
+      <SetupModal
+        open={!isSetupComplete && !isLoading}
+        electiveGroups={allElectiveGroups}
+        customElectives={customElectives}
+        onSave={saveSelections}
+        onAddCustom={addCustomElective}
+        onRemoveCustom={removeCustomElective}
+        onUpdateCustom={updateCustomElective}
+      />
+
+      <SetupModal
+        open={showEditElectives}
+        electiveGroups={allElectiveGroups}
+        customElectives={customElectives}
+        initialSelections={selections}
+        onSave={saveAndCloseEditor}
+        onAddCustom={addCustomElective}
+        onRemoveCustom={removeCustomElective}
+        onUpdateCustom={updateCustomElective}
+        onClose={closeElectiveEditor}
+        isEditing
+      />
+
+      <SettingsDialog
+        open={showSettings}
+        onClose={closeSettings}
+        selections={selections}
+        customElectives={customElectives}
+        showRoom={showRoom}
+        onShowRoomChange={setShowRoom}
+        tileLabel={tileLabel}
+        onTileLabelChange={setTileLabel}
+        onExport={exportSettings}
+        onImport={importSettings}
+        onReset={resetAndCloseSettings}
+        onEditElectives={editElectivesFromSettings}
+        onEditAppearance={editAppearanceFromSettings}
+      />
+
+      <AppearanceDialog
+        open={showAppearance}
+        onClose={closeAppearance}
+        tileLabel={tileLabel}
+        onTileLabelChange={setTileLabel}
+        showRoom={showRoom}
+        onShowRoomChange={setShowRoom}
+      />
+
+      <div className="max-w-4xl mx-auto px-4 py-6">
+        <header className="space-y-4 mb-6">
+          <div className="flex items-start justify-between">
+            <div>
+              <h1 className="text-lg font-semibold tracking-tight">Timetable</h1>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                MIT Manipal • IT_CCE • Sem VII
+                {labBatch && (
+                  <Badge variant="outline" className="ml-2 text-[10px]">
+                    {labBatch}
+                  </Badge>
+                )}
+              </p>
+            </div>
+            <div className="flex items-center gap-1">
+              <Button variant="ghost" size="icon-sm" onClick={toggleTheme}>
+                {theme === "dark" ? (
+                  <SunIcon className="size-4" />
+                ) : (
+                  <MoonIcon className="size-4" />
+                )}
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                onClick={openAppearance}
+                aria-label="Appearance"
+              >
+                <PaletteIcon className="size-4" />
+              </Button>
+              <Button variant="ghost" size="icon-sm" onClick={openSettings}>
+                <GearIcon className="size-4" />
+              </Button>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <Badge variant="secondary" className="font-mono text-xs">
+              {formattedTime}
+            </Badge>
+            <span className="text-xs text-muted-foreground">{formattedDate}</span>
+          </div>
+
+          <Separator />
+
+          {/* View toggle */}
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-1 p-1 bg-muted/30 rounded-none">
+              <Button
+                variant={viewMode === "day" ? "default" : "ghost"}
+                size="sm"
+                onClick={() => setViewMode("day")}
+                className="gap-1.5"
+              >
+                <CalendarIcon className="size-3.5" />
+                <span className="hidden sm:inline">Day</span>
+              </Button>
+              <Button
+                variant={viewMode === "week" ? "default" : "ghost"}
+                size="sm"
+                onClick={() => setViewMode("week")}
+                className="gap-1.5"
+              >
+                <CalendarDotsIcon className="size-3.5" />
+                <span className="hidden sm:inline">Week</span>
+              </Button>
+            </div>
+
+            {/* Day selector (only in day view) */}
+            {viewMode === "day" && (
+              <div className="flex items-center gap-0.5 overflow-x-auto">
+                {days.map((day) => (
+                  <Button
+                    key={day}
+                    variant={displayDay === day ? "default" : "ghost"}
+                    size="xs"
+                    onClick={() => setSelectedDay(day)}
+                    className={cn(
+                      "min-w-8 px-2",
+                      currentDayName === day && displayDay !== day && "ring-1 ring-primary/50",
+                    )}
+                  >
+                    {day.slice(0, 2)}
+                  </Button>
+                ))}
+              </div>
+            )}
+          </div>
+        </header>
+
+        <main>
+          {viewMode === "day" ? (
+            <DayView
+              day={displayDay}
+              now={now}
+              selections={selections}
+              selectedElectives={selectedElectives}
+              labBatch={labBatch}
+              onConfigureElective={openElectiveEditor}
+              showRoom={showRoom}
+              labelMode={tileLabel}
+            />
+          ) : (
+            <WeekView
+              now={now}
+              selections={selections}
+              selectedElectives={selectedElectives}
+              labBatch={labBatch}
+              onConfigureElective={openElectiveEditor}
+              showRoom={showRoom}
+              labelMode={tileLabel}
+            />
+          )}
+        </main>
+
+        <footer className="mt-8 pt-4 border-t border-border/50">
+          <p className="text-center text-[10px] text-muted-foreground">
+            Tap/click course for details • <CalendarExportLink />
+          </p>
+        </footer>
+      </div>
+    </div>
+  );
 }

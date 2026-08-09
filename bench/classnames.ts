@@ -30,11 +30,7 @@ const STATE_ACTIVE = "ring-2 ring-primary bg-primary/10 opacity-100";
 
 function before(className: string | undefined, isPassed: boolean, isActive: boolean): string {
   const baseClasses = cn(BASE, INTERACTIVE, className);
-  const stateClasses = cn(
-    STATE_DEFAULT,
-    isPassed && STATE_PASSED,
-    isActive && STATE_ACTIVE,
-  );
+  const stateClasses = cn(STATE_DEFAULT, isPassed && STATE_PASSED, isActive && STATE_ACTIVE);
   return cn(baseClasses, stateClasses, "flex-col gap-0.5");
 }
 
@@ -60,8 +56,16 @@ function renderTiles(build: (c: string, p: boolean, a: boolean) => string): numb
 }
 
 bench("week grid: class strings for 18 course tiles", [
-  { name: "before: 3 cn() per tile (warm tailwind-merge LRU)", fn: () => renderTiles(before), unitsPerOp: 18 },
-  { name: "after: memoised on (layout, passed, active)", fn: () => renderTiles(__tileClassName), unitsPerOp: 18 },
+  {
+    name: "before: 3 cn() per tile (warm tailwind-merge LRU)",
+    fn: () => renderTiles(before),
+    unitsPerOp: 18,
+  },
+  {
+    name: "after: memoised on (layout, passed, active)",
+    fn: () => renderTiles(__tileClassName),
+    unitsPerOp: 18,
+  },
 ]);
 
 bench("a single tile's class string", [

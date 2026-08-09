@@ -82,25 +82,49 @@ function typeAcrossAllBaskets(
 // Parity gate: the fast path must return exactly the results it replaces.
 for (const q of [...TYPED, ...TYPED_CODE, "ml", "hci", "zzz", "", "  "]) {
   for (const basket of BASKETS) {
-    const a = beforeSearchOptions(basket, q).map((o) => o.id).join(",");
-    const b = searchOptions(basket, q).map((o) => o.id).join(",");
+    const a = beforeSearchOptions(basket, q)
+      .map((o) => o.id)
+      .join(",");
+    const b = searchOptions(basket, q)
+      .map((o) => o.id)
+      .join(",");
     if (a !== b) throw new Error(`mismatch for ${JSON.stringify(q)}:\n  ${a}\n  ${b}`);
   }
 }
 console.log(`parity check passed over ${TOTAL} options in ${BASKETS.length} baskets`);
 
 bench(`typing "deep" across all 6 baskets (${TOTAL} options x 4 keystrokes)`, [
-  { name: "before", fn: () => typeAcrossAllBaskets(beforeSearchOptions, TYPED), unitsPerOp: TOTAL * 4 },
-  { name: "after: cached fields + counting sort", fn: () => typeAcrossAllBaskets(searchOptions, TYPED), unitsPerOp: TOTAL * 4 },
+  {
+    name: "before",
+    fn: () => typeAcrossAllBaskets(beforeSearchOptions, TYPED),
+    unitsPerOp: TOTAL * 4,
+  },
+  {
+    name: "after: cached fields + counting sort",
+    fn: () => typeAcrossAllBaskets(searchOptions, TYPED),
+    unitsPerOp: TOTAL * 4,
+  },
 ]);
 
 bench(`typing "ict44" across all 6 baskets (${TOTAL} options x 5 keystrokes)`, [
-  { name: "before", fn: () => typeAcrossAllBaskets(beforeSearchOptions, TYPED_CODE), unitsPerOp: TOTAL * 5 },
-  { name: "after: cached fields + counting sort", fn: () => typeAcrossAllBaskets(searchOptions, TYPED_CODE), unitsPerOp: TOTAL * 5 },
+  {
+    name: "before",
+    fn: () => typeAcrossAllBaskets(beforeSearchOptions, TYPED_CODE),
+    unitsPerOp: TOTAL * 5,
+  },
+  {
+    name: "after: cached fields + counting sort",
+    fn: () => typeAcrossAllBaskets(searchOptions, TYPED_CODE),
+    unitsPerOp: TOTAL * 5,
+  },
 ]);
 
 bench("one keystroke, one basket (PE-3)", [
-  { name: "before", fn: () => beforeSearchOptions(BASKETS[0], "deep"), unitsPerOp: BASKETS[0].length },
+  {
+    name: "before",
+    fn: () => beforeSearchOptions(BASKETS[0], "deep"),
+    unitsPerOp: BASKETS[0].length,
+  },
   { name: "after", fn: () => searchOptions(BASKETS[0], "deep"), unitsPerOp: BASKETS[0].length },
 ]);
 

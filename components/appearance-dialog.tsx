@@ -3,24 +3,24 @@
 import * as React from "react";
 
 import {
-    AlertDialog,
-    AlertDialogContent,
-    AlertDialogHeader,
-    AlertDialogTitle,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogCancel,
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogCancel,
 } from "@/components/ui/alert-dialog";
 import { AppearanceSettings } from "@/components/appearance-settings";
 import { TileLabelMode } from "@/lib/hooks/use-timetable";
 
 interface AppearanceDialogProps {
-    open: boolean;
-    onClose: () => void;
-    tileLabel: TileLabelMode;
-    onTileLabelChange: (value: TileLabelMode) => void;
-    showRoom: boolean;
-    onShowRoomChange: (value: boolean) => void;
+  open: boolean;
+  onClose: () => void;
+  tileLabel: TileLabelMode;
+  onTileLabelChange: (value: TileLabelMode) => void;
+  showRoom: boolean;
+  onShowRoomChange: (value: boolean) => void;
 }
 
 /**
@@ -29,40 +29,40 @@ interface AppearanceDialogProps {
  * together, and they are a once-in-a-while decision.
  */
 function AppearanceDialogImpl({
-    open,
-    onClose,
-    tileLabel,
-    onTileLabelChange,
-    showRoom,
-    onShowRoomChange,
+  open,
+  onClose,
+  tileLabel,
+  onTileLabelChange,
+  showRoom,
+  onShowRoomChange,
 }: AppearanceDialogProps) {
-    return (
-        <AlertDialog open={open} onOpenChange={(next) => !next && onClose()}>
-            {/* Cap the whole dialog (not just the body) so header and footer stay
+  return (
+    <AlertDialog open={open} onOpenChange={(next) => !next && onClose()}>
+      {/* Cap the whole dialog (not just the body) so header and footer stay
                 on-screen on mobile; the body is the only scroll container. */}
-            <AlertDialogContent className="max-w-sm max-h-[90dvh] overflow-hidden flex flex-col">
-                <AlertDialogHeader>
-                    <AlertDialogTitle className="text-base">Appearance</AlertDialogTitle>
-                    <AlertDialogDescription>
-                        Pick a template, or set the accent and background yourself
-                    </AlertDialogDescription>
-                </AlertDialogHeader>
+      <AlertDialogContent className="max-w-sm max-h-[90dvh] overflow-hidden flex flex-col">
+        <AlertDialogHeader>
+          <AlertDialogTitle className="text-base">Appearance</AlertDialogTitle>
+          <AlertDialogDescription>
+            Pick a template, or set the accent and background yourself
+          </AlertDialogDescription>
+        </AlertDialogHeader>
 
-                <div className="py-2 flex-1 overflow-y-auto">
-                    <AppearanceSettings
-                        tileLabel={tileLabel}
-                        onTileLabelChange={onTileLabelChange}
-                        showRoom={showRoom}
-                        onShowRoomChange={onShowRoomChange}
-                    />
-                </div>
+        <div className="py-2 flex-1 overflow-y-auto">
+          <AppearanceSettings
+            tileLabel={tileLabel}
+            onTileLabelChange={onTileLabelChange}
+            showRoom={showRoom}
+            onShowRoomChange={onShowRoomChange}
+          />
+        </div>
 
-                <AlertDialogFooter>
-                    <AlertDialogCancel onClick={onClose}>Close</AlertDialogCancel>
-                </AlertDialogFooter>
-            </AlertDialogContent>
-        </AlertDialog>
-    );
+        <AlertDialogFooter>
+          <AlertDialogCancel onClick={onClose}>Close</AlertDialogCancel>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
 }
 
 /**

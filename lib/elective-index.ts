@@ -19,17 +19,17 @@
  */
 
 import {
-    electiveGroups,
-    electiveTypes,
-    isStudentProject,
-    studentProjectOption,
-    type ElectiveOption,
-    type ElectiveType,
+  electiveGroups,
+  electiveTypes,
+  isStudentProject,
+  studentProjectOption,
+  type ElectiveOption,
+  type ElectiveType,
 } from "@/lib/timetable-data";
 
 /** An `ElectiveOption` the user added themselves, tagged with its basket. */
 export interface TaggedElective extends ElectiveOption {
-    groupType: ElectiveType;
+  groupType: ElectiveType;
 }
 
 export type OptionsByType = Record<ElectiveType, ElectiveOption[]>;
@@ -43,23 +43,23 @@ export type ResolvedElectives = Record<ElectiveType, ElectiveOption | null>;
  * The project goes last so it never pushes a real course down the list.
  */
 export function buildOptionsByType(customElectives: TaggedElective[]): OptionsByType {
-    const byType = {} as OptionsByType;
+  const byType = {} as OptionsByType;
 
-    // One pass over the custom electives for all six baskets, rather than one
-    // filter per basket. It matters less than the shape of the old code implies
-    // — nobody has hundreds of custom courses — but it also reads better.
-    const customByType = {} as Record<ElectiveType, ElectiveOption[]>;
-    for (const type of electiveTypes) customByType[type] = [];
-    for (const { groupType, ...option } of customElectives) {
-        customByType[groupType]?.push(option as ElectiveOption);
-    }
+  // One pass over the custom electives for all six baskets, rather than one
+  // filter per basket. It matters less than the shape of the old code implies
+  // — nobody has hundreds of custom courses — but it also reads better.
+  const customByType = {} as Record<ElectiveType, ElectiveOption[]>;
+  for (const type of electiveTypes) customByType[type] = [];
+  for (const { groupType, ...option } of customElectives) {
+    customByType[groupType]?.push(option as ElectiveOption);
+  }
 
-    for (const group of electiveGroups) {
-        const project = group.type === "OE" ? [studentProjectOption] : [];
-        byType[group.type] = [...group.options, ...customByType[group.type], ...project];
-    }
+  for (const group of electiveGroups) {
+    const project = group.type === "OE" ? [studentProjectOption] : [];
+    byType[group.type] = [...group.options, ...customByType[group.type], ...project];
+  }
 
-    return byType;
+  return byType;
 }
 
 /**
@@ -79,15 +79,15 @@ export function buildOptionsByType(customElectives: TaggedElective[]): OptionsBy
  * same saved selection.
  */
 export function buildOptionIndex(optionsByType: OptionsByType): OptionIndex {
-    const index = {} as OptionIndex;
-    for (const type of electiveTypes) {
-        const map = new Map<string, ElectiveOption>();
-        for (const option of optionsByType[type]) {
-            if (!map.has(option.id)) map.set(option.id, option);
-        }
-        index[type] = map;
+  const index = {} as OptionIndex;
+  for (const type of electiveTypes) {
+    const map = new Map<string, ElectiveOption>();
+    for (const option of optionsByType[type]) {
+      if (!map.has(option.id)) map.set(option.id, option);
     }
-    return index;
+    index[type] = map;
+  }
+  return index;
 }
 
 /**
@@ -99,16 +99,16 @@ export function buildOptionIndex(optionsByType: OptionsByType): OptionIndex {
  * apart by reading the raw selection, which is why this does not try to.
  */
 export function resolveSelections(
-    selections: Partial<Record<ElectiveType, string>>,
-    optionIndex: OptionIndex,
+  selections: Partial<Record<ElectiveType, string>>,
+  optionIndex: OptionIndex,
 ): ResolvedElectives {
-    const resolved = {} as ResolvedElectives;
-    for (const type of electiveTypes) {
-        const selectedId = selections[type];
-        resolved[type] =
-            !selectedId || isStudentProject(type, selectedId)
-                ? null
-                : (optionIndex[type].get(selectedId) ?? null);
-    }
-    return resolved;
+  const resolved = {} as ResolvedElectives;
+  for (const type of electiveTypes) {
+    const selectedId = selections[type];
+    resolved[type] =
+      !selectedId || isStudentProject(type, selectedId)
+        ? null
+        : (optionIndex[type].get(selectedId) ?? null);
+  }
+  return resolved;
 }

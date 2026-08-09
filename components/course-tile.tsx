@@ -8,22 +8,22 @@ import { TileLabelMode } from "@/lib/hooks/use-timetable";
 import { Badge } from "@/components/ui/badge";
 
 interface CourseTileProps {
-    course: Course;
-    timeSlot: string;
-    isActive?: boolean;
-    isPassed?: boolean;
-    isLab?: boolean;
-    className?: string;
-    /** Number of time slots this class spans - affects height proportionally */
-    durationSlots?: number;
-    /** Opt-in (settings): append the room to the course label, e.g. "HCI [G] | AB5-311" */
-    showRoom?: boolean;
-    /** Settings: label the tile with the abbreviation ("HCI [G]") or the course code ("ICT 4403") */
-    labelMode?: TileLabelMode;
+  course: Course;
+  timeSlot: string;
+  isActive?: boolean;
+  isPassed?: boolean;
+  isLab?: boolean;
+  className?: string;
+  /** Number of time slots this class spans - affects height proportionally */
+  durationSlots?: number;
+  /** Opt-in (settings): append the room to the course label, e.g. "HCI [G] | AB5-311" */
+  showRoom?: boolean;
+  /** Settings: label the tile with the abbreviation ("HCI [G]") or the course code ("ICT 4403") */
+  labelMode?: TileLabelMode;
 }
 
 const BASE =
-    "group relative flex items-center justify-center px-2 py-2 min-h-[44px] text-xs font-medium transition-all duration-200 cursor-pointer select-none";
+  "group relative flex items-center justify-center px-2 py-2 min-h-[44px] text-xs font-medium transition-all duration-200 cursor-pointer select-none";
 const INTERACTIVE = "hover:bg-accent active:scale-[0.98]";
 // Default state
 const STATE_DEFAULT = "bg-card ring-1 ring-foreground/10";
@@ -51,76 +51,68 @@ const CLASS_CACHE = new Map<string, string>();
 const CLASS_CACHE_LIMIT = 64;
 
 function tileClassName(
-    className: string | undefined,
-    isPassed: boolean,
-    isActive: boolean,
+  className: string | undefined,
+  isPassed: boolean,
+  isActive: boolean,
 ): string {
-    const key = `${isPassed ? "p" : ""}${isActive ? "a" : ""}|${className ?? ""}`;
-    const cached = CLASS_CACHE.get(key);
-    if (cached !== undefined) return cached;
+  const key = `${isPassed ? "p" : ""}${isActive ? "a" : ""}|${className ?? ""}`;
+  const cached = CLASS_CACHE.get(key);
+  if (cached !== undefined) return cached;
 
-    const value = cn(
-        cn(BASE, INTERACTIVE, className),
-        cn(STATE_DEFAULT, isPassed && STATE_PASSED, isActive && STATE_ACTIVE),
-        "flex-col gap-0.5",
-    );
+  const value = cn(
+    cn(BASE, INTERACTIVE, className),
+    cn(STATE_DEFAULT, isPassed && STATE_PASSED, isActive && STATE_ACTIVE),
+    "flex-col gap-0.5",
+  );
 
-    if (CLASS_CACHE.size >= CLASS_CACHE_LIMIT) CLASS_CACHE.clear();
-    CLASS_CACHE.set(key, value);
-    return value;
+  if (CLASS_CACHE.size >= CLASS_CACHE_LIMIT) CLASS_CACHE.clear();
+  CLASS_CACHE.set(key, value);
+  return value;
 }
 
 /** Exported for `course-tile.test.ts`, which pins the cache against the expression it replaced. */
 export const __tileClassName = tileClassName;
 
 function CourseTileImpl({
-    course,
-    timeSlot,
-    isActive = false,
-    isPassed = false,
-    isLab = false,
-    className,
-    durationSlots = 1,
-    showRoom = false,
-    labelMode = "abbreviation",
+  course,
+  timeSlot,
+  isActive = false,
+  isPassed = false,
+  isLab = false,
+  className,
+  durationSlots = 1,
+  showRoom = false,
+  labelMode = "abbreviation",
 }: CourseTileProps) {
-    // Base height is 44px per slot, with some extra for multi-slot items
-    const heightStyle = React.useMemo(
-        () =>
-            durationSlots > 1
-                ? { minHeight: `${44 * durationSlots + (durationSlots - 1) * 4}px` }
-                : undefined,
-        [durationSlots],
-    );
+  // Base height is 44px per slot, with some extra for multi-slot items
+  const heightStyle = React.useMemo(
+    () =>
+      durationSlots > 1
+        ? { minHeight: `${44 * durationSlots + (durationSlots - 1) * 4}px` }
+        : undefined,
+    [durationSlots],
+  );
 
-    return (
-        <CourseDetail
-            course={course}
-            timeSlot={timeSlot}
-            isActive={isActive}
-            isPassed={isPassed}
-        >
-            <div
-                className={tileClassName(className, isPassed, isActive)}
-                style={heightStyle}
-            >
-                <span className="font-semibold text-center leading-tight text-balance">
-                    {labelMode === "code" ? course.code : course.abbreviation}
-                    {showRoom && course.room && (
-                        <>
-                            <span className="mx-1 text-muted-foreground font-normal">|</span>
-                            <span className="font-normal">{course.room}</span>
-                        </>
-                    )}
-                </span>
-                {isLab && (
-                    <Badge variant="secondary" className="text-[9px] h-3.5 px-1">
-                        LAB
-                    </Badge>
-                )}
-            </div>
-        </CourseDetail>
-    );
+  return (
+    <CourseDetail course={course} timeSlot={timeSlot} isActive={isActive} isPassed={isPassed}>
+      <div className={tileClassName(className, isPassed, isActive)} style={heightStyle}>
+        <span className="font-semibold text-center leading-tight text-balance">
+          {labelMode === "code" ? course.code : course.abbreviation}
+          {showRoom && course.room && (
+            <>
+              <span className="mx-1 text-muted-foreground font-normal">|</span>
+              <span className="font-normal">{course.room}</span>
+            </>
+          )}
+        </span>
+        {isLab && (
+          <Badge variant="secondary" className="text-[9px] h-3.5 px-1">
+            LAB
+          </Badge>
+        )}
+      </div>
+    </CourseDetail>
+  );
 }
 
 /**
