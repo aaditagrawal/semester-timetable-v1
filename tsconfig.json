@@ -30,5 +30,11 @@
     ".next/dev/types/**/*.ts",
     "**/*.mts"
   ],
-  "exclude": ["node_modules", "archived", "**/*.test.ts", "bench"]
+  "exclude": [
+    "node_modules",
+    "archived",
+    "**/*.test.ts",
+    "bench",
+    "tools/oxlint/anti-slop"
+  ]
 }

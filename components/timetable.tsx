@@ -98,10 +98,11 @@ export function Timetable() {
     setShowAppearance(true);
   }, []);
 
-  // Determine which day to show
+  // Determine which day to show. `DayName` is `Day` plus "SUN", the one day the
+  // grid has no column for, so excluding it narrows to `Day` without a cast —
+  // and Sunday opens on the coming Monday, as it did before.
   const currentDayName = currentDay;
-  const displayDay =
-    selectedDay || (days.includes(currentDayName as Day) ? (currentDayName as Day) : "MON");
+  const displayDay: Day = selectedDay || (currentDayName === "SUN" ? "MON" : currentDayName);
 
   if (isLoading) {
     return (

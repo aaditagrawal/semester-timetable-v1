@@ -12,7 +12,12 @@
 
 export interface Case {
   name: string;
-  fn: () => unknown;
+  /**
+   * The thing being timed. Whatever it returns is discarded — the return value
+   * exists only to keep the engine from eliding the work — so it is typed
+   * `void`, which accepts a function returning anything.
+   */
+  fn: () => void;
   /** Logical units per call, when one call does N of them (e.g. 54 grid cells). */
   unitsPerOp?: number;
   /**
@@ -32,7 +37,13 @@ const WARMUP_MS = 100;
 /** Batch size between clock reads, so `performance.now` is not what is measured. */
 const BATCH = 64;
 
-function runFor(fn: () => unknown, ms: number): { iters: number; elapsed: number } {
+/** One timed round: how many calls were made, and how long they took. */
+interface Round {
+  iters: number;
+  elapsed: number;
+}
+
+function runFor(fn: () => void, ms: number): Round {
   const start = performance.now();
   let iters = 0;
   let elapsed = 0;

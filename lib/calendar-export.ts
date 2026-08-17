@@ -76,7 +76,7 @@ function getElectiveOptions(
   const defaultOptions = group?.options || [];
   const customOptions = customElectives
     .filter((e) => e.groupType === type)
-    .map(({ groupType: _groupType, ...rest }) => rest as ElectiveOption);
+    .map(({ groupType: _groupType, ...rest }) => rest);
   return [...defaultOptions, ...customOptions];
 }
 

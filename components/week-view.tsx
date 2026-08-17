@@ -69,7 +69,10 @@ export function WeekView({
   showRoom = false,
   labelMode = "abbreviation",
 }: WeekViewProps) {
-  const currentDayName = DAY_NAMES[now.dayOfWeek] as Day;
+  // Kept as a `DayName`, not a `Day`: on Sunday this is "SUN", which the grid
+  // has no column for, and every use below is an equality test against a `Day`
+  // that simply never matches.
+  const currentDayName = DAY_NAMES[now.dayOfWeek];
 
   // Track which slots have been consumed by multi-slot labs
   // Key format: "DAY-slotIndex"

@@ -48,12 +48,12 @@ export interface TimetableExport {
  * output and hydration still matches.
  */
 function readShowRoom(): boolean {
-  if (typeof window === "undefined") return false;
+  if (!("window" in globalThis)) return false;
   return localStorage.getItem(SHOW_ROOM_KEY) === "1";
 }
 
 function readTileLabel(): TileLabelMode {
-  if (typeof window === "undefined") return "abbreviation";
+  if (!("window" in globalThis)) return "abbreviation";
   return localStorage.getItem(TILE_LABEL_KEY) === "code" ? "code" : "abbreviation";
 }
 
@@ -245,6 +245,13 @@ export function useTimetable() {
    */
   const importSettings = useCallback((jsonString: string): boolean => {
     try {
+      // SAFETY: the file is whatever the user handed us, so this names the
+      // shape we are looking for rather than one we have checked. Nothing below
+      // trusts it: the version is compared against the two we accept, the
+      // selections are read basket by basket out of `electiveTypes` (so keys
+      // this semester does not have are dropped rather than copied through),
+      // custom electives are filtered against the same list, and both display
+      // preferences are decided by equality against a known value.
       const data = JSON.parse(jsonString) as TimetableExport;
 
       if (data.version !== 1 && data.version !== EXPORT_VERSION) {
@@ -252,16 +259,20 @@ export function useTimetable() {
         return false;
       }
 
-      const isKnownType = (t: string): t is ElectiveType => (electiveTypes as string[]).includes(t);
+      const knownTypes = new Set<string>(electiveTypes);
 
+      // Walking the baskets this semester has, rather than the payload's keys,
+      // is what filters a v1 backup down: PE-1/PE-2/FC-2 simply have nothing to
+      // read them into.
       const selections: UserElectiveSelections = {};
-      for (const [type, id] of Object.entries(data.selections ?? {})) {
-        if (isKnownType(type) && typeof id === "string" && id) {
-          selections[type] = id;
-        }
+      for (const type of electiveTypes) {
+        const id = data.selections?.[type];
+        if (id) selections[type] = id;
       }
 
-      const customElectives = (data.customElectives ?? []).filter((e) => isKnownType(e.groupType));
+      const customElectives = (data.customElectives ?? []).filter((e) =>
+        knownTypes.has(e.groupType),
+      );
 
       setSelections(selections);
       localStorage.setItem(STORAGE_KEY, JSON.stringify(selections));
