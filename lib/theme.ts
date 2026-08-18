@@ -92,11 +92,15 @@ function oklchToLinearRgb({ l: okL, c, h }: Oklch): [number, number, number] {
   const m_ = (okL - 0.1055613458 * a - 0.0638541728 * b) ** 3;
   const s_ = (okL - 0.0894841775 * a - 1.291485548 * b) ** 3;
 
+  // Clipped channel by channel rather than through `.map`, which flattens the
+  // triple back to `number[]` and then needs asserting into shape again.
+  const toGamut = (channel: number) => Math.min(1, Math.max(0, channel));
+
   return [
-    4.0767416621 * l_ - 3.3077115913 * m_ + 0.2309699292 * s_,
-    -1.2684380046 * l_ + 2.6097574011 * m_ - 0.3413193965 * s_,
-    -0.0041960863 * l_ - 0.7034186147 * m_ + 1.707614701 * s_,
-  ].map((channel) => Math.min(1, Math.max(0, channel))) as [number, number, number];
+    toGamut(4.0767416621 * l_ - 3.3077115913 * m_ + 0.2309699292 * s_),
+    toGamut(-1.2684380046 * l_ + 2.6097574011 * m_ - 0.3413193965 * s_),
+    toGamut(-0.0041960863 * l_ - 0.7034186147 * m_ + 1.707614701 * s_),
+  ];
 }
 
 /** WCAG relative luminance, used to decide whether text on a colour is light or dark. */
@@ -237,46 +241,50 @@ export function buildThemeCss(settings: ThemeSettings, mode: ThemeMode): string 
   const accentSurface = css(step(surface.accent));
   const ring = css({ l: text.ring, c: tint, h: bg.h });
 
-  const vars: Record<string, string> = {
-    background: css(bg),
-    foreground,
-    card,
-    "card-foreground": foreground,
-    popover: card,
-    "popover-foreground": foreground,
-    primary: css(primary),
-    "primary-foreground": primaryForeground,
-    secondary,
-    "secondary-foreground": foreground,
-    muted: css(step(surface.muted)),
-    "muted-foreground": mutedForeground,
-    accent: accentSurface,
-    "accent-foreground": foreground,
-    destructive: DESTRUCTIVE[key],
-    border,
-    input,
-    ring,
-    sidebar: card,
-    "sidebar-foreground": foreground,
-    "sidebar-primary": css(primary),
-    "sidebar-primary-foreground": primaryForeground,
-    "sidebar-accent": secondary,
-    "sidebar-accent-foreground": foreground,
-    "sidebar-border": border,
-    "sidebar-ring": ring,
-  };
+  // A list of pairs rather than an object: the result is a `cssText` string, so
+  // declaration order is the only thing the shape has to preserve, and this
+  // does not need an index signature to append the chart ramp to.
+  const vars: [name: string, value: string][] = [
+    ["background", css(bg)],
+    ["foreground", foreground],
+    ["card", card],
+    ["card-foreground", foreground],
+    ["popover", card],
+    ["popover-foreground", foreground],
+    ["primary", css(primary)],
+    ["primary-foreground", primaryForeground],
+    ["secondary", secondary],
+    ["secondary-foreground", foreground],
+    ["muted", css(step(surface.muted))],
+    ["muted-foreground", mutedForeground],
+    ["accent", accentSurface],
+    ["accent-foreground", foreground],
+    ["destructive", DESTRUCTIVE[key]],
+    ["border", border],
+    ["input", input],
+    ["ring", ring],
+    ["sidebar", card],
+    ["sidebar-foreground", foreground],
+    ["sidebar-primary", css(primary)],
+    ["sidebar-primary-foreground", primaryForeground],
+    ["sidebar-accent", secondary],
+    ["sidebar-accent-foreground", foreground],
+    ["sidebar-border", border],
+    ["sidebar-ring", ring],
+  ];
 
   CHART_RAMP.forEach((stop, i) => {
-    vars[`chart-${i + 1}`] = css({
-      l: stop.l,
-      c: rawAccent.c * stop.c,
-      h: rawAccent.h + stop.h,
-    });
+    vars.push([
+      `chart-${i + 1}`,
+      css({
+        l: stop.l,
+        c: rawAccent.c * stop.c,
+        h: rawAccent.h + stop.h,
+      }),
+    ]);
   });
 
-  return Object.entries(vars)
-    .map(([name, value]) => `--${name}:${value}`)
-    .join(";");
+  return vars.map(([name, value]) => `--${name}:${value}`).join(";");
 }
 
 /* -------------------------------------------------------------------------- */
@@ -374,25 +382,48 @@ export const ACCENT_PRESETS = [
 ];
 
 /** Background presets, per mode — neutral first, then a few tinted options. */
-export const BACKGROUND_PRESETS: Record<ThemeMode, string[]> = {
+export const BACKGROUND_PRESETS = {
   light: ["#ffffff", "#f7f7f7", "#faf6f1", "#f8fafe", "#f9fdfa", "#fbfbff"],
   dark: ["#070707", "#000000", "#171717", "#050b0f", "#070c08", "#0b0a12"],
-};
+} satisfies Record<ThemeMode, string[]>;
 
-/** Coerce anything read out of localStorage into a usable settings object. */
-export function normalizeTheme(value: unknown): ThemeSettings {
-  if (typeof value !== "object" || value === null) return DEFAULT_THEME;
-  const raw = value as Partial<Record<keyof ThemeSettings, unknown>>;
-  const hex = (v: unknown, fallback: string) =>
-    typeof v === "string" && hexToOklch(v) ? v : fallback;
+/**
+ * A theme as it comes back out of `localStorage`.
+ *
+ * The field names are the ones `ThemeProvider` wrote, but none of the values
+ * have been checked: the entry is a string a user can edit, and a stale build
+ * may have written a shape this version no longer recognises. Every field is
+ * therefore optional, and `normalizeTheme` is the only thing allowed to turn
+ * one of these into a `ThemeSettings`.
+ */
+export interface StoredTheme {
+  templateId?: string;
+  accent?: string;
+  lightBg?: string;
+  darkBg?: string;
+}
+
+/**
+ * Decode a stored theme into settings the palette maths can rely on.
+ *
+ * A colour is kept only if `hexToOklch` can actually parse it, and a template
+ * id only if a template by that name still ships — so a hand-edited entry, or
+ * one naming a template that has since been removed, degrades to the default
+ * rather than producing an unreadable palette.
+ */
+export function normalizeTheme(stored: StoredTheme | null): ThemeSettings {
+  const hex = (value: string | undefined, fallback: string) =>
+    value !== undefined && hexToOklch(value) !== null ? value : fallback;
+
+  const templateId = stored?.templateId;
 
   return {
     templateId:
-      typeof raw.templateId === "string" && THEME_TEMPLATES.some((t) => t.id === raw.templateId)
-        ? raw.templateId
+      templateId !== undefined && THEME_TEMPLATES.some((t) => t.id === templateId)
+        ? templateId
         : null,
-    accent: hex(raw.accent, DEFAULT_THEME.accent),
-    lightBg: hex(raw.lightBg, DEFAULT_THEME.lightBg),
-    darkBg: hex(raw.darkBg, DEFAULT_THEME.darkBg),
+    accent: hex(stored?.accent, DEFAULT_THEME.accent),
+    lightBg: hex(stored?.lightBg, DEFAULT_THEME.lightBg),
+    darkBg: hex(stored?.darkBg, DEFAULT_THEME.darkBg),
   };
 }

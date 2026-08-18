@@ -102,16 +102,13 @@ function SettingsDialogImpl({
     }
   };
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // `Blob#text` rather than a `FileReader`: it hands back a `string` instead of
+  // the `string | ArrayBuffer | null` a reader's `result` is typed as, which is
+  // only ever a string here because `readAsText` was the method called.
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const text = event.target?.result as string;
-      setImportText(text);
-    };
-    reader.readAsText(file);
+    setImportText(await file.text());
   };
 
   const handleReset = () => {

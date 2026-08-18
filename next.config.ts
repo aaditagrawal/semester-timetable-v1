@@ -8,11 +8,7 @@ const nextConfig: NextConfig = {
      * carries all six weight variants. None is in Next's default list, so
      * without this the first-paint chunk pays for components no page renders.
      */
-    optimizePackageImports: [
-      "radix-ui",
-      "@base-ui/react",
-      "@phosphor-icons/react",
-    ],
+    optimizePackageImports: ["radix-ui", "@base-ui/react", "@phosphor-icons/react"],
   },
 };
 

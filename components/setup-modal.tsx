@@ -32,6 +32,9 @@ type SetupStep = "start" | "electives" | "oe";
 /** PE-3..PE-7 — everything the registration lookup can fill. */
 const PROGRAM_ELECTIVES = electiveTypes.filter((type) => type !== "OE");
 
+/** The one basket the "oe" step shows. */
+const OPEN_ELECTIVE_ONLY: ElectiveType[] = ["OE"];
+
 interface SetupModalProps {
   open: boolean;
   electiveGroups: ElectiveGroup[];
@@ -223,7 +226,15 @@ function SetupModalImpl({
 
       const normalized = normalizeRegistration(reg);
       const allocations = normalized === null ? null : lookupAllocation(normalized);
-      const found = Object.entries(allocations ?? {});
+
+      // Collected by walking `electiveTypes` rather than `Object.entries`,
+      // which would hand back `string` keys that then need casting back to the
+      // basket they came from.
+      const found: [ElectiveType, string][] = [];
+      for (const type of electiveTypes) {
+        const id = allocations?.[type];
+        if (id) found.push([type, id]);
+      }
 
       if (found.length === 0) {
         setLookupState("empty");
@@ -240,9 +251,9 @@ function SetupModalImpl({
       setSelections((prev) => {
         const next = { ...prev };
         for (const [type, id] of found) {
-          if (next[type as ElectiveType]) kept += 1;
+          if (next[type]) kept += 1;
           else {
-            next[type as ElectiveType] = id;
+            next[type] = id;
             filled += 1;
           }
         }
@@ -399,7 +410,7 @@ function SetupModalImpl({
               ? electiveTypes
               : PROGRAM_ELECTIVES
             : step === "oe"
-              ? (["OE"] as ElectiveType[])
+              ? OPEN_ELECTIVE_ONLY
               : []
           ).map((type) => {
             const options = getOptionsForType(type);

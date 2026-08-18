@@ -27,14 +27,14 @@ export type ElectiveType = "PE-3" | "PE-4" | "PE-5" | "PE-6" | "PE-7" | "OE";
 
 export const electiveTypes: ElectiveType[] = ["PE-3", "PE-4", "PE-5", "PE-6", "PE-7", "OE"];
 
-export const electiveTypeLabels: Record<ElectiveType, string> = {
+export const electiveTypeLabels = {
   "PE-3": "Program Elective 3",
   "PE-4": "Program Elective 4",
   "PE-5": "Program Elective 5",
   "PE-6": "Program Elective 6",
   "PE-7": "Program Elective 7",
   OE: "Open Elective",
-};
+} satisfies Record<ElectiveType, string>;
 
 export interface ElectiveOption extends Course {
   id: string;
@@ -156,9 +156,12 @@ export type Day = (typeof days)[number];
  * `days.indexOf` per call. Small either way at six entries; the point is that
  * it is a property read rather than a scan in a loop that runs per cell.
  */
-export const dayIndex: Record<Day, number> = Object.fromEntries(
-  days.map((day, index) => [day, index]),
-) as Record<Day, number>;
+export const dayIndex: Record<Day, number> =
+  // SAFETY: the entries are `days.map(...)`, so there is exactly one key per
+  // member of `days`, and `Day` is `(typeof days)[number]` — the record is
+  // total over `Day` by construction. `Object.fromEntries` cannot say so: it
+  // always widens the key back to `string`.
+  Object.fromEntries(days.map((day, index) => [day, index])) as Record<Day, number>;
 
 /**
  * Minutes-from-midnight for every "HH:MM" the schedule actually contains.
@@ -281,17 +284,21 @@ export interface ScheduledPeriod {
  * here instead — 18 scheduled periods across the week, found by walking the
  * slots in order rather than by sorting.
  */
-export const daySchedules: Record<Day, ScheduledPeriod[]> = Object.fromEntries(
-  days.map((day) => {
-    const schedule = weekSchedule[day];
-    const periods: ScheduledPeriod[] = [];
-    for (let slotIndex = 0; slotIndex < timeSlots.length; slotIndex += 1) {
-      const entry = schedule?.[slotIndex];
-      if (entry) periods.push({ slotIndex, slot: timeSlots[slotIndex], entry });
-    }
-    return [day, periods];
-  }),
-) as Record<Day, ScheduledPeriod[]>;
+export const daySchedules: Record<Day, ScheduledPeriod[]> =
+  // SAFETY: as with `dayIndex`, the entries come from `days.map(...)`, so every
+  // `Day` gets exactly one entry; only `Object.fromEntries`' widening of the key
+  // back to `string` makes the assertion necessary.
+  Object.fromEntries(
+    days.map((day) => {
+      const schedule = weekSchedule[day];
+      const periods: ScheduledPeriod[] = [];
+      for (let slotIndex = 0; slotIndex < timeSlots.length; slotIndex += 1) {
+        const entry = schedule?.[slotIndex];
+        if (entry) periods.push({ slotIndex, slot: timeSlots[slotIndex], entry });
+      }
+      return [day, periods];
+    }),
+  ) as Record<Day, ScheduledPeriod[]>;
 
 /**
  * The current instant reduced to the only two numbers the grid asks about.

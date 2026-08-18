@@ -31,14 +31,14 @@ import {
   type ElectiveType,
 } from "../lib/timetable-data";
 
-const SELECTIONS: Partial<Record<ElectiveType, string>> = {
+const SELECTIONS = {
   "PE-3": "ict-4403-e",
   "PE-4": electiveGroups[1].options[0].id,
   "PE-5": electiveGroups[2].options[0].id,
   "PE-6": electiveGroups[3].options[0].id,
   "PE-7": electiveGroups[4].options[0].id,
   OE: electiveGroups[5].options[0].id,
-};
+} satisfies Partial<Record<ElectiveType, string>>;
 
 const NOW = new Date(2026, 7, 25, 11, 45); // a Tuesday, mid-morning
 

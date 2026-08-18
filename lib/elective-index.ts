@@ -20,7 +20,6 @@
 
 import {
   electiveGroups,
-  electiveTypes,
   isStudentProject,
   studentProjectOption,
   type ElectiveOption,
@@ -32,9 +31,43 @@ export interface TaggedElective extends ElectiveOption {
   groupType: ElectiveType;
 }
 
-export type OptionsByType = Record<ElectiveType, ElectiveOption[]>;
-export type OptionIndex = Record<ElectiveType, Map<string, ElectiveOption>>;
-export type ResolvedElectives = Record<ElectiveType, ElectiveOption | null>;
+/**
+ * One value per elective basket.
+ *
+ * Written out key by key rather than as `Record<ElectiveType, T>` so the
+ * compiler checks totality where these are *built* instead of only promising it
+ * where they are read. The three builders below used to start from
+ * `{} as Record<…>` — a claim that every basket was present made before a
+ * single key had been written — and a basket missed by the loop would have
+ * surfaced as `undefined` at a call site typed to exclude it.
+ *
+ * Adding a basket to `ElectiveType` without adding it here is a compile error
+ * at every `[type]` read, which is the whole point.
+ */
+export interface ByElectiveType<T> {
+  "PE-3": T;
+  "PE-4": T;
+  "PE-5": T;
+  "PE-6": T;
+  "PE-7": T;
+  OE: T;
+}
+
+export type OptionsByType = ByElectiveType<ElectiveOption[]>;
+export type OptionIndex = ByElectiveType<Map<string, ElectiveOption>>;
+export type ResolvedElectives = ByElectiveType<ElectiveOption | null>;
+
+/** Build the value for every basket, in one place, with no partial state. */
+function perBasket<T>(build: (type: ElectiveType) => T): ByElectiveType<T> {
+  return {
+    "PE-3": build("PE-3"),
+    "PE-4": build("PE-4"),
+    "PE-5": build("PE-5"),
+    "PE-6": build("PE-6"),
+    "PE-7": build("PE-7"),
+    OE: build("OE"),
+  };
+}
 
 /**
  * Every basket's pick-list: the published catalogue, then the user's own
@@ -43,23 +76,24 @@ export type ResolvedElectives = Record<ElectiveType, ElectiveOption | null>;
  * The project goes last so it never pushes a real course down the list.
  */
 export function buildOptionsByType(customElectives: TaggedElective[]): OptionsByType {
-  const byType = {} as OptionsByType;
-
   // One pass over the custom electives for all six baskets, rather than one
   // filter per basket. It matters less than the shape of the old code implies
   // — nobody has hundreds of custom courses — but it also reads better.
-  const customByType = {} as Record<ElectiveType, ElectiveOption[]>;
-  for (const type of electiveTypes) customByType[type] = [];
+  const customByType = new Map<ElectiveType, ElectiveOption[]>();
   for (const { groupType, ...option } of customElectives) {
-    customByType[groupType]?.push(option as ElectiveOption);
+    const bucket = customByType.get(groupType);
+    if (bucket === undefined) customByType.set(groupType, [option]);
+    else bucket.push(option);
   }
 
-  for (const group of electiveGroups) {
-    const project = group.type === "OE" ? [studentProjectOption] : [];
-    byType[group.type] = [...group.options, ...customByType[group.type], ...project];
-  }
+  const catalogue = new Map<ElectiveType, ElectiveOption[]>();
+  for (const group of electiveGroups) catalogue.set(group.type, group.options);
 
-  return byType;
+  return perBasket((type) => [
+    ...(catalogue.get(type) ?? []),
+    ...(customByType.get(type) ?? []),
+    ...(type === "OE" ? [studentProjectOption] : []),
+  ]);
 }
 
 /**
@@ -79,15 +113,13 @@ export function buildOptionsByType(customElectives: TaggedElective[]): OptionsBy
  * same saved selection.
  */
 export function buildOptionIndex(optionsByType: OptionsByType): OptionIndex {
-  const index = {} as OptionIndex;
-  for (const type of electiveTypes) {
+  return perBasket((type) => {
     const map = new Map<string, ElectiveOption>();
     for (const option of optionsByType[type]) {
       if (!map.has(option.id)) map.set(option.id, option);
     }
-    index[type] = map;
-  }
-  return index;
+    return map;
+  });
 }
 
 /**
@@ -102,13 +134,10 @@ export function resolveSelections(
   selections: Partial<Record<ElectiveType, string>>,
   optionIndex: OptionIndex,
 ): ResolvedElectives {
-  const resolved = {} as ResolvedElectives;
-  for (const type of electiveTypes) {
+  return perBasket((type) => {
     const selectedId = selections[type];
-    resolved[type] =
-      !selectedId || isStudentProject(type, selectedId)
-        ? null
-        : (optionIndex[type].get(selectedId) ?? null);
-  }
-  return resolved;
+    return !selectedId || isStudentProject(type, selectedId)
+      ? null
+      : (optionIndex[type].get(selectedId) ?? null);
+  });
 }

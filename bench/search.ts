@@ -18,7 +18,7 @@ import { searchOptions, scoreOption } from "../lib/elective-search";
 import { electiveOptions } from "../lib/elective-options";
 import type { ElectiveOption } from "../lib/timetable-data";
 
-const BASKETS = Object.values(electiveOptions) as ElectiveOption[][];
+const BASKETS = Object.values(electiveOptions);
 const ALL = BASKETS.flat();
 const TOTAL = ALL.length;
 
