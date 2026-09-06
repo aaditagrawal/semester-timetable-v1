@@ -1,3 +1,4 @@
+import { classNames } from "@/ui.stylex";
 import Link from "next/link";
 
 function HomeIcon({ className }: { className?: string }) {
@@ -38,42 +39,34 @@ function ArrowLeftIcon({ className }: { className?: string }) {
 
 export default function NotFound() {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        <div className="bg-card text-card-foreground ring-foreground/10 ring-1 overflow-hidden">
-          <div className="px-4 py-12 flex flex-col items-center text-center gap-6">
-            <div className="text-muted-foreground text-xs font-mono tracking-widest uppercase">
-              404
-            </div>
+    <main className={classNames.notFound34}>
+      <div className={classNames.notFound35}>
+        <div className={classNames.notFound36}>
+          <div className={classNames.notFound37}>
+            <div className={classNames.notFound38}>404</div>
 
-            <div className="flex flex-col gap-2 items-center">
-              <h1 className="text-2xl font-medium">Page Not Found</h1>
-              <p className="text-muted-foreground text-sm max-w-[280px]">
+            <div className={classNames.notFound39}>
+              <h1 className={classNames.notFound40}>Page Not Found</h1>
+              <p className={classNames.notFound41}>
                 The timetable you&apos;re looking for doesn&apos;t exist or has been moved.
               </p>
             </div>
 
-            <div className="flex gap-3 mt-2">
-              <Link
-                href="/"
-                className="inline-flex items-center justify-center whitespace-nowrap transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-muted hover:text-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50 h-8 gap-1.5 px-2.5 has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2 text-xs font-medium group/button"
-              >
-                <ArrowLeftIcon className="w-4 h-4 group-hover/button:-translate-x-0.5 transition-transform" />
+            <div className={classNames.notFound42}>
+              <Link href="/" className={classNames.notFound43}>
+                <ArrowLeftIcon className={classNames.notFound44} />
                 Go Back
               </Link>
-              <Link
-                href="/"
-                className="inline-flex items-center justify-center whitespace-nowrap transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground [a]:hover:bg-primary/80 h-8 gap-1.5 px-2.5 has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2 text-xs font-medium"
-              >
-                <HomeIcon className="w-4 h-4" />
+              <Link href="/" className={classNames.notFound45}>
+                <HomeIcon className={classNames.notFound46} />
                 Home
               </Link>
             </div>
           </div>
         </div>
 
-        <div className="mt-8 text-center">
-          <p className="text-muted-foreground text-xs">MIT Manipal IT_CCE Timetable</p>
+        <div className={classNames.notFound47}>
+          <p className={classNames.notFound48}>MIT Manipal IT_CCE Timetable</p>
         </div>
       </div>
     </main>

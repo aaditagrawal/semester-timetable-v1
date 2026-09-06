@@ -1,5 +1,7 @@
 "use client";
 
+import { classNames } from "@/ui.stylex";
+
 import * as React from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -217,30 +219,30 @@ export function DayView({
         <Card
           key={idx}
           size="sm"
-          className={`border-dashed border-2 border-muted-foreground/30 bg-muted/10 ${entry.isPassed ? "opacity-40" : ""}`}
+          className={` ${classNames.dayView195} ${entry.isPassed ? classNames.dayView194 : ""}`}
         >
-          <CardContent className="py-2">
-            <div className="flex items-center gap-3">
-              <div className="text-xs text-muted-foreground w-24 shrink-0 flex flex-col">
-                <span className="font-mono">{entry.startTime}</span>
-                <span className="text-[10px]">to {entry.endTime}</span>
+          <CardContent className={classNames.dayView196}>
+            <div className={classNames.dayView197}>
+              <div className={classNames.dayView198}>
+                <span className={classNames.dayView199}>{entry.startTime}</span>
+                <span className={classNames.dayView200}>to {entry.endTime}</span>
               </div>
-              <Separator orientation="vertical" className="h-10" />
-              <div className="flex-1 flex items-center justify-between">
+              <Separator orientation="vertical" className={classNames.dayView201} />
+              <div className={classNames.dayView202}>
                 <div>
-                  <Badge variant="outline" className="mb-1">
+                  <Badge variant="outline" className={classNames.dayView203}>
                     {entry.electiveType}
                   </Badge>
-                  <p className="text-xs text-muted-foreground">Not configured</p>
+                  <p className={classNames.home22}>Not configured</p>
                 </div>
                 {onConfigureElective && (
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={onConfigureElective}
-                    className="gap-1"
+                    className={classNames.dayView204}
                   >
-                    <PlusIcon className="size-3" />
+                    <PlusIcon className={classNames.setupModal75} />
                     Add
                   </Button>
                 )}
@@ -254,33 +256,29 @@ export function DayView({
     if (!entry.course) return null;
 
     return (
-      <Card
-        key={idx}
-        size="sm"
-        className={entry.isActive ? "ring-2 ring-primary bg-primary/5" : ""}
-      >
-        <CardContent className="py-2">
-          <div className="flex items-center gap-3">
-            <div className="text-xs text-muted-foreground w-24 shrink-0 flex flex-col">
-              <span className="font-mono">{entry.startTime}</span>
-              <span className="text-[10px]">to {entry.endTime}</span>
+      <Card key={idx} size="sm" className={entry.isActive ? classNames.dayView205 : ""}>
+        <CardContent className={classNames.dayView196}>
+          <div className={classNames.dayView197}>
+            <div className={classNames.dayView198}>
+              <span className={classNames.dayView199}>{entry.startTime}</span>
+              <span className={classNames.dayView200}>to {entry.endTime}</span>
             </div>
-            <Separator orientation="vertical" className="h-10" />
-            <div className="flex-1">
+            <Separator orientation="vertical" className={classNames.dayView201} />
+            <div className={classNames.setupModal78}>
               <CourseTile
                 course={entry.course}
                 timeSlot={entry.timeSlot}
                 isActive={entry.isActive}
                 isPassed={entry.isPassed}
                 isLab={entry.isLab}
-                className="min-h-10"
+                className={classNames.dayView206}
                 durationSlots={entry.durationSlots}
                 showRoom={showRoom}
                 labelMode={labelMode}
               />
             </div>
             {entry.isActive && (
-              <Badge variant="default" className="shrink-0">
+              <Badge variant="default" className={classNames.dayView207}>
                 NOW
               </Badge>
             )}
@@ -291,17 +289,17 @@ export function DayView({
   };
 
   return (
-    <div className="space-y-4">
+    <div className={classNames.home17}>
       {/* Alert for unconfigured electives */}
       {unconfiguredCount > 0 && onConfigureElective && (
-        <Card className="bg-primary/10 border-primary/30">
-          <CardContent className="py-3">
-            <div className="flex items-center justify-between">
+        <Card className={classNames.dayView208}>
+          <CardContent className={classNames.dayView209}>
+            <div className={classNames.dayView210}>
               <div>
-                <p className="text-xs font-medium text-primary">
+                <p className={classNames.dayView211}>
                   {unconfiguredCount} elective{unconfiguredCount > 1 ? "s" : ""} not configured
                 </p>
-                <p className="text-[10px] text-primary/70">
+                <p className={classNames.dayView212}>
                   Add your course details to see full schedule
                 </p>
               </div>
@@ -309,9 +307,9 @@ export function DayView({
                 variant="outline"
                 size="sm"
                 onClick={onConfigureElective}
-                className="border-primary/50 text-primary hover:bg-primary/20"
+                className={classNames.dayView213}
               >
-                <PlusIcon className="size-3 mr-1" />
+                <PlusIcon className={classNames.setupModal80} />
                 Configure
               </Button>
             </div>
@@ -321,24 +319,24 @@ export function DayView({
 
       {/* Current/Next class highlight */}
       {activeClass && activeClass.course && (
-        <Card className="ring-2 ring-primary bg-gradient-to-r from-primary/10 to-primary/5">
-          <CardContent className="py-4">
-            <div className="flex items-start justify-between">
-              <div className="space-y-1">
-                <div className="flex items-center gap-2">
+        <Card className={classNames.dayView214}>
+          <CardContent className={classNames.dayView215}>
+            <div className={classNames.dayView216}>
+              <div className={classNames.dayView217}>
+                <div className={classNames.home18}>
                   <Badge variant="default">LIVE</Badge>
-                  <span className="text-[10px] text-muted-foreground">{activeClass.timeSlot}</span>
+                  <span className={classNames.setupModal60}>{activeClass.timeSlot}</span>
                 </div>
-                <p className="text-sm font-semibold">{activeClass.course.name}</p>
-                <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                <p className={classNames.dayView218}>{activeClass.course.name}</p>
+                <div className={classNames.dayView219}>
                   {activeClass.course.room && (
-                    <span className="flex items-center gap-1">
-                      <MapPinIcon className="size-3" />
+                    <span className={classNames.dayView220}>
+                      <MapPinIcon className={classNames.setupModal75} />
                       {activeClass.course.room}
                     </span>
                   )}
-                  <span className="flex items-center gap-1">
-                    <ClockIcon className="size-3" />
+                  <span className={classNames.dayView220}>
+                    <ClockIcon className={classNames.setupModal75} />
                     {activeClass.course.abbreviation}
                   </span>
                 </div>
@@ -349,15 +347,15 @@ export function DayView({
       )}
 
       {!activeClass && nextClass && nextClass.course && (
-        <Card className="bg-muted/30">
-          <CardContent className="py-3">
-            <div className="flex items-start justify-between">
-              <div className="space-y-0.5">
-                <div className="flex items-center gap-2">
+        <Card className={classNames.dayView221}>
+          <CardContent className={classNames.dayView209}>
+            <div className={classNames.dayView216}>
+              <div className={classNames.dayView222}>
+                <div className={classNames.home18}>
                   <Badge variant="secondary">NEXT UP</Badge>
-                  <span className="text-[10px] text-muted-foreground">{nextClass.timeSlot}</span>
+                  <span className={classNames.setupModal60}>{nextClass.timeSlot}</span>
                 </div>
-                <p className="text-sm font-medium">{nextClass.course.name}</p>
+                <p className={classNames.home20}>{nextClass.course.name}</p>
               </div>
             </div>
           </CardContent>
@@ -366,16 +364,16 @@ export function DayView({
 
       {/* Classes list */}
       {hasClasses ? (
-        <div className="space-y-5">
+        <div className={classNames.dayView223}>
           {/* Morning */}
           {morningClasses.length > 0 && (
-            <div className="space-y-2">
-              <div className="flex items-center gap-2 text-xs text-muted-foreground px-1">
-                <SunIcon className="size-4" weight="fill" />
-                <span className="font-medium">Morning</span>
-                <Separator className="flex-1" />
+            <div className={classNames.home13}>
+              <div className={classNames.dayView224}>
+                <SunIcon className={classNames.setupModal53} weight="fill" />
+                <span className={classNames.dayView225}>Morning</span>
+                <Separator className={classNames.setupModal78} />
               </div>
-              <div className="space-y-2">
+              <div className={classNames.home13}>
                 {morningClasses.map((entry, idx) => renderClassCard(entry, idx))}
               </div>
             </div>
@@ -383,13 +381,13 @@ export function DayView({
 
           {/* Afternoon */}
           {afternoonClasses.length > 0 && (
-            <div className="space-y-2">
-              <div className="flex items-center gap-2 text-xs text-muted-foreground px-1">
-                <MoonIcon className="size-4" weight="fill" />
-                <span className="font-medium">Afternoon</span>
-                <Separator className="flex-1" />
+            <div className={classNames.home13}>
+              <div className={classNames.dayView224}>
+                <MoonIcon className={classNames.setupModal53} weight="fill" />
+                <span className={classNames.dayView225}>Afternoon</span>
+                <Separator className={classNames.setupModal78} />
               </div>
-              <div className="space-y-2">
+              <div className={classNames.home13}>
                 {afternoonClasses.map((entry, idx) =>
                   renderClassCard(entry, morningClasses.length + idx),
                 )}
@@ -399,9 +397,9 @@ export function DayView({
         </div>
       ) : (
         <Card>
-          <CardContent className="py-12 text-center">
-            <p className="text-muted-foreground text-sm mb-1">No classes today</p>
-            <p className="text-xs text-muted-foreground/70">Enjoy your day off! 🎉</p>
+          <CardContent className={classNames.dayView226}>
+            <p className={classNames.dayView227}>No classes today</p>
+            <p className={classNames.dayView228}>Enjoy your day off! 🎉</p>
           </CardContent>
         </Card>
       )}

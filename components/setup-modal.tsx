@@ -1,5 +1,7 @@
 "use client";
 
+import { classNames } from "@/ui.stylex";
+
 import * as React from "react";
 import { useState } from "react";
 import {
@@ -298,19 +300,24 @@ function SetupModalImpl({
 
   return (
     <AlertDialog open={open}>
-      <AlertDialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-md md:max-w-lg p-3 sm:p-4 max-h-[90dvh] overflow-hidden flex flex-col">
-        <AlertDialogHeader className="flex-shrink-0">
-          <div className="flex items-center justify-between gap-2">
-            <AlertDialogTitle className="text-sm sm:text-base">
+      <AlertDialogContent className={classNames.setupModal49}>
+        <AlertDialogHeader className={classNames.setupModal50}>
+          <div className={classNames.setupModal51}>
+            <AlertDialogTitle className={classNames.setupModal52}>
               {isEditing ? "Edit Your Timetable" : "Configure Your Timetable"}
             </AlertDialogTitle>
             {isEditing && onClose && (
-              <Button variant="ghost" size="icon-xs" onClick={onClose} className="flex-shrink-0">
-                <XIcon className="size-4" />
+              <Button
+                variant="ghost"
+                size="icon-xs"
+                onClick={onClose}
+                className={classNames.setupModal50}
+              >
+                <XIcon className={classNames.setupModal53} />
               </Button>
             )}
           </div>
-          <AlertDialogDescription className="text-xs">
+          <AlertDialogDescription className={classNames.home16}>
             {step === "start"
               ? "Start with your registration number, or pick everything yourself."
               : step === "electives"
@@ -321,14 +328,14 @@ function SetupModalImpl({
           </AlertDialogDescription>
         </AlertDialogHeader>
 
-        <div className="flex-1 overflow-y-auto space-y-3 py-2 -mx-3 sm:-mx-4 px-3 sm:px-4">
+        <div className={classNames.setupModal54}>
           {showLookup && (
-            <Card size="sm" className="border-primary/20 bg-primary/5">
-              <CardHeader className="pb-1">
-                <CardTitle className="text-xs sm:text-sm">Registration number</CardTitle>
+            <Card size="sm" className={classNames.setupModal55}>
+              <CardHeader className={classNames.setupModal56}>
+                <CardTitle className={classNames.setupModal57}>Registration number</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-2">
-                <p className="text-[11px] text-muted-foreground">
+              <CardContent className={classNames.home13}>
+                <p className={classNames.setupModal58}>
                   {step === "start" ? (
                     <>
                       Auto-fills your five program electives, with the right section and room.
@@ -343,7 +350,7 @@ function SetupModalImpl({
                     </>
                   )}
                 </p>
-                <div className="flex gap-2">
+                <div className={classNames.setupModal59}>
                   <Input
                     value={regInput}
                     onChange={(e) => setRegInput(e.target.value)}
@@ -358,14 +365,14 @@ function SetupModalImpl({
                     autoComplete="off"
                     autoFocus={step === "start"}
                     disabled={lookupState === "loading"}
-                    className="text-xs"
+                    className={classNames.home16}
                     aria-label="Registration number"
                   />
                   <Button
                     size="sm"
                     onClick={() => void handleLookup()}
                     disabled={lookupState === "loading" || !regInput.trim()}
-                    className="flex-shrink-0"
+                    className={classNames.setupModal50}
                   >
                     {lookupState === "loading"
                       ? "Looking..."
@@ -378,13 +385,13 @@ function SetupModalImpl({
                                     instead, so it survives this card disappearing once
                                     everything is filled. */}
                 {step === "start" && lookupMessage && (
-                  <p className="text-[10px] text-muted-foreground">{lookupMessage}</p>
+                  <p className={classNames.setupModal60}>{lookupMessage}</p>
                 )}
                 {step === "start" && (
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="w-full justify-center text-[11px]"
+                    className={classNames.setupModal61}
                     onClick={() => {
                       setLookupMessage(null);
                       setStep("electives");
@@ -398,7 +405,7 @@ function SetupModalImpl({
           )}
 
           {step !== "start" && lookupMessage && (
-            <p className="text-[11px] text-muted-foreground px-1">{lookupMessage}</p>
+            <p className={classNames.setupModal62}>{lookupMessage}</p>
           )}
 
           {/* Elective Groups, scoped to the current step. Editing has
@@ -419,32 +426,28 @@ function SetupModalImpl({
 
             return (
               <Card key={type} size="sm">
-                <CardHeader className="pb-1">
-                  <CardTitle className="flex items-center justify-between gap-2">
-                    <span className="text-xs sm:text-sm">{getTypeLabel(type)}</span>
-                    <Badge variant="outline" className="text-[10px] sm:text-xs">
+                <CardHeader className={classNames.setupModal56}>
+                  <CardTitle className={classNames.setupModal51}>
+                    <span className={classNames.setupModal57}>{getTypeLabel(type)}</span>
+                    <Badge variant="outline" className={classNames.setupModal63}>
                       {type}
                     </Badge>
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-2">
+                <CardContent className={classNames.home13}>
                   {selectedOption ? (
-                    <div className="flex items-center justify-between gap-2 p-2 bg-primary/10 border border-primary/20 rounded-none">
-                      <div className="flex-1 min-w-0">
-                        <div className="font-medium text-xs sm:text-sm">
-                          {selectedOption.abbreviation}
-                        </div>
-                        <div className="text-[10px] sm:text-xs text-muted-foreground truncate">
-                          {selectedOption.name}
-                        </div>
+                    <div className={classNames.setupModal64}>
+                      <div className={classNames.setupModal65}>
+                        <div className={classNames.setupModal66}>{selectedOption.abbreviation}</div>
+                        <div className={classNames.setupModal67}>{selectedOption.name}</div>
                       </div>
                       <Button
                         variant="ghost"
                         size="icon-xs"
-                        className="flex-shrink-0"
+                        className={classNames.setupModal50}
                         onClick={() => handleSelectionChange(type, "")}
                       >
-                        <XIcon className="size-4" />
+                        <XIcon className={classNames.setupModal53} />
                       </Button>
                     </div>
                   ) : hasOptions ? (
@@ -456,7 +459,7 @@ function SetupModalImpl({
                       onSelect={handleSelectionChange}
                     />
                   ) : (
-                    <div className="text-[10px] sm:text-xs text-muted-foreground py-2 text-center bg-muted/30 rounded-none">
+                    <div className={classNames.setupModal68}>
                       No courses added yet. Add your own below.
                     </div>
                   )}
@@ -470,17 +473,15 @@ function SetupModalImpl({
                         <div
                           key={custom.id}
                           onClick={() => handleSelectionChange(type, custom.id)}
-                          className={`flex items-center justify-between gap-2 text-xs px-2 py-1.5 cursor-pointer transition-colors ${
-                            isSelected
-                              ? "bg-primary/10 border border-primary/20"
-                              : "bg-muted/50 hover:bg-muted/80"
+                          className={` ${classNames.setupModal71} ${
+                            isSelected ? classNames.setupModal69 : classNames.setupModal70
                           }`}
                         >
-                          <span className="truncate flex-1">
+                          <span className={classNames.setupModal72}>
                             {custom.abbreviation} - {custom.name}
                           </span>
-                          <div className="flex gap-1 flex-shrink-0">
-                            {isSelected && <CheckIcon className="size-3 text-primary" />}
+                          <div className={classNames.setupModal73}>
+                            {isSelected && <CheckIcon className={classNames.setupModal74} />}
                             <Button
                               variant="ghost"
                               size="icon-xs"
@@ -489,7 +490,7 @@ function SetupModalImpl({
                                 handleEditCustom(custom);
                               }}
                             >
-                              <PencilSimpleIcon className="size-3" />
+                              <PencilSimpleIcon className={classNames.setupModal75} />
                             </Button>
                             <Button
                               variant="ghost"
@@ -499,7 +500,7 @@ function SetupModalImpl({
                                 onRemoveCustom(custom.id);
                               }}
                             >
-                              <TrashIcon className="size-3" />
+                              <TrashIcon className={classNames.setupModal75} />
                             </Button>
                           </div>
                         </div>
@@ -507,8 +508,8 @@ function SetupModalImpl({
                     })}
 
                   {showAddCustom === type ? (
-                    <div className="space-y-2 p-2 border border-border bg-muted/30">
-                      <div className="grid grid-cols-2 gap-2">
+                    <div className={classNames.setupModal76}>
+                      <div className={classNames.setupModal77}>
                         <Input
                           placeholder="Abbrev (e.g. ML)"
                           value={customForm.abbreviation}
@@ -518,7 +519,7 @@ function SetupModalImpl({
                               abbreviation: e.target.value,
                             }))
                           }
-                          className="text-xs"
+                          className={classNames.home16}
                         />
                         <Input
                           placeholder="Code (e.g. ICT 3250)"
@@ -529,7 +530,7 @@ function SetupModalImpl({
                               code: e.target.value,
                             }))
                           }
-                          className="text-xs"
+                          className={classNames.home16}
                         />
                       </div>
                       <Input
@@ -541,7 +542,7 @@ function SetupModalImpl({
                             name: e.target.value,
                           }))
                         }
-                        className="text-xs"
+                        className={classNames.home16}
                       />
                       <Input
                         placeholder="Faculty (comma separated)"
@@ -552,7 +553,7 @@ function SetupModalImpl({
                             faculty: e.target.value,
                           }))
                         }
-                        className="text-xs"
+                        className={classNames.home16}
                       />
                       <Input
                         placeholder="Room (optional)"
@@ -563,14 +564,14 @@ function SetupModalImpl({
                             room: e.target.value,
                           }))
                         }
-                        className="text-xs"
+                        className={classNames.home16}
                       />
-                      <div className="flex gap-2">
+                      <div className={classNames.setupModal59}>
                         <Button
                           variant="outline"
                           size="sm"
                           onClick={handleCancelCustom}
-                          className="flex-1"
+                          className={classNames.setupModal78}
                         >
                           Cancel
                         </Button>
@@ -578,7 +579,7 @@ function SetupModalImpl({
                           size="sm"
                           onClick={editingCustomId ? handleUpdateCustom : handleAddCustom}
                           disabled={!customForm.name}
-                          className="flex-1"
+                          className={classNames.setupModal78}
                         >
                           {editingCustomId ? "Update" : "Add"}
                         </Button>
@@ -589,9 +590,9 @@ function SetupModalImpl({
                       variant="ghost"
                       size="sm"
                       onClick={() => setShowAddCustom(type)}
-                      className="w-full justify-start"
+                      className={classNames.setupModal79}
                     >
-                      <PlusIcon className="size-3 mr-1" />
+                      <PlusIcon className={classNames.setupModal80} />
                       {type} not listed? Add it manually
                     </Button>
                   )}
@@ -601,8 +602,8 @@ function SetupModalImpl({
           })}
         </div>
 
-        <div className="flex-shrink-0 pt-2">
-          <Separator className="mb-3" />
+        <div className={classNames.setupModal81}>
+          <Separator className={classNames.setupModal82} />
 
           <AlertDialogFooter>
             {isEditing && onClose && (

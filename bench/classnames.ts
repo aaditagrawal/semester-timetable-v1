@@ -1,41 +1,25 @@
-/**
- * `cn()` — the cost nobody counts.
- *
- * Every tile built its class string with three `cn()` calls, and `cn` is
- * `tailwind-merge`: it has to tokenise each argument and resolve the conflicts
- * between them. With 18 tiles on the week grid that was 54 merges per render,
- * and under the old one-second clock, per second.
- *
- * It turned out to cost more than the grid's entire data lookup — which is why
- * `course-tile.tsx` now memoises it on (layout class, passed, active). This
- * measures the real shipped function, not a stand-in, so the number cannot
- * drift away from what the app actually does.
- *
- * tailwind-merge keeps its own LRU (500 entries) keyed on the joined argument
- * string, so the "before" case here is already the warm, best-case version of
- * the old code.
- */
+import { classNames } from "@/ui.stylex";
+/** Compare uncached StyleX composition with the existing tile cache. */
 
 import { bench } from "./harness";
 import { cn } from "../lib/utils";
 import { __tileClassName } from "../components/course-tile";
 
-// Verbatim from components/course-tile.tsx, before the change.
-const BASE =
-  "group relative flex items-center justify-center px-2 py-2 min-h-[44px] text-xs font-medium transition-all duration-200 cursor-pointer select-none";
-const INTERACTIVE = "hover:bg-accent active:scale-[0.98]";
-const STATE_DEFAULT = "bg-card ring-1 ring-foreground/10";
-const STATE_PASSED = "opacity-40 bg-muted/50 text-muted-foreground";
-const STATE_ACTIVE = "ring-2 ring-primary bg-primary/10 opacity-100";
+// The same definitions as course-tile, composed without the cache.
+const BASE = classNames.courseTile229;
+const INTERACTIVE = classNames.courseTile230;
+const STATE_DEFAULT = classNames.courseTile231;
+const STATE_PASSED = classNames.courseTile232;
+const STATE_ACTIVE = classNames.courseTile233;
 
 function before(className: string | undefined, isPassed: boolean, isActive: boolean): string {
   const baseClasses = cn(BASE, INTERACTIVE, className);
   const stateClasses = cn(STATE_DEFAULT, isPassed && STATE_PASSED, isActive && STATE_ACTIVE);
-  return cn(baseClasses, stateClasses, "flex-col gap-0.5");
+  return cn(baseClasses, stateClasses, classNames.courseTile234);
 }
 
 // Parity, so the comparison below is between two things that agree.
-for (const className of [undefined, "h-full", "min-h-10"]) {
+for (const className of [undefined, classNames.weekView242, classNames.dayView206]) {
   for (const isPassed of [false, true]) {
     for (const isActive of [false, true]) {
       const a = before(className, isPassed, isActive);
@@ -50,14 +34,14 @@ console.log("parity check passed across every tile state");
 function renderTiles(build: (c: string, p: boolean, a: boolean) => string): number {
   let sink = 0;
   for (let i = 0; i < 18; i += 1) {
-    sink += build("h-full", i % 3 === 0, i === 4).length;
+    sink += build(classNames.weekView242, i % 3 === 0, i === 4).length;
   }
   return sink;
 }
 
 bench("week grid: class strings for 18 course tiles", [
   {
-    name: "before: 3 cn() per tile (warm tailwind-merge LRU)",
+    name: "uncached: 3 StyleX compositions per tile",
     fn: () => renderTiles(before),
     unitsPerOp: 18,
   },
@@ -69,6 +53,6 @@ bench("week grid: class strings for 18 course tiles", [
 ]);
 
 bench("a single tile's class string", [
-  { name: "before", fn: () => before("h-full", false, true) },
-  { name: "after (cache hit)", fn: () => __tileClassName("h-full", false, true) },
+  { name: "before", fn: () => before(classNames.weekView242, false, true) },
+  { name: "after (cache hit)", fn: () => __tileClassName(classNames.weekView242, false, true) },
 ]);

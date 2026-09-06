@@ -1,3 +1,4 @@
+import { classNames } from "@/ui.stylex";
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono, JetBrains_Mono } from "next/font/google";
 import Script from "next/script";
@@ -61,11 +62,15 @@ export default function RootLayout({
   // <html> before React hydrates, which is a mismatch by definition — that is
   // the whole point of it.
   return (
-    <html lang="en" className={`${jetbrainsMono.variable} dark`} suppressHydrationWarning>
+    <html
+      lang="en"
+      className={`${jetbrainsMono.variable} ${classNames.layout0} `}
+      suppressHydrationWarning
+    >
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeBootstrap }} />
       </head>
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+      <body className={`${geistSans.variable} ${geistMono.variable} ${classNames.layout1} `}>
         <Script defer src="https://stat.sys256.com/script.js" strategy="afterInteractive" />
         <ThemeProvider>{children}</ThemeProvider>
         <ServiceWorker />

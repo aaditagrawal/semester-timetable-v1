@@ -1,5 +1,7 @@
 "use client";
 
+import { classNames } from "@/ui.stylex";
+
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
@@ -23,17 +25,17 @@ export function TileDisplaySettings({
   onShowRoomChange,
 }: TileDisplaySettingsProps) {
   return (
-    <div className="space-y-3">
-      <div className="flex items-start justify-between gap-3">
-        <div className="space-y-0.5">
-          <Label className="text-xs">Tile label</Label>
-          <p className="text-[10px] text-muted-foreground">
+    <div className={classNames.appearanceSettings264}>
+      <div className={classNames.tileDisplaySettings281}>
+        <div className={classNames.dayView222}>
+          <Label className={classNames.home16}>Tile label</Label>
+          <p className={classNames.setupModal60}>
             {tileLabel === "code"
               ? "Tiles show the course code — e.g. ICT 4403"
               : "Tiles show the abbreviation — e.g. HCI [G]"}
           </p>
         </div>
-        <div className="flex items-center gap-1 bg-muted/30 p-0.5 shrink-0">
+        <div className={classNames.tileDisplaySettings282}>
           <Button
             variant={tileLabel === "abbreviation" ? "default" : "ghost"}
             size="xs"
@@ -51,12 +53,12 @@ export function TileDisplaySettings({
         </div>
       </div>
 
-      <div className="flex items-start justify-between gap-3">
-        <div className="space-y-0.5">
-          <Label htmlFor="show-room" className="text-xs">
+      <div className={classNames.tileDisplaySettings281}>
+        <div className={classNames.dayView222}>
+          <Label htmlFor="show-room" className={classNames.home16}>
             Show room on tiles
           </Label>
-          <p className="text-[10px] text-muted-foreground">
+          <p className={classNames.setupModal60}>
             Adds the room beside the course in day and week view — e.g. HCI [G] | AB5-311
           </p>
         </div>
@@ -64,7 +66,7 @@ export function TileDisplaySettings({
           id="show-room"
           checked={showRoom}
           onCheckedChange={onShowRoomChange}
-          className="mt-0.5 shrink-0"
+          className={classNames.tileDisplaySettings283}
         />
       </div>
     </div>

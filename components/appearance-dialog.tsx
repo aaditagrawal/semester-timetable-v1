@@ -1,5 +1,7 @@
 "use client";
 
+import { classNames } from "@/ui.stylex";
+
 import * as React from "react";
 
 import {
@@ -40,15 +42,15 @@ function AppearanceDialogImpl({
     <AlertDialog open={open} onOpenChange={(next) => !next && onClose()}>
       {/* Cap the whole dialog (not just the body) so header and footer stay
                 on-screen on mobile; the body is the only scroll container. */}
-      <AlertDialogContent className="max-w-sm max-h-[90dvh] overflow-hidden flex flex-col">
+      <AlertDialogContent className={classNames.appearanceDialog278}>
         <AlertDialogHeader>
-          <AlertDialogTitle className="text-base">Appearance</AlertDialogTitle>
+          <AlertDialogTitle className={classNames.appearanceDialog279}>Appearance</AlertDialogTitle>
           <AlertDialogDescription>
             Pick a template, or set the accent and background yourself
           </AlertDialogDescription>
         </AlertDialogHeader>
 
-        <div className="py-2 flex-1 overflow-y-auto">
+        <div className={classNames.appearanceDialog280}>
           <AppearanceSettings
             tileLabel={tileLabel}
             onTileLabelChange={onTileLabelChange}

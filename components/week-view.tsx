@@ -1,5 +1,7 @@
 "use client";
 
+import { classNames } from "@/ui.stylex";
+
 import * as React from "react";
 import { cn } from "@/lib/utils";
 import { CourseTile } from "@/components/course-tile";
@@ -58,7 +60,7 @@ const PIXELS_PER_MINUTE = 0.9;
 const DAY_NAMES = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"] as const;
 
 /** An empty period. One element, shared by every blank cell in the grid. */
-const BLANK_CELL = <div className="h-full min-h-[44px] bg-muted/5" />;
+const BLANK_CELL = <div className={classNames.weekView239} />;
 
 export function WeekView({
   now,
@@ -165,13 +167,10 @@ export function WeekView({
           return {
             element: (
               <div
-                className={cn(
-                  "h-full min-h-[44px] flex flex-col items-center justify-center bg-muted/20 border border-dashed border-muted-foreground/20 cursor-pointer hover:bg-muted/30 transition-colors",
-                  isPassed && "opacity-40",
-                )}
+                className={cn(classNames.weekView240, isPassed && classNames.dayView194)}
                 onClick={onConfigureElective}
               >
-                <Badge variant="outline" className="text-[9px] h-4 px-1.5">
+                <Badge variant="outline" className={classNames.weekView241}>
                   {entry.electiveType}
                 </Badge>
               </div>
@@ -195,7 +194,7 @@ export function WeekView({
             isActive={isPeriodActive(startMin, endMin, now, index)}
             isPassed={isPeriodPassed(endMin, now, index)}
             isLab={isLab}
-            className="h-full"
+            className={classNames.weekView242}
             durationSlots={rowSpan}
             showRoom={showRoom}
             labelMode={labelMode}
@@ -222,22 +221,22 @@ export function WeekView({
   ]);
 
   return (
-    <div className="overflow-x-auto -mx-4 px-4 pb-4">
-      <div className="min-w-[700px]">
+    <div className={classNames.weekView243}>
+      <div className={classNames.weekView244}>
         {/* Grid - using table for proper row spanning */}
         <table
-          className="w-full border-collapse"
+          className={classNames.weekView245}
           style={{ borderSpacing: "1px", background: "hsl(var(--border) / 0.3)" }}
         >
           <thead>
             <tr>
-              <th className="bg-background p-2 w-14" />
+              <th className={classNames.weekView246} />
               {days.map((day) => (
                 <th
                   key={day}
                   className={cn(
-                    "bg-background p-2 text-center text-xs font-medium",
-                    day === currentDayName && "bg-primary/10 text-primary",
+                    classNames.weekView247,
+                    day === currentDayName && classNames.weekView248,
                   )}
                 >
                   {day}
@@ -249,8 +248,8 @@ export function WeekView({
             {rows.map(({ slot, cells }, slotIndex) => (
               <tr key={slot.label}>
                 {/* Time label */}
-                <td className="bg-background p-1.5 text-[10px] text-muted-foreground text-center">
-                  <span className="leading-tight font-mono">{slot.start}</span>
+                <td className={classNames.weekView249}>
+                  <span className={classNames.weekView250}>{slot.start}</span>
                 </td>
 
                 {/* Day cells */}
@@ -276,7 +275,10 @@ export function WeekView({
                       key={`${day}-${slotIndex}`}
                       rowSpan={cell.rowSpan}
                       style={cellHeight}
-                      className={cn("bg-background p-0", day === currentDayName && "bg-primary/5")}
+                      className={cn(
+                        classNames.weekView251,
+                        day === currentDayName && classNames.weekView252,
+                      )}
                     >
                       {cell.element}
                     </td>

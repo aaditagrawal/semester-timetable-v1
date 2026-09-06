@@ -1,5 +1,7 @@
 "use client";
 
+import { classNames } from "@/ui.stylex";
+
 import * as React from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -66,18 +68,18 @@ export function ExamView({ selections, getSelectedElective }: ExamViewProps) {
   const highlightIdx = mounted ? examStatuses.findIndex((s) => s !== "past") : -1;
 
   return (
-    <div className="space-y-4">
+    <div className={classNames.home17}>
       {/* Header */}
-      <div className="space-y-1 px-1">
-        <div className="flex items-center gap-2">
-          <BookOpenIcon className="size-5 text-primary" weight="fill" />
-          <h2 className="text-lg font-semibold">End Semester Exams</h2>
+      <div className={classNames.examViewEndsem325}>
+        <div className={classNames.home18}>
+          <BookOpenIcon className={classNames.examViewEndsem326} weight="fill" />
+          <h2 className={classNames.examViewEndsem327}>End Semester Exams</h2>
         </div>
-        <p className="text-xs text-muted-foreground">May 2026 &middot; 2:00 PM &ndash; 5:00 PM</p>
+        <p className={classNames.home22}>May 2026 &middot; 2:00 PM &ndash; 5:00 PM</p>
       </div>
 
       {/* Exam list */}
-      <div className="space-y-2">
+      <div className={classNames.home13}>
         {allExams.map((exam, idx) => {
           const status = examStatuses[idx];
           const isHighlighted = idx === highlightIdx;
@@ -104,43 +106,41 @@ export function ExamView({ selections, getSelectedElective }: ExamViewProps) {
               size="sm"
               className={
                 status === "past"
-                  ? "opacity-50"
+                  ? classNames.examViewEndsem328
                   : isHighlighted
-                    ? "ring-2 ring-primary bg-primary/5"
+                    ? classNames.dayView205
                     : ""
               }
             >
-              <CardContent className="py-2">
-                <div className="flex items-center gap-3">
-                  <div className="text-xs text-muted-foreground w-24 shrink-0 flex flex-col items-start gap-0.5">
-                    <span className="flex items-center gap-1">
-                      <CalendarIcon className="size-3" />
-                      <span className="font-mono">{formatDate(exam.date)}</span>
+              <CardContent className={classNames.dayView196}>
+                <div className={classNames.dayView197}>
+                  <div className={classNames.examViewEndsem329}>
+                    <span className={classNames.dayView220}>
+                      <CalendarIcon className={classNames.setupModal75} />
+                      <span className={classNames.dayView199}>{formatDate(exam.date)}</span>
                     </span>
-                    <span className="flex items-center gap-1 text-[10px]">
-                      <ClockIcon className="size-3" />
+                    <span className={classNames.examViewEndsem330}>
+                      <ClockIcon className={classNames.setupModal75} />
                       {exam.startTime} &ndash; {exam.endTime}
                     </span>
                   </div>
-                  <Separator orientation="vertical" className="h-10" />
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <p className="text-sm font-medium truncate">{courseName}</p>
+                  <Separator orientation="vertical" className={classNames.dayView201} />
+                  <div className={classNames.setupModal65}>
+                    <div className={classNames.home18}>
+                      <p className={classNames.examViewEndsem331}>{courseName}</p>
                       {isUnconfiguredElective && exam.electiveType && (
-                        <Badge variant="outline" className="shrink-0">
+                        <Badge variant="outline" className={classNames.dayView207}>
                           {exam.electiveType}
                         </Badge>
                       )}
                     </div>
-                    {courseCode && (
-                      <p className="text-[10px] text-muted-foreground">{courseCode}</p>
-                    )}
+                    {courseCode && <p className={classNames.setupModal60}>{courseCode}</p>}
                   </div>
                   <Badge
                     variant={
                       status === "today" ? "default" : status === "past" ? "secondary" : "outline"
                     }
-                    className="shrink-0"
+                    className={classNames.dayView207}
                   >
                     {status === "today"
                       ? "Today"

@@ -1,13 +1,12 @@
 "use client";
 
+import { classNames } from "@/ui.stylex";
+
 import Link from "next/link";
 
 export function CalendarExportLink() {
   return (
-    <Link
-      href="/export"
-      className="text-primary hover:text-primary/80 hover:underline transition-colors"
-    >
+    <Link href="/export" className={classNames.calendarExport284}>
       Export to Calendar
     </Link>
   );

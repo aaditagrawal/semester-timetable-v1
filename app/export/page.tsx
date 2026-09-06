@@ -1,5 +1,7 @@
 "use client";
 
+import { classNames } from "@/ui.stylex";
+
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -82,50 +84,43 @@ export default function ExportPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="text-muted-foreground text-sm">Loading...</div>
+      <div className={classNames.home2}>
+        <div className={classNames.home3}>Loading...</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="max-w-md mx-auto px-4 py-8">
+    <div className={classNames.home4}>
+      <div className={classNames.home5}>
         {/* Header */}
-        <header className="space-y-4 mb-8">
-          <Link
-            href="/"
-            className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
-          >
-            <ArrowLeftIcon className="size-3.5" />
+        <header className={classNames.home6}>
+          <Link href="/" className={classNames.home7}>
+            <ArrowLeftIcon className={classNames.home8} />
             Back to Timetable
           </Link>
 
           <div>
-            <h1 className="text-lg font-semibold tracking-tight">Export Calendar</h1>
-            <p className="text-xs text-muted-foreground mt-1">
-              Download your timetable as an ICS file
-            </p>
+            <h1 className={classNames.home9}>Export Calendar</h1>
+            <p className={classNames.home10}>Download your timetable as an ICS file</p>
           </div>
         </header>
 
-        <Separator className="mb-6" />
+        <Separator className={classNames.home11} />
 
         {/* Content */}
-        <div className="space-y-6">
+        <div className={classNames.home12}>
           {/* Info */}
-          <div className="space-y-2">
-            <p className="text-sm text-muted-foreground">
-              ICS files work with most calendar apps including:
-            </p>
-            <div className="flex flex-wrap gap-1.5">
-              <Badge variant="secondary" className="text-xs">
+          <div className={classNames.home13}>
+            <p className={classNames.home14}>ICS files work with most calendar apps including:</p>
+            <div className={classNames.home15}>
+              <Badge variant="secondary" className={classNames.home16}>
                 Apple Calendar
               </Badge>
-              <Badge variant="secondary" className="text-xs">
+              <Badge variant="secondary" className={classNames.home16}>
                 Google Calendar
               </Badge>
-              <Badge variant="secondary" className="text-xs">
+              <Badge variant="secondary" className={classNames.home16}>
                 Microsoft Outlook
               </Badge>
             </div>
@@ -134,15 +129,15 @@ export default function ExportPage() {
           <Separator />
 
           {/* Date Range */}
-          <div className="space-y-4">
-            <div className="flex items-center gap-2">
-              <CalendarIcon className="size-4 text-muted-foreground" />
-              <span className="text-sm font-medium">Semester Dates</span>
+          <div className={classNames.home17}>
+            <div className={classNames.home18}>
+              <CalendarIcon className={classNames.home19} />
+              <span className={classNames.home20}>Semester Dates</span>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="start-date" className="text-xs text-muted-foreground">
+            <div className={classNames.home21}>
+              <div className={classNames.home13}>
+                <Label htmlFor="start-date" className={classNames.home22}>
                   Start Date
                 </Label>
                 <Input
@@ -150,11 +145,11 @@ export default function ExportPage() {
                   type="date"
                   value={semesterStartDate}
                   onChange={(e) => setSemesterStartDate(e.target.value)}
-                  className="text-sm"
+                  className={classNames.home23}
                 />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="end-date" className="text-xs text-muted-foreground">
+              <div className={classNames.home13}>
+                <Label htmlFor="end-date" className={classNames.home22}>
                   End Date
                 </Label>
                 <Input
@@ -162,54 +157,59 @@ export default function ExportPage() {
                   type="date"
                   value={semesterEndDate}
                   onChange={(e) => setSemesterEndDate(e.target.value)}
-                  className="text-sm"
+                  className={classNames.home23}
                 />
               </div>
             </div>
 
             {/* Recurrence */}
-            <label className="flex items-center gap-2.5 cursor-pointer">
+            <label className={classNames.home24}>
               <input
                 type="checkbox"
                 checked={includeRecurrence}
                 onChange={(e) => setIncludeRecurrence(e.target.checked)}
-                className="size-4 rounded border-input accent-primary"
+                className={classNames.home25}
               />
-              <span className="text-sm text-muted-foreground">Repeat weekly until end date</span>
+              <span className={classNames.home14}>Repeat weekly until end date</span>
             </label>
           </div>
 
           <Separator />
 
           {/* Download Button */}
-          <Button onClick={handleExport} size="lg" className="w-full" disabled={downloaded}>
+          <Button
+            onClick={handleExport}
+            size="lg"
+            className={classNames.home26}
+            disabled={downloaded}
+          >
             {downloaded ? (
               <>
-                <CheckIcon className="size-4 mr-2" />
+                <CheckIcon className={classNames.home27} />
                 Downloaded!
               </>
             ) : (
               <>
-                <DownloadIcon className="size-4 mr-2" />
+                <DownloadIcon className={classNames.home27} />
                 Download ICS File
               </>
             )}
           </Button>
 
           {/* Instructions */}
-          <div className="space-y-3 pt-2">
-            <p className="text-xs text-muted-foreground font-medium">After downloading:</p>
-            <ul className="text-xs text-muted-foreground space-y-1.5 list-disc list-inside">
+          <div className={classNames.home28}>
+            <p className={classNames.home29}>After downloading:</p>
+            <ul className={classNames.home30}>
               <li>
-                <span className="text-foreground/80">Apple Calendar:</span> Double-click the file or
+                <span className={classNames.home31}>Apple Calendar:</span> Double-click the file or
                 drag it onto Calendar
               </li>
               <li>
-                <span className="text-foreground/80">Google Calendar:</span> Settings → Import &
+                <span className={classNames.home31}>Google Calendar:</span> Settings → Import &
                 Export → Import
               </li>
               <li>
-                <span className="text-foreground/80">Outlook:</span> File → Open & Export → Import
+                <span className={classNames.home31}>Outlook:</span> File → Open & Export → Import
                 .ics file
               </li>
             </ul>
@@ -217,10 +217,8 @@ export default function ExportPage() {
         </div>
 
         {/* Footer */}
-        <footer className="mt-12 pt-4 border-t border-border/50">
-          <p className="text-center text-[10px] text-muted-foreground">
-            MIT Manipal • IT_CCE • Sem VII
-          </p>
+        <footer className={classNames.home32}>
+          <p className={classNames.home33}>MIT Manipal • IT_CCE • Sem VII</p>
         </footer>
       </div>
     </div>

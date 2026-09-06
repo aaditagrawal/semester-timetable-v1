@@ -1,5 +1,7 @@
 "use client";
 
+import { classNames } from "@/ui.stylex";
+
 import * as React from "react";
 import {
   DropdownMenu,
@@ -30,17 +32,17 @@ export function CourseDetail({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>{children}</DropdownMenuTrigger>
-      <DropdownMenuContent align="center" className="w-72" sideOffset={8}>
-        <DropdownMenuLabel className="flex items-center justify-between">
-          <span className="font-semibold text-sm">{course.abbreviation}</span>
-          <div className="flex gap-1">
+      <DropdownMenuContent align="center" className={classNames.courseDetail297} sideOffset={8}>
+        <DropdownMenuLabel className={classNames.dayView210}>
+          <span className={classNames.courseDetail298}>{course.abbreviation}</span>
+          <div className={classNames.courseDetail299}>
             {isActive && (
-              <Badge variant="default" className="text-[10px] h-4">
+              <Badge variant="default" className={classNames.courseDetail300}>
                 LIVE
               </Badge>
             )}
             {isPassed && (
-              <Badge variant="secondary" className="text-[10px] h-4">
+              <Badge variant="secondary" className={classNames.courseDetail300}>
                 DONE
               </Badge>
             )}
@@ -48,38 +50,38 @@ export function CourseDetail({
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
 
-        <div className="px-2 py-2 space-y-3">
+        <div className={classNames.courseDetail301}>
           {/* Course name */}
-          <div className="flex items-start gap-2">
-            <BookIcon className="size-4 text-muted-foreground shrink-0 mt-0.5" />
+          <div className={classNames.courseDetail302}>
+            <BookIcon className={classNames.courseDetail303} />
             <div>
-              <p className="text-xs font-medium">{course.name}</p>
-              <p className="text-[10px] text-muted-foreground">{course.code}</p>
+              <p className={classNames.courseDetail304}>{course.name}</p>
+              <p className={classNames.setupModal60}>{course.code}</p>
             </div>
           </div>
 
           {/* Room */}
           {course.room && (
-            <div className="flex items-center gap-2">
-              <MapPinIcon className="size-4 text-muted-foreground shrink-0" />
-              <p className="text-xs">{course.room}</p>
+            <div className={classNames.home18}>
+              <MapPinIcon className={classNames.courseDetail305} />
+              <p className={classNames.home16}>{course.room}</p>
             </div>
           )}
 
           {/* Time slot */}
           {timeSlot && (
-            <div className="flex items-center gap-2">
-              <ClockIcon className="size-4 text-muted-foreground shrink-0" />
-              <p className="text-xs">{timeSlot}</p>
+            <div className={classNames.home18}>
+              <ClockIcon className={classNames.courseDetail305} />
+              <p className={classNames.home16}>{timeSlot}</p>
             </div>
           )}
 
           {/* Faculty */}
-          <div className="flex items-start gap-2">
-            <UserIcon className="size-4 text-muted-foreground shrink-0 mt-0.5" />
-            <div className="space-y-0.5">
+          <div className={classNames.courseDetail302}>
+            <UserIcon className={classNames.courseDetail303} />
+            <div className={classNames.dayView222}>
               {course.faculty.map((f, idx) => (
-                <p key={idx} className="text-xs">
+                <p key={idx} className={classNames.home16}>
                   {f.name}
                 </p>
               ))}
