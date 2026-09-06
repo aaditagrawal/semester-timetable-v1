@@ -1,5 +1,7 @@
 "use client";
 
+import { classNames } from "@/ui.stylex";
+
 import * as React from "react";
 import { cn } from "@/lib/utils";
 import { CourseDetail } from "@/components/course-detail";
@@ -22,30 +24,16 @@ interface CourseTileProps {
   labelMode?: TileLabelMode;
 }
 
-const BASE =
-  "group relative flex items-center justify-center px-2 py-2 min-h-[44px] text-xs font-medium transition-all duration-200 cursor-pointer select-none";
-const INTERACTIVE = "hover:bg-accent active:scale-[0.98]";
+const BASE = classNames.courseTile229;
+const INTERACTIVE = classNames.courseTile230;
 // Default state
-const STATE_DEFAULT = "bg-card ring-1 ring-foreground/10";
+const STATE_DEFAULT = classNames.courseTile231;
 // Passed state - grayed out
-const STATE_PASSED = "opacity-40 bg-muted/50 text-muted-foreground";
+const STATE_PASSED = classNames.courseTile232;
 // Active state - highlighted border
-const STATE_ACTIVE = "ring-2 ring-primary bg-primary/10 opacity-100";
+const STATE_ACTIVE = classNames.courseTile233;
 
-/**
- * A tile's class string depends on three things: whether it has passed, whether
- * it is live, and the layout class its view hands down. Across the whole app
- * that is a handful of distinct strings — but it was recomputed for every tile
- * on every render, and `cn` is `tailwind-merge`, which has to tokenise each
- * argument and resolve the conflicts between them.
- *
- * Measured in `bench/classnames.ts`: 10.6 µs for the week grid's 18 tiles, more
- * than the entire grid's data lookup put together. Memoised it is 45 ns.
- *
- * The staged `cn(cn(...), cn(...), ...)` shape is deliberate: it reproduces
- * exactly what the inline version computed, so this is a cache in front of the
- * old expression rather than a re-derivation of it.
- */
+/** Cache the StyleX class composition by layout and time state. */
 const CLASS_CACHE = new Map<string, string>();
 /** Call sites pass literals, so this holds ~8 entries; the cap is for anyone who later passes a computed one. */
 const CLASS_CACHE_LIMIT = 64;
@@ -62,7 +50,7 @@ function tileClassName(
   const value = cn(
     cn(BASE, INTERACTIVE, className),
     cn(STATE_DEFAULT, isPassed && STATE_PASSED, isActive && STATE_ACTIVE),
-    "flex-col gap-0.5",
+    classNames.courseTile234,
   );
 
   if (CLASS_CACHE.size >= CLASS_CACHE_LIMIT) CLASS_CACHE.clear();
@@ -96,17 +84,17 @@ function CourseTileImpl({
   return (
     <CourseDetail course={course} timeSlot={timeSlot} isActive={isActive} isPassed={isPassed}>
       <div className={tileClassName(className, isPassed, isActive)} style={heightStyle}>
-        <span className="font-semibold text-center leading-tight text-balance">
+        <span className={classNames.courseTile235}>
           {labelMode === "code" ? course.code : course.abbreviation}
           {showRoom && course.room && (
             <>
-              <span className="mx-1 text-muted-foreground font-normal">|</span>
-              <span className="font-normal">{course.room}</span>
+              <span className={classNames.courseTile236}>|</span>
+              <span className={classNames.courseTile237}>{course.room}</span>
             </>
           )}
         </span>
         {isLab && (
-          <Badge variant="secondary" className="text-[9px] h-3.5 px-1">
+          <Badge variant="secondary" className={classNames.courseTile238}>
             LAB
           </Badge>
         )}

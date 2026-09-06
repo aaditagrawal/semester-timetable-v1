@@ -18,8 +18,8 @@ A modern, responsive, and personalized timetable management application explicit
 
 ## 🛠️ Tech Stack
 
-- **Framework**: [Next.js 15](https://nextjs.org/)
-- **Styling**: [Tailwind CSS 4](https://tailwindcss.com/)
+- **Framework**: [Next.js 16](https://nextjs.org/)
+- **Styling**: [StyleX](https://stylexjs.com/)
 - **Components**: [ShadCN UI](https://ui.shadcn.com/) / [Radix UI](https://www.radix-ui.com/)
 - **Icons**: [Phosphor Icons](https://phosphoricons.com/)
 - **Runtime**: [Bun](https://bun.sh/)

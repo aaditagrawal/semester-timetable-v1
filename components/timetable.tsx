@@ -1,5 +1,7 @@
 "use client";
 
+import { classNames } from "@/ui.stylex";
+
 import { useCallback, useState } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -106,14 +108,14 @@ export function Timetable() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="text-muted-foreground text-sm">Loading...</div>
+      <div className={classNames.home2}>
+        <div className={classNames.home3}>Loading...</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className={classNames.home4}>
       <SetupModal
         open={!isSetupComplete && !isLoading}
         electiveGroups={allElectiveGroups}
@@ -162,26 +164,26 @@ export function Timetable() {
         onShowRoomChange={setShowRoom}
       />
 
-      <div className="max-w-4xl mx-auto px-4 py-6">
-        <header className="space-y-4 mb-6">
-          <div className="flex items-start justify-between">
+      <div className={classNames.timetable285}>
+        <header className={classNames.timetable286}>
+          <div className={classNames.dayView216}>
             <div>
-              <h1 className="text-lg font-semibold tracking-tight">Timetable</h1>
-              <p className="text-xs text-muted-foreground mt-0.5">
+              <h1 className={classNames.home9}>Timetable</h1>
+              <p className={classNames.timetable287}>
                 MIT Manipal • IT_CCE • Sem VII
                 {labBatch && (
-                  <Badge variant="outline" className="ml-2 text-[10px]">
+                  <Badge variant="outline" className={classNames.timetable288}>
                     {labBatch}
                   </Badge>
                 )}
               </p>
             </div>
-            <div className="flex items-center gap-1">
+            <div className={classNames.dayView220}>
               <Button variant="ghost" size="icon-sm" onClick={toggleTheme}>
                 {theme === "dark" ? (
-                  <SunIcon className="size-4" />
+                  <SunIcon className={classNames.setupModal53} />
                 ) : (
-                  <MoonIcon className="size-4" />
+                  <MoonIcon className={classNames.setupModal53} />
                 )}
               </Button>
               <Button
@@ -190,49 +192,49 @@ export function Timetable() {
                 onClick={openAppearance}
                 aria-label="Appearance"
               >
-                <PaletteIcon className="size-4" />
+                <PaletteIcon className={classNames.setupModal53} />
               </Button>
               <Button variant="ghost" size="icon-sm" onClick={openSettings}>
-                <GearIcon className="size-4" />
+                <GearIcon className={classNames.setupModal53} />
               </Button>
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
-            <Badge variant="secondary" className="font-mono text-xs">
+          <div className={classNames.dayView197}>
+            <Badge variant="secondary" className={classNames.timetable289}>
               {formattedTime}
             </Badge>
-            <span className="text-xs text-muted-foreground">{formattedDate}</span>
+            <span className={classNames.home22}>{formattedDate}</span>
           </div>
 
           <Separator />
 
           {/* View toggle */}
-          <div className="flex items-center justify-between gap-2">
-            <div className="flex items-center gap-1 p-1 bg-muted/30 rounded-none">
+          <div className={classNames.setupModal51}>
+            <div className={classNames.timetable290}>
               <Button
                 variant={viewMode === "day" ? "default" : "ghost"}
                 size="sm"
                 onClick={() => setViewMode("day")}
-                className="gap-1.5"
+                className={classNames.timetable291}
               >
-                <CalendarIcon className="size-3.5" />
-                <span className="hidden sm:inline">Day</span>
+                <CalendarIcon className={classNames.home8} />
+                <span className={classNames.timetable292}>Day</span>
               </Button>
               <Button
                 variant={viewMode === "week" ? "default" : "ghost"}
                 size="sm"
                 onClick={() => setViewMode("week")}
-                className="gap-1.5"
+                className={classNames.timetable291}
               >
-                <CalendarDotsIcon className="size-3.5" />
-                <span className="hidden sm:inline">Week</span>
+                <CalendarDotsIcon className={classNames.home8} />
+                <span className={classNames.timetable292}>Week</span>
               </Button>
             </div>
 
             {/* Day selector (only in day view) */}
             {viewMode === "day" && (
-              <div className="flex items-center gap-0.5 overflow-x-auto">
+              <div className={classNames.timetable293}>
                 {days.map((day) => (
                   <Button
                     key={day}
@@ -240,8 +242,8 @@ export function Timetable() {
                     size="xs"
                     onClick={() => setSelectedDay(day)}
                     className={cn(
-                      "min-w-8 px-2",
-                      currentDayName === day && displayDay !== day && "ring-1 ring-primary/50",
+                      classNames.timetable294,
+                      currentDayName === day && displayDay !== day && classNames.timetable295,
                     )}
                   >
                     {day.slice(0, 2)}
@@ -277,8 +279,8 @@ export function Timetable() {
           )}
         </main>
 
-        <footer className="mt-8 pt-4 border-t border-border/50">
-          <p className="text-center text-[10px] text-muted-foreground">
+        <footer className={classNames.timetable296}>
+          <p className={classNames.home33}>
             Tap/click course for details • <CalendarExportLink />
           </p>
         </footer>

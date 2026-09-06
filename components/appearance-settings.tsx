@@ -1,5 +1,7 @@
 "use client";
 
+import { classNames } from "@/ui.stylex";
+
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -29,12 +31,12 @@ function TemplatePreview({ template, isDark }: { template: ThemeTemplate; isDark
   const surface = base ? oklchToHex({ ...base, l: base.l + (isDark ? 0.09 : -0.06) }) : bg;
 
   return (
-    <div
-      className="flex h-8 w-full items-center gap-1 border border-border/60 p-1"
-      style={{ backgroundColor: bg }}
-    >
-      <div className="h-full w-1/2" style={{ backgroundColor: surface }} />
-      <div className="h-full w-3" style={{ backgroundColor: template.accent }} />
+    <div className={classNames.appearanceSettings253} style={{ backgroundColor: bg }}>
+      <div className={classNames.appearanceSettings254} style={{ backgroundColor: surface }} />
+      <div
+        className={classNames.appearanceSettings255}
+        style={{ backgroundColor: template.accent }}
+      />
     </div>
   );
 }
@@ -53,7 +55,7 @@ function SwatchRow({
   const active = value.toLowerCase();
 
   return (
-    <div className="flex flex-wrap items-center gap-1.5">
+    <div className={classNames.appearanceSettings256}>
       {colors.map((color) => (
         <button
           key={color}
@@ -63,21 +65,18 @@ function SwatchRow({
           onClick={() => onSelect(color)}
           style={{ backgroundColor: color }}
           className={cn(
-            "size-6 border transition-all",
+            classNames.appearanceSettings257,
             active === color.toLowerCase()
-              ? "border-foreground ring-1 ring-foreground ring-offset-2 ring-offset-background"
-              : "border-border hover:border-foreground/40",
+              ? classNames.appearanceSettings258
+              : classNames.appearanceSettings259,
           )}
         />
       ))}
 
       {/* Native picker for anything not in the row. */}
-      <label
-        className="relative size-6 shrink-0 cursor-pointer overflow-hidden border border-dashed border-border hover:border-foreground/40"
-        title={`Custom ${label.toLowerCase()}`}
-      >
+      <label className={classNames.appearanceSettings260} title={`Custom ${label.toLowerCase()}`}>
         <span
-          className="absolute inset-0"
+          className={classNames.appearanceSettings261}
           style={{
             background: "conic-gradient(#f54900,#eab308,#22c55e,#0ea5e9,#8b5cf6,#f43f5e,#f54900)",
           }}
@@ -87,11 +86,11 @@ function SwatchRow({
           value={value}
           onChange={(e) => onSelect(e.target.value)}
           aria-label={`Custom ${label.toLowerCase()}`}
-          className="absolute inset-0 size-full cursor-pointer opacity-0"
+          className={classNames.appearanceSettings262}
         />
       </label>
 
-      <span className="font-mono text-[10px] uppercase text-muted-foreground">{active}</span>
+      <span className={classNames.appearanceSettings263}>{active}</span>
     </div>
   );
 }
@@ -116,36 +115,36 @@ export function AppearanceSettings({
   const background = isDark ? settings.darkBg : settings.lightBg;
 
   return (
-    <div className="space-y-3">
-      <div className="flex items-center justify-between gap-2">
-        <Label className="text-xs">Mode</Label>
-        <div className="flex items-center gap-1 bg-muted/30 p-0.5">
+    <div className={classNames.appearanceSettings264}>
+      <div className={classNames.setupModal51}>
+        <Label className={classNames.home16}>Mode</Label>
+        <div className={classNames.appearanceSettings265}>
           <Button
             variant={isDark ? "ghost" : "default"}
             size="xs"
             onClick={() => setMode("light")}
-            className="gap-1"
+            className={classNames.dayView204}
           >
-            <SunIcon className="size-3" />
+            <SunIcon className={classNames.setupModal75} />
             Light
           </Button>
           <Button
             variant={isDark ? "default" : "ghost"}
             size="xs"
             onClick={() => setMode("dark")}
-            className="gap-1"
+            className={classNames.dayView204}
           >
-            <MoonIcon className="size-3" />
+            <MoonIcon className={classNames.setupModal75} />
             Dark
           </Button>
         </div>
       </div>
 
-      <div className="space-y-1.5">
-        <p className="text-[10px] text-muted-foreground">
+      <div className={classNames.appearanceSettings266}>
+        <p className={classNames.setupModal60}>
           Templates set the accent and both backgrounds at once.
         </p>
-        <div className="grid grid-cols-2 gap-1.5">
+        <div className={classNames.appearanceSettings267}>
           {THEME_TEMPLATES.map((template) => (
             <button
               key={template.id}
@@ -154,21 +153,21 @@ export function AppearanceSettings({
               title={template.description}
               aria-pressed={settings.templateId === template.id}
               className={cn(
-                "space-y-1 border p-1.5 text-left transition-colors",
+                classNames.appearanceSettings268,
                 settings.templateId === template.id
-                  ? "border-primary bg-muted/40"
-                  : "border-border hover:bg-muted/30",
+                  ? classNames.appearanceSettings269
+                  : classNames.appearanceSettings270,
               )}
             >
               <TemplatePreview template={template} isDark={isDark} />
-              <span className="block text-[10px] font-medium">{template.name}</span>
+              <span className={classNames.appearanceSettings271}>{template.name}</span>
             </button>
           ))}
         </div>
       </div>
 
-      <div className="space-y-1.5">
-        <Label className="text-[10px] text-muted-foreground">Accent</Label>
+      <div className={classNames.appearanceSettings266}>
+        <Label className={classNames.setupModal60}>Accent</Label>
         <SwatchRow
           colors={ACCENT_PRESETS}
           value={settings.accent}
@@ -177,8 +176,8 @@ export function AppearanceSettings({
         />
       </div>
 
-      <div className="space-y-1.5">
-        <Label className="text-[10px] text-muted-foreground">
+      <div className={classNames.appearanceSettings266}>
+        <Label className={classNames.setupModal60}>
           Background ({isDark ? "dark" : "light"} mode)
         </Label>
         <SwatchRow
@@ -187,7 +186,7 @@ export function AppearanceSettings({
           onSelect={setBackground}
           label="Background"
         />
-        <p className="text-[10px] text-muted-foreground">
+        <p className={classNames.setupModal60}>
           Cards, borders and text are derived from this, so each mode keeps its own background.
         </p>
       </div>
@@ -205,8 +204,8 @@ export function AppearanceSettings({
 
       {/* Resets the theme only — tile display prefs belong to the timetable
                 settings and are cleared by "Reset All Settings" instead. */}
-      <Button variant="outline" size="sm" className="w-full justify-start" onClick={resetTheme}>
-        <ArrowCounterClockwiseIcon className="size-4 mr-2" />
+      <Button variant="outline" size="sm" className={classNames.setupModal79} onClick={resetTheme}>
+        <ArrowCounterClockwiseIcon className={classNames.home27} />
         Reset Appearance
       </Button>
     </div>

@@ -1,5 +1,7 @@
 "use client";
 
+import { classNames } from "@/ui.stylex";
+
 import * as React from "react";
 import { Input } from "@/components/ui/input";
 import { searchOptions } from "@/lib/elective-search";
@@ -28,21 +30,16 @@ interface OptionRowProps {
  */
 const OptionRow = React.memo(function OptionRow({ option, type, onSelect }: OptionRowProps) {
   return (
-    <button
-      onClick={() => onSelect(type, option.id)}
-      className="w-full flex items-start gap-2 p-2 text-left hover:bg-muted/50 transition-colors border-b border-border last:border-0"
-    >
-      <div className="flex-1">
-        <div className="font-medium text-xs">
+    <button onClick={() => onSelect(type, option.id)} className={classNames.electivePicker311}>
+      <div className={classNames.setupModal78}>
+        <div className={classNames.electivePicker312}>
           {option.abbreviation}
-          {option.room && (
-            <span className="ml-1.5 font-normal text-muted-foreground/70">{option.room}</span>
-          )}
+          {option.room && <span className={classNames.electivePicker313}>{option.room}</span>}
         </div>
-        <div className="text-xs text-muted-foreground">{option.name}</div>
-        <div className="text-xs text-muted-foreground/70">{option.code}</div>
+        <div className={classNames.home22}>{option.name}</div>
+        <div className={classNames.dayView228}>{option.code}</div>
       </div>
-      <CheckIcon className="size-3.5 text-muted-foreground shrink-0 mt-1" />
+      <CheckIcon className={classNames.electivePicker314} />
     </button>
   );
 });
@@ -74,26 +71,26 @@ export const ElectivePicker = React.memo(function ElectivePicker({
   const filteredOptions = React.useMemo(() => searchOptions(options, query), [options, query]);
 
   return (
-    <div className="relative">
-      <div className="relative">
-        <MagnifyingGlassIcon className="absolute left-2 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+    <div className={classNames.electivePicker315}>
+      <div className={classNames.electivePicker315}>
+        <MagnifyingGlassIcon className={classNames.electivePicker316} />
         <Input
           placeholder="Search by abbreviation, code or name..."
           value={query}
           onChange={(e) => onQueryChange(type, e.target.value)}
-          className="pl-8 text-xs"
+          className={classNames.electivePicker317}
           aria-label={`Search ${type} courses`}
         />
       </div>
       {/* Always shown, so the basket reads as a pick-list rather than
                 something you have to fill in yourself. */}
-      <div className="mt-2 border border-border rounded-none max-h-48 overflow-y-auto">
+      <div className={classNames.electivePicker318}>
         {filteredOptions.length > 0 ? (
           filteredOptions.map((option) => (
             <OptionRow key={option.id} option={option} type={type} onSelect={onSelect} />
           ))
         ) : (
-          <div className="p-3 text-xs text-muted-foreground text-center">No results found</div>
+          <div className={classNames.electivePicker319}>No results found</div>
         )}
       </div>
     </div>

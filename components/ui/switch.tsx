@@ -1,5 +1,7 @@
 "use client";
 
+import { classNames } from "@/ui.stylex";
+
 import * as React from "react";
 import { Switch as SwitchPrimitive } from "radix-ui";
 
@@ -10,21 +12,17 @@ function Switch({ className, ...props }: React.ComponentProps<typeof SwitchPrimi
     <SwitchPrimitive.Root
       data-slot="switch"
       className={cn(
-        "peer inline-flex h-5 w-9 shrink-0 items-center rounded-none border border-border p-0.5 transition-colors outline-none",
-        "focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]",
-        "disabled:cursor-not-allowed disabled:opacity-50",
-        "data-[state=checked]:bg-primary data-[state=unchecked]:bg-muted",
+        classNames.switch147,
+        classNames.switch148,
+        classNames.switch149,
+        classNames.switch150,
         className,
       )}
       {...props}
     >
       <SwitchPrimitive.Thumb
         data-slot="switch-thumb"
-        className={cn(
-          "pointer-events-none block size-4 rounded-none transition-transform",
-          "data-[state=checked]:translate-x-4 data-[state=unchecked]:translate-x-0",
-          "data-[state=checked]:bg-primary-foreground data-[state=unchecked]:bg-foreground/60",
-        )}
+        className={cn(classNames.switch151, classNames.switch152, classNames.switch153)}
       />
     </SwitchPrimitive.Root>
   );

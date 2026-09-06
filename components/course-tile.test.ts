@@ -1,7 +1,9 @@
+import * as stylex from "@stylexjs/stylex";
+import { classNames, styles } from "@/ui.stylex";
 /**
  * The tile class cache must be invisible.
  *
- * `tailwind-merge` resolves conflicts by keeping the last class in each group,
+ * StyleX resolves conflicts by keeping the last definition for each property,
  * so the *order* the strings are combined in decides the outcome — a cache that
  * combined them differently would produce tiles that look subtly wrong (a
  * passed tile that never dims, an active tile without its ring) rather than
@@ -17,29 +19,31 @@ import { __tileClassName } from "./course-tile";
 import { cn } from "@/lib/utils";
 
 /* -------------------------------------------------------------------------- */
-/* The expression being replaced, copied verbatim from before the change       */
+/* The uncached composition, using the same migrated style definitions       */
 /* -------------------------------------------------------------------------- */
 
 function reference(className: string | undefined, isPassed: boolean, isActive: boolean): string {
-  const baseClasses = cn(
-    "group relative flex items-center justify-center px-2 py-2 min-h-[44px] text-xs font-medium transition-all duration-200 cursor-pointer select-none",
-    "hover:bg-accent active:scale-[0.98]",
-    className,
-  );
+  const baseClasses = cn(classNames.courseTile229, classNames.courseTile230, className);
 
   const stateClasses = cn(
-    "bg-card ring-1 ring-foreground/10",
-    isPassed && "opacity-40 bg-muted/50 text-muted-foreground",
-    isActive && "ring-2 ring-primary bg-primary/10 opacity-100",
+    classNames.courseTile231,
+    isPassed && classNames.courseTile232,
+    isActive && classNames.courseTile233,
   );
 
-  return cn(baseClasses, stateClasses, "flex-col gap-0.5");
+  return cn(baseClasses, stateClasses, classNames.courseTile234);
 }
 
 /* -------------------------------------------------------------------------- */
 
 /** Everything the views hand down today, plus the undefined default. */
-const CLASS_NAMES = [undefined, "", "h-full", "min-h-10", "h-full min-h-[44px]"];
+const CLASS_NAMES = [
+  undefined,
+  "",
+  classNames.weekView242,
+  classNames.dayView206,
+  "h-full min-h-[44px]",
+];
 
 describe("tileClassName", () => {
   test("matches the inline expression for every state and layout class", () => {
@@ -58,14 +62,14 @@ describe("tileClassName", () => {
   });
 
   test("a cache hit returns the identical string, not merely an equal one", () => {
-    const first = __tileClassName("h-full", true, false);
-    const second = __tileClassName("h-full", true, false);
+    const first = __tileClassName(classNames.weekView242, true, false);
+    const second = __tileClassName(classNames.weekView242, true, false);
     expect(second).toBe(first);
   });
 
   test("state and layout both take part in the key", () => {
     const combinations = new Set<string>();
-    for (const className of ["h-full", "min-h-10"]) {
+    for (const className of [classNames.weekView242, classNames.dayView206]) {
       for (const isPassed of [false, true]) {
         for (const isActive of [false, true]) {
           combinations.add(__tileClassName(className, isPassed, isActive));
@@ -77,19 +81,24 @@ describe("tileClassName", () => {
   });
 
   test("still correct after the cache is cleared by the size cap", () => {
-    const expected = reference("h-full", false, true);
+    const expected = reference(classNames.weekView242, false, true);
     // Overflow the cap with throwaway keys, then ask again.
     for (let i = 0; i < 100; i += 1) __tileClassName(`overflow-${i}`, false, false);
-    expect(__tileClassName("h-full", false, true)).toBe(expected);
+    expect(__tileClassName(classNames.weekView242, false, true)).toBe(expected);
   });
 
   test("the passed state actually dims and the active state actually rings", () => {
-    // Guards the merge order: `opacity-40` must survive into a passed tile,
-    // and `ring-2 ring-primary` into an active one.
-    expect(__tileClassName("h-full", true, false)).toContain("opacity-40");
-    expect(__tileClassName("h-full", false, true)).toContain("ring-primary");
-    // Active beats passed, so a live class is never dimmed.
-    expect(__tileClassName("h-full", true, true)).toContain("opacity-100");
-    expect(__tileClassName("h-full", true, true)).not.toContain("opacity-40");
+    const passed = __tileClassName(classNames.weekView242, true, false).split(" ");
+    const active = __tileClassName(classNames.weekView242, true, true).split(" ");
+    for (const token of stylex.props(styles.courseTile232).className?.split(" ") ?? []) {
+      expect(passed).toContain(token);
+    }
+    for (const token of stylex.props(styles.courseTile233).className?.split(" ") ?? []) {
+      expect(active).toContain(token);
+    }
+    // The standalone dimming definition is the same opacity used by passed tiles.
+    const dimmed = stylex.props(styles.dayView194).className;
+    expect(dimmed).toBeTruthy();
+    expect(active).not.toContain(dimmed);
   });
 });

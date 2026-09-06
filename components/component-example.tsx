@@ -1,5 +1,7 @@
 "use client";
 
+import { classNames } from "@/ui.stylex";
+
 import * as React from "react";
 
 import { Example, ExampleWrapper } from "@/components/example";
@@ -104,14 +106,14 @@ export function ComponentExample() {
 
 function CardExample() {
   return (
-    <Example title="Card" className="items-center justify-center">
-      <Card className="relative w-full max-w-sm overflow-hidden pt-0">
-        <div className="bg-primary absolute inset-0 z-30 aspect-video opacity-50 mix-blend-color" />
+    <Example title="Card" className={classNames.componentExample272}>
+      <Card className={classNames.componentExample273}>
+        <div className={classNames.componentExample274} />
         <img
           src="https://images.unsplash.com/photo-1604076850742-4c7221f3101b?q=80&w=1887&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
           alt="Photo by mymind on Unsplash"
           title="Photo by mymind on Unsplash"
-          className="relative z-20 aspect-video w-full object-cover brightness-60 grayscale"
+          className={classNames.componentExample275}
         />
         <CardHeader>
           <CardTitle>Observability Plus is replacing Monitoring</CardTitle>
@@ -144,7 +146,7 @@ function CardExample() {
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
-          <Badge variant="secondary" className="ml-auto">
+          <Badge variant="secondary" className={classNames.dropdownMenu182}>
             Warning
           </Badge>
         </CardFooter>
@@ -165,7 +167,7 @@ function FormExample() {
 
   return (
     <Example title="Form">
-      <Card className="w-full max-w-md">
+      <Card className={classNames.notFound35}>
         <CardHeader>
           <CardTitle>User Information</CardTitle>
           <CardDescription>Please fill in your details below</CardDescription>
@@ -174,10 +176,10 @@ function FormExample() {
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon">
                   <DotsThreeVerticalIcon />
-                  <span className="sr-only">More options</span>
+                  <span className={classNames.componentExample276}>More options</span>
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56">
+              <DropdownMenuContent align="end" className={classNames.componentExample277}>
                 <DropdownMenuGroup>
                   <DropdownMenuLabel>File</DropdownMenuLabel>
                   <DropdownMenuItem>
@@ -407,7 +409,7 @@ function FormExample() {
         <CardContent>
           <form>
             <FieldGroup>
-              <div className="grid grid-cols-2 gap-4">
+              <div className={classNames.home21}>
                 <Field>
                   <FieldLabel htmlFor="small-form-name">Name</FieldLabel>
                   <Input id="small-form-name" placeholder="Enter your name" required />

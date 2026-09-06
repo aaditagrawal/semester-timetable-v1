@@ -1,5 +1,7 @@
 "use client";
 
+import { classNames } from "@/ui.stylex";
+
 import * as React from "react";
 import { useState } from "react";
 import {
@@ -122,25 +124,25 @@ function SettingsDialogImpl({
     <AlertDialog open={open} onOpenChange={(open) => !open && onClose()}>
       {/* Cap the whole dialog (not just the body) so header and footer stay
                 on-screen on mobile; the body is the only scroll container. */}
-      <AlertDialogContent className="max-w-sm max-h-[90dvh] overflow-hidden flex flex-col">
+      <AlertDialogContent className={classNames.appearanceDialog278}>
         <AlertDialogHeader>
-          <AlertDialogTitle className="text-base">Settings</AlertDialogTitle>
+          <AlertDialogTitle className={classNames.appearanceDialog279}>Settings</AlertDialogTitle>
           <AlertDialogDescription>Manage your timetable configuration</AlertDialogDescription>
         </AlertDialogHeader>
 
-        <div className="space-y-3 py-2 flex-1 overflow-y-auto">
+        <div className={classNames.settingsDialog320}>
           {/* Only surface electives that still need configuring */}
           {missingTypes.length > 0 && (
             <>
               <Card size="sm">
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-xs">
+                <CardHeader className={classNames.settingsDialog321}>
+                  <CardTitle className={classNames.home16}>
                     {missingTypes.length} elective{missingTypes.length > 1 ? "s" : ""} not set
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="flex flex-wrap gap-1.5">
+                <CardContent className={classNames.home15}>
                   {missingTypes.map((type) => (
-                    <Badge key={type} variant="secondary" className="text-[10px]">
+                    <Badge key={type} variant="secondary" className={classNames.dayView200}>
                       {electiveTypeLabels[type]}
                     </Badge>
                   ))}
@@ -162,41 +164,41 @@ function SettingsDialogImpl({
           <Separator />
 
           {/* Actions */}
-          <div className="space-y-2">
+          <div className={classNames.home13}>
             <Button
               variant="outline"
               size="sm"
-              className="w-full justify-start"
+              className={classNames.setupModal79}
               onClick={onEditElectives}
             >
-              <GearIcon className="size-4 mr-2" />
+              <GearIcon className={classNames.home27} />
               Edit Electives
             </Button>
 
             <Button
               variant="outline"
               size="sm"
-              className="w-full justify-start"
+              className={classNames.setupModal79}
               onClick={onEditAppearance}
             >
-              <PaletteIcon className="size-4 mr-2" />
+              <PaletteIcon className={classNames.home27} />
               Appearance
             </Button>
 
             <Button
               variant="outline"
               size="sm"
-              className="w-full justify-start"
+              className={classNames.setupModal79}
               onClick={handleExport}
             >
               {copied ? (
                 <>
-                  <CheckIcon className="size-4 mr-2" />
+                  <CheckIcon className={classNames.home27} />
                   Copied to Clipboard!
                 </>
               ) : (
                 <>
-                  <CopyIcon className="size-4 mr-2" />
+                  <CopyIcon className={classNames.home27} />
                   Copy Settings as JSON
                 </>
               )}
@@ -205,41 +207,41 @@ function SettingsDialogImpl({
             <Button
               variant="outline"
               size="sm"
-              className="w-full justify-start"
+              className={classNames.setupModal79}
               onClick={handleDownload}
             >
-              <ExportIcon className="size-4 mr-2" />
+              <ExportIcon className={classNames.home27} />
               Download Settings
             </Button>
 
             <Button
               variant="outline"
               size="sm"
-              className="w-full justify-start"
+              className={classNames.setupModal79}
               onClick={() => setShowImport(!showImport)}
             >
-              <UploadIcon className="size-4 mr-2" />
+              <UploadIcon className={classNames.home27} />
               Import Settings
             </Button>
 
             {showImport && (
-              <div className="space-y-2 p-2 border border-border bg-muted/30">
-                <div className="flex items-center gap-2">
+              <div className={classNames.setupModal76}>
+                <div className={classNames.home18}>
                   <input
                     type="file"
                     accept=".json"
                     onChange={handleFileUpload}
-                    className="text-xs file:mr-2 file:py-1 file:px-2 file:border-0 file:text-xs file:bg-muted file:text-foreground"
+                    className={classNames.settingsDialog322}
                   />
                 </div>
                 <Textarea
                   placeholder="Or paste your settings JSON here..."
                   value={importText}
                   onChange={(e) => setImportText(e.target.value)}
-                  className="text-xs min-h-[80px] font-mono"
+                  className={classNames.settingsDialog323}
                 />
-                {importError && <p className="text-xs text-destructive">{importError}</p>}
-                <div className="flex gap-2">
+                {importError && <p className={classNames.settingsDialog324}>{importError}</p>}
+                <div className={classNames.setupModal59}>
                   <Button
                     variant="outline"
                     size="sm"
@@ -248,11 +250,11 @@ function SettingsDialogImpl({
                       setImportText("");
                       setImportError(null);
                     }}
-                    className="flex-1"
+                    className={classNames.setupModal78}
                   >
                     Cancel
                   </Button>
-                  <Button size="sm" onClick={handleImport} className="flex-1">
+                  <Button size="sm" onClick={handleImport} className={classNames.setupModal78}>
                     Import
                   </Button>
                 </div>
@@ -264,10 +266,10 @@ function SettingsDialogImpl({
             <Button
               variant="destructive"
               size="sm"
-              className="w-full justify-start"
+              className={classNames.setupModal79}
               onClick={handleReset}
             >
-              <TrashIcon className="size-4 mr-2" />
+              <TrashIcon className={classNames.home27} />
               Reset All Settings
             </Button>
           </div>

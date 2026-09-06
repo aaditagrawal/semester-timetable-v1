@@ -1,0 +1,4 @@
+preload = ["./scripts/stylex-bun.mjs"]
+
+[test]
+preload = ["./scripts/stylex-bun.mjs"]
