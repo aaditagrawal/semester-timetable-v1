@@ -73,13 +73,15 @@ function CourseTileImpl({
   labelMode = "abbreviation",
 }: CourseTileProps) {
   // Base height is 44px per slot, with some extra for multi-slot items
-  const heightStyle = React.useMemo(
-    () =>
-      durationSlots > 1
-        ? { minHeight: `${44 * durationSlots + (durationSlots - 1) * 4}px` }
-        : undefined,
-    [durationSlots],
-  );
+  // (--tile-min-height is consumed by the tile's min-height in ui.stylex.js)
+  // SAFETY: `--*` custom properties are valid style keys; React.CSSProperties
+  // just doesn't type them.
+  const heightStyle: React.CSSProperties | undefined =
+    durationSlots > 1
+      ? ({
+          "--tile-min-height": `${44 * durationSlots + (durationSlots - 1) * 4}px`,
+        } as React.CSSProperties)
+      : undefined;
 
   return (
     <CourseDetail course={course} timeSlot={timeSlot} isActive={isActive} isPassed={isPassed}>

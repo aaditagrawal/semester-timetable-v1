@@ -2,6 +2,7 @@
 
 import { classNames } from "@/ui.stylex";
 
+import type { CSSProperties } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -31,12 +32,20 @@ function TemplatePreview({ template, isDark }: { template: ThemeTemplate; isDark
   const surface = base ? oklchToHex({ ...base, l: base.l + (isDark ? 0.09 : -0.06) }) : bg;
 
   return (
-    <div className={classNames.appearanceSettings253} style={{ backgroundColor: bg }}>
-      <div className={classNames.appearanceSettings254} style={{ backgroundColor: surface }} />
-      <div
-        className={classNames.appearanceSettings255}
-        style={{ backgroundColor: template.accent }}
-      />
+    <div
+      className={cn(classNames.appearanceSettings253, classNames.dynamicTplBg)}
+      style={
+        // SAFETY: `--*` custom properties are valid style keys; React.CSSProperties
+        // just doesn't type them.
+        {
+          "--tpl-bg": bg,
+          "--tpl-surface": surface,
+          "--tpl-accent": template.accent,
+        } as CSSProperties
+      }
+    >
+      <div className={cn(classNames.appearanceSettings254, classNames.dynamicTplSurface)} />
+      <div className={cn(classNames.appearanceSettings255, classNames.dynamicTplAccent)} />
     </div>
   );
 }
@@ -63,9 +72,12 @@ function SwatchRow({
           aria-label={`${label} ${color}`}
           aria-pressed={active === color.toLowerCase()}
           onClick={() => onSelect(color)}
-          style={{ backgroundColor: color }}
+          // SAFETY: `--*` custom properties are valid style keys; React.CSSProperties
+          // just doesn't type them.
+          style={{ "--swatch-color": color } as CSSProperties}
           className={cn(
             classNames.appearanceSettings257,
+            classNames.dynamicSwatchColor,
             active === color.toLowerCase()
               ? classNames.appearanceSettings258
               : classNames.appearanceSettings259,
@@ -75,12 +87,7 @@ function SwatchRow({
 
       {/* Native picker for anything not in the row. */}
       <label className={classNames.appearanceSettings260} title={`Custom ${label.toLowerCase()}`}>
-        <span
-          className={classNames.appearanceSettings261}
-          style={{
-            background: "conic-gradient(#f54900,#eab308,#22c55e,#0ea5e9,#8b5cf6,#f43f5e,#f54900)",
-          }}
-        />
+        <span className={cn(classNames.appearanceSettings261, classNames.swatchRainbow)} />
         <input
           type="color"
           value={value}

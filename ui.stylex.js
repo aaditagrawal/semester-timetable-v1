@@ -1775,7 +1775,7 @@ export const styles = stylex.create({
   courseTile229: {
     position: "relative",
     display: "flex",
-    minHeight: "44px",
+    minHeight: "var(--tile-min-height, 44px)",
     cursor: "pointer",
     alignItems: "center",
     justifyContent: "center",
@@ -2544,6 +2544,31 @@ export const styles = stylex.create({
     fontWeight: "var(--font-weight-medium)",
     "--tw-leading": null,
   },
+  /* Dynamic-value slots: the component sets the custom property in `style`,
+     the class consumes it — keeps `style` to custom properties only. */
+  dynamicCellHeight: {
+    height: "var(--cell-height)",
+  },
+  dynamicSwatchColor: {
+    backgroundColor: "var(--swatch-color)",
+  },
+  dynamicTplBg: {
+    backgroundColor: "var(--tpl-bg)",
+  },
+  dynamicTplSurface: {
+    backgroundColor: "var(--tpl-surface)",
+  },
+  dynamicTplAccent: {
+    backgroundColor: "var(--tpl-accent)",
+  },
+  swatchRainbow: {
+    backgroundImage:
+      "conic-gradient(#f54900, #eab308, #22c55e, #0ea5e9, #8b5cf6, #f43f5e, #f54900)",
+  },
+  weekTableChrome: {
+    borderSpacing: "1px",
+    backgroundColor: "color-mix(in oklab, var(--border) 30%, transparent)",
+  },
 });
 export const classNames = {
   layout0: `${stylex.props(styles.layout0).className ?? ""} tt-layout0 `,
@@ -2878,6 +2903,13 @@ export const classNames = {
   examViewEndsem329: `${stylex.props(styles.examViewEndsem329).className ?? ""} tt-examViewEndsem329 w-explicit `,
   examViewEndsem330: `${stylex.props(styles.examViewEndsem330).className ?? ""} tt-examViewEndsem330 `,
   examViewEndsem331: `${stylex.props(styles.examViewEndsem331).className ?? ""} tt-examViewEndsem331 `,
+  dynamicCellHeight: `${stylex.props(styles.dynamicCellHeight).className ?? ""} tt-dynamicCellHeight `,
+  dynamicSwatchColor: `${stylex.props(styles.dynamicSwatchColor).className ?? ""} tt-dynamicSwatchColor `,
+  dynamicTplBg: `${stylex.props(styles.dynamicTplBg).className ?? ""} tt-dynamicTplBg `,
+  dynamicTplSurface: `${stylex.props(styles.dynamicTplSurface).className ?? ""} tt-dynamicTplSurface `,
+  dynamicTplAccent: `${stylex.props(styles.dynamicTplAccent).className ?? ""} tt-dynamicTplAccent `,
+  swatchRainbow: `${stylex.props(styles.swatchRainbow).className ?? ""} tt-swatchRainbow `,
+  weekTableChrome: `${stylex.props(styles.weekTableChrome).className ?? ""} tt-weekTableChrome `,
 };
 
 export const styleEntries = {
@@ -3213,4 +3245,11 @@ export const styleEntries = {
   "tt-examViewEndsem329": styles.examViewEndsem329,
   "tt-examViewEndsem330": styles.examViewEndsem330,
   "tt-examViewEndsem331": styles.examViewEndsem331,
+  "tt-dynamicCellHeight": styles.dynamicCellHeight,
+  "tt-dynamicSwatchColor": styles.dynamicSwatchColor,
+  "tt-dynamicTplBg": styles.dynamicTplBg,
+  "tt-dynamicTplSurface": styles.dynamicTplSurface,
+  "tt-dynamicTplAccent": styles.dynamicTplAccent,
+  "tt-swatchRainbow": styles.swatchRainbow,
+  "tt-weekTableChrome": styles.weekTableChrome,
 };
