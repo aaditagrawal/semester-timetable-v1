@@ -224,10 +224,7 @@ export function WeekView({
     <div className={classNames.weekView243}>
       <div className={classNames.weekView244}>
         {/* Grid - using table for proper row spanning */}
-        <table
-          className={classNames.weekView245}
-          style={{ borderSpacing: "1px", background: "hsl(var(--border) / 0.3)" }}
-        >
+        <table className={cn(classNames.weekView245, classNames.weekTableChrome)}>
           <thead>
             <tr>
               <th className={classNames.weekView246} />
@@ -260,14 +257,17 @@ export function WeekView({
                   }
 
                   // For multi-slot cells, use duration-based height if available
-                  // Otherwise fall back to row-based calculation
-                  const cellHeight =
+                  // Otherwise fall back to row-based calculation.
+                  // --cell-height is consumed by tt-dynamicCellHeight in ui.stylex.js.
+                  // SAFETY: `--*` custom properties are valid style keys;
+                  // React.CSSProperties just doesn't type them.
+                  const cellHeight: React.CSSProperties | undefined =
                     cell.rowSpan > 1
-                      ? {
-                          height: cell.height
+                      ? ({
+                          "--cell-height": cell.height
                             ? `${cell.height}px`
                             : `${44 * cell.rowSpan + (cell.rowSpan - 1)}px`,
-                        }
+                        } as React.CSSProperties)
                       : undefined;
 
                   return (
@@ -277,6 +277,7 @@ export function WeekView({
                       style={cellHeight}
                       className={cn(
                         classNames.weekView251,
+                        cell.rowSpan > 1 && classNames.dynamicCellHeight,
                         day === currentDayName && classNames.weekView252,
                       )}
                     >
