@@ -16,6 +16,8 @@
     "suspicious": "warn"
   },
   "rules": {
+    "react/set-state-in-effect": "warn",
+    "react/refs": "warn",
     "react-hooks/rules-of-hooks": "error",
     "react-hooks/exhaustive-deps": "warn",
     "react/jsx-key": "error",
