@@ -16,28 +16,28 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@base-ui/react": "^1.7.0",
+    "@base-ui/react": "^1.8.0",
     "@phosphor-icons/react": "^2.1.10",
-    "@stylexjs/stylex": "0.19.0",
+    "@stylexjs/stylex": "0.19.1",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
-    "next": "16.3.0",
+    "next": "16.3.6",
     "radix-ui": "^1.6.7",
-    "react": "19.2.8",
-    "react-dom": "19.2.8"
+    "react": "19.3.0",
+    "react-dom": "19.3.0"
   },
   "devDependencies": {
-    "@babel/core": "7",
-    "@oxlint/plugins": "^1.78.0",
-    "@stylexjs/babel-plugin": "0.19.0",
-    "@stylexjs/postcss-plugin": "0.19.0",
-    "@types/bun": "^1.4.1",
-    "@types/node": "^26.2.0",
-    "@types/react": "^19.2.18",
-    "@types/react-dom": "^19.2.4",
+    "@babel/core": "8.0.6",
+    "@oxlint/plugins": "^1.85.0",
+    "@stylexjs/babel-plugin": "0.19.1",
+    "@stylexjs/postcss-plugin": "0.19.1",
+    "@types/bun": "^1.4.2",
+    "@types/node": "^26.6.2",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
     "babel-loader": "^10.1.1",
-    "oxfmt": "^0.62.0",
-    "oxlint": "^1.78.0",
+    "oxfmt": "^0.70.0",
+    "oxlint": "^1.85.0",
     "typescript": "^7.0.2"
   },
   "ignoreScripts": [
