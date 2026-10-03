@@ -195,6 +195,13 @@ export function generateICS(
   customElectives: CustomElective[],
   options: CalendarExportOptions,
 ): string {
+  if (
+    !Number.isFinite(options.semesterStartDate.getTime()) ||
+    !Number.isFinite(options.semesterEndDate.getTime()) ||
+    options.semesterStartDate > options.semesterEndDate
+  ) {
+    throw new RangeError("Choose a valid start date on or before the end date");
+  }
   const events = collectEvents(selections, customElectives);
   const lines: string[] = [];
 
@@ -221,6 +228,7 @@ export function generateICS(
   for (const event of events) {
     const dayOffset = getDayOffset(event.day);
     const eventDate = getNextWeekday(options.semesterStartDate, dayOffset);
+    if (formatICSDate(eventDate) > formatICSDate(options.semesterEndDate)) continue;
 
     lines.push("BEGIN:VEVENT");
     lines.push(`UID:${generateUID()}`);
@@ -266,34 +274,4 @@ export function downloadICS(
   a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
-}
-
-// Generate Google Calendar URL for adding events
-// Note: Google Calendar URL only supports single events, not bulk import
-// The ICS file is the recommended way for bulk import
-export function generateGoogleCalendarImportInstructions(): string {
-  return `To import your timetable to Google Calendar:
-1. Download the ICS file
-2. Open Google Calendar (calendar.google.com)
-3. Click the gear icon → Settings
-4. Select "Import & Export" from the sidebar
-5. Click "Select file from your computer"
-6. Choose the downloaded .ics file
-7. Select which calendar to add events to
-8. Click "Import"`;
-}
-
-// Generate Apple Calendar import instructions
-export function generateAppleCalendarImportInstructions(): string {
-  return `To import your timetable to Apple Calendar:
-• macOS: Double-click the .ics file, or drag it onto the Calendar app
-• iOS: Open the .ics file → Tap "Add All Events"
-• iCloud: Upload via icloud.com/calendar`;
-}
-
-// Generate Outlook import instructions
-export function generateOutlookImportInstructions(): string {
-  return `To import your timetable to Microsoft Outlook:
-• Outlook desktop: File → Open & Export → Import/Export → Import .ics file
-• Outlook.com: Settings → View all Outlook settings → Calendar → Shared calendars → Publish or import`;
 }

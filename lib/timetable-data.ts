@@ -338,7 +338,7 @@ export function isPeriodPassed(slotEndMin: number, now: NowSnapshot, index: numb
     return now.dayOfWeek > targetDayIndex;
   }
 
-  return now.minutes > slotEndMin;
+  return now.minutes >= slotEndMin;
 }
 
 export function isPeriodActive(

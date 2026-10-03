@@ -73,9 +73,10 @@ export default function ExportPage() {
   }, []);
 
   const handleExport = () => {
+    if (!semesterStartDate || !semesterEndDate || semesterStartDate > semesterEndDate) return;
     downloadICS(selections, customElectives, {
-      semesterStartDate: new Date(semesterStartDate),
-      semesterEndDate: new Date(semesterEndDate),
+      semesterStartDate: new Date(`${semesterStartDate}T00:00:00`),
+      semesterEndDate: new Date(`${semesterEndDate}T00:00:00`),
       includeRecurrence,
     });
     setDownloaded(true);

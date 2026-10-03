@@ -44,7 +44,7 @@ function referenceIsSlotPassed(slotEnd: string, currentTime: Date, day: Day): bo
 
   const currentMinutes = currentTime.getHours() * 60 + currentTime.getMinutes();
   const slotEndMinutes = timeToMinutes(slotEnd);
-  return currentMinutes > slotEndMinutes;
+  return currentMinutes >= slotEndMinutes;
 }
 
 function referenceIsSlotActive(
