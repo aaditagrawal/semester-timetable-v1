@@ -1,5 +1,6 @@
 "use client";
 
+import { z } from "zod";
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import {
   electiveGroups,
@@ -29,6 +30,19 @@ export type TileLabelMode = "abbreviation" | "code";
 
 export interface CustomElective extends ElectiveOption {
   groupType: ElectiveType;
+}
+
+const CustomElectiveSchema = z.object({
+  id: z.string(),
+  abbreviation: z.string(),
+  code: z.string(),
+  name: z.string(),
+  room: z.string().optional(),
+  faculty: z.array(z.object({ name: z.string() })),
+  groupType: z.enum(["PE-3", "PE-4", "PE-5", "PE-6", "PE-7", "OE"]),
+});
+export function isValidCustomElective(elective: CustomElective): boolean {
+  return CustomElectiveSchema.safeParse(elective).success;
 }
 
 export interface TimetableExport {
@@ -167,22 +181,7 @@ export function useTimetable() {
     [selections, optionIndex],
   );
 
-  // Get all elective options for a type (including custom ones)
-  const getElectiveOptions = useCallback(
-    (type: ElectiveType): ElectiveOption[] => optionsByType[type],
-    [optionsByType],
-  );
-
-  // Get selected elective for a type
-  const getSelectedElective = useCallback(
-    (type: ElectiveType): ElectiveOption | null => selectedElectives[type],
-    [selectedElectives],
-  );
-
   const labBatch = selections.labBatch ?? null;
-
-  // Get lab batch
-  const getLabBatch = useCallback((): LabBatch | null => labBatch, [labBatch]);
 
   // Reset all settings
   const resetSetup = useCallback(() => {
@@ -214,11 +213,6 @@ export function useTimetable() {
         options: optionsByType[group.type],
       })),
     [optionsByType],
-  );
-
-  const getAllElectiveGroups = useCallback(
-    (): ElectiveGroup[] => allElectiveGroups,
-    [allElectiveGroups],
   );
 
   // Export settings as JSON
@@ -267,12 +261,15 @@ export function useTimetable() {
       const selections: UserElectiveSelections = {};
       for (const type of electiveTypes) {
         const id = data.selections?.[type];
-        if (id) selections[type] = id;
+        const parsedId = z.string().min(1).safeParse(id);
+        if (parsedId.success) selections[type] = parsedId.data;
       }
 
-      const customElectives = (data.customElectives ?? []).filter((e) =>
-        knownTypes.has(e.groupType),
+      if (data.customElectives != null && !Array.isArray(data.customElectives)) return false;
+      const customElectives = (data.customElectives ?? []).filter(
+        (e) => e != null && knownTypes.has(e.groupType),
       );
+      if (!customElectives.every(isValidCustomElective)) return false;
 
       setSelections(selections);
       localStorage.setItem(STORAGE_KEY, JSON.stringify(selections));
@@ -317,19 +314,9 @@ export function useTimetable() {
     addCustomElective,
     removeCustomElective,
     updateCustomElective,
-    getElectiveOptions,
-    getSelectedElective,
-    getLabBatch,
     resetSetup,
-    getAllElectiveGroups,
     exportSettings,
     importSettings,
-    /**
-     * The memoised forms of the three getters above. Prefer these in
-     * anything that renders: they hold one identity until their inputs
-     * actually change, so a component can be memoised on them, which the
-     * getters — recreated on each render of this hook — cannot support.
-     */
     selectedElectives,
     allElectiveGroups,
     labBatch,

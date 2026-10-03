@@ -116,15 +116,17 @@ export function Timetable() {
 
   return (
     <div className={classNames.home4}>
-      <SetupModal
-        open={!isSetupComplete && !isLoading}
-        electiveGroups={allElectiveGroups}
-        customElectives={customElectives}
-        onSave={saveSelections}
-        onAddCustom={addCustomElective}
-        onRemoveCustom={removeCustomElective}
-        onUpdateCustom={updateCustomElective}
-      />
+      {!isSetupComplete && (
+        <SetupModal
+          open={!isLoading}
+          electiveGroups={allElectiveGroups}
+          customElectives={customElectives}
+          onSave={saveSelections}
+          onAddCustom={addCustomElective}
+          onRemoveCustom={removeCustomElective}
+          onUpdateCustom={updateCustomElective}
+        />
+      )}
 
       <SetupModal
         open={showEditElectives}
