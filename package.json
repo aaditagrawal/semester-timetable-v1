@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev --turbopack",
     "dev:portless": "portless run",
-    "build": "next build",
+    "build": "next build && bun run typecheck",
     "start": "next start",
     "lint": "oxlint .",
     "lint:fix": "oxlint . --fix",
@@ -13,34 +13,36 @@
     "format:check": "oxfmt --check \"**/*.{js,mjs,cjs,ts,tsx,jsx}\" --ignore-path .gitignore --no-error-on-unmatched-pattern",
     "test": "bun test",
     "bench": "for f in bench/*.ts; do [ \"$f\" = bench/harness.ts ] || bun run $f; done",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "bunx --bun tsrs --noEmit"
   },
   "dependencies": {
-    "@base-ui/react": "^1.7.0",
+    "@base-ui/react": "^1.9.0",
     "@phosphor-icons/react": "^2.1.10",
-    "@stylexjs/stylex": "0.19.0",
+    "@stylexjs/stylex": "0.19.1",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
-    "next": "16.3.0",
-    "radix-ui": "^1.6.7",
-    "react": "19.2.8",
-    "react-dom": "19.2.8"
+    "next": "16.4.2",
+    "radix-ui": "^1.8.1",
+    "react": "19.3.1",
+    "react-dom": "19.3.1"
   },
   "devDependencies": {
-    "@babel/core": "7",
-    "@oxlint/plugins": "^1.78.0",
-    "@shadcn/lint": "^0.1.0",
-    "@stylexjs/babel-plugin": "0.19.0",
-    "@stylexjs/postcss-plugin": "0.19.0",
-    "@types/bun": "^1.4.1",
-    "@types/node": "^26.2.0",
-    "@types/react": "^19.2.18",
-    "@types/react-dom": "^19.2.4",
+    "@babel/core": "8.0.7",
+    "@oxlint/plugins": "^1.89.0",
+    "@shadcn/lint": "^0.2.3",
+    "@stylexjs/babel-plugin": "0.19.1",
+    "@stylexjs/postcss-plugin": "0.19.1",
+    "@types/bun": "^1.4.3",
+    "@types/node": "^26.6.5",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
     "babel-loader": "^10.1.1",
-    "oxfmt": "^0.62.0",
-    "oxlint": "^1.83.0",
-    "typescript": "^7.0.2"
+    "oxfmt": "^0.74.0",
+    "oxlint": "^1.89.0",
+    "tsrs": "0.18.0-ts7.1.0-dev.20260929",
+    "typescript": "6.0.3"
   },
+  "packageManager": "bun@1.4.2",
   "ignoreScripts": [
     "sharp",
     "unrs-resolver"
@@ -48,6 +50,5 @@
   "trustedDependencies": [
     "sharp",
     "unrs-resolver"
-  ],
-  "packageManager": "bun@1.4.2"
+  ]
 }
