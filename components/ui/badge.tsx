@@ -1,32 +1,41 @@
 import { classNames } from "@/ui.stylex";
 import * as React from "react";
-import { cva, type VariantProps } from "class-variance-authority";
 import { Slot } from "radix-ui";
 
 import { cn } from "@/lib/utils";
+import { joinClasses, type ClassValue } from "@/lib/classes";
 
-const badgeVariants = cva(classNames.badge154, {
-  variants: {
-    variant: {
-      default: classNames.badge155,
-      secondary: classNames.badge156,
-      destructive: classNames.badge157,
-      outline: classNames.badge158,
-      ghost: classNames.badge159,
-      link: classNames.badge160,
-    },
-  },
-  defaultVariants: {
-    variant: "default",
-  },
-});
+const variantClasses = {
+  default: classNames.badge155,
+  secondary: classNames.badge156,
+  destructive: classNames.badge157,
+  outline: classNames.badge158,
+  ghost: classNames.badge159,
+  link: classNames.badge160,
+};
+
+type BadgeVariants = { variant?: keyof typeof variantClasses | null };
+
+function badgeVariants({
+  variant = "default",
+  className,
+  class: extraClass,
+}: BadgeVariants & { className?: ClassValue; class?: ClassValue } = {}) {
+  let classes = classNames.badge154;
+  if (variant !== null) classes += ` ${variantClasses[variant]}`;
+  if (extraClass || className) {
+    const caller = joinClasses(extraClass, className);
+    if (caller) classes += ` ${caller}`;
+  }
+  return classes;
+}
 
 function Badge({
   className,
   variant = "default",
   asChild = false,
   ...props
-}: React.ComponentProps<"span"> & VariantProps<typeof badgeVariants> & { asChild?: boolean }) {
+}: React.ComponentProps<"span"> & BadgeVariants & { asChild?: boolean }) {
   const Comp = asChild ? Slot.Root : "span";
 
   return (
