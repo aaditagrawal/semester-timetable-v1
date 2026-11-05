@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import * as stylex from "@stylexjs/stylex";
 import { classNames, styles } from "@/ui.stylex";
-import { joinClasses } from "./classes";
+import { clsx } from "clsx";
 import { cn } from "./utils";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Badge, badgeVariants } from "@/components/ui/badge";
@@ -9,29 +9,6 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { createElement } from "react";
 
 describe("class composition", () => {
-  test("flattens nested conditions without sorting or deduplicating names", () => {
-    expect(
-      joinClasses("first", [null, false, "repeat", [0, -2, undefined]], {
-        selected: true,
-        hidden: false,
-        repeat: 1,
-      }),
-    ).toBe("first repeat -2 selected repeat");
-    expect(joinClasses(undefined, null, false, true, 0, NaN, "")).toBe("");
-    expect(joinClasses(" two  names ", ["last"])).toBe(" two  names  last");
-    expect(joinClasses("a", { "": true }, "b")).toBe("a b");
-    expect(joinClasses({ a: true, "": true, b: true })).toBe("a  b");
-    expect(joinClasses(1n, 0n)).toBe("");
-    const large = Array.from({ length: 100_000 }, () => "name");
-    expect(joinClasses(large)).toBe(large.join(" "));
-  });
-
-  test("supports inherited enumerable and prototype-free conditions", () => {
-    const inherited = Object.assign(Object.create({ inherited: true }), { own: 1 });
-    const bare = Object.assign(Object.create(null), { bare: true, absent: false });
-    expect(joinClasses(inherited, bare)).toBe("own inherited bare");
-  });
-
   test("keeps StyleX's last-property override and semantic class markers", () => {
     const expected = stylex.props(styles.courseTile231, styles.courseTile232, styles.courseTile233);
     expect(
@@ -50,11 +27,11 @@ describe("class composition", () => {
 describe("finite control variants", () => {
   test("distinguishes absent defaults from explicit null", () => {
     expect(buttonVariants()).toBe(
-      joinClasses(classNames.button162, classNames.badge155, classNames.button167),
+      clsx(classNames.button162, classNames.badge155, classNames.button167),
     );
     expect(buttonVariants({ variant: undefined, size: undefined })).toBe(buttonVariants());
     expect(buttonVariants({ variant: null, size: null })).toBe(classNames.button162);
-    expect(badgeVariants()).toBe(joinClasses(classNames.badge154, classNames.badge155));
+    expect(badgeVariants()).toBe(clsx(classNames.badge154, classNames.badge155));
     expect(badgeVariants({ variant: undefined })).toBe(badgeVariants());
     expect(badgeVariants({ variant: null })).toBe(classNames.badge154);
   });
@@ -68,7 +45,7 @@ describe("finite control variants", () => {
         className: "caller",
       }),
     ).toBe(
-      joinClasses(
+      clsx(
         classNames.button162,
         classNames.button163,
         classNames.button173,
@@ -76,7 +53,7 @@ describe("finite control variants", () => {
       ),
     );
     expect(badgeVariants({ variant: "secondary", class: "extra", className: "caller" })).toBe(
-      joinClasses(classNames.badge154, classNames.badge156, "extra caller"),
+      clsx(classNames.badge154, classNames.badge156, "extra caller"),
     );
   });
 

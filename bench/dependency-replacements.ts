@@ -7,7 +7,7 @@ import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { classNames } from "@/ui.stylex";
 import { cn } from "@/lib/utils";
-import type { ClassValue } from "@/lib/classes";
+import type { ClassValue } from "clsx";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Badge, badgeVariants } from "@/components/ui/badge";
 

@@ -1,4 +1,4 @@
-import { joinClassValues, type ClassValue } from "@/lib/classes";
+import { clsx, type ClassValue } from "clsx";
 import * as stylex from "@stylexjs/stylex";
 import { styleEntries } from "@/ui.stylex";
 
@@ -17,13 +17,10 @@ for (const [marker, style] of Object.entries(styleEntries)) {
 export function cn(...inputs: ClassValue[]) {
   const composed: RegisteredStyle[] = [];
   const preserved: string[] = [];
-  for (const name of joinClassValues(inputs).split(/\s+/)) {
+  for (const name of clsx(inputs).split(/\s+/)) {
     const style = registered.get(name);
     if (style) composed.push(style);
-    if (name && !atomicClasses.has(name)) preserved.push(name);
+    if (!atomicClasses.has(name)) preserved.push(name);
   }
-  const markers = preserved.join(" ");
-  if (!composed.length) return markers;
-  const atomic = stylex.props(...composed).className;
-  return atomic && markers ? `${atomic} ${markers}` : atomic || markers;
+  return clsx(stylex.props(...composed).className, preserved);
 }

@@ -3,7 +3,7 @@ import * as React from "react";
 import { Slot } from "radix-ui";
 
 import { cn } from "@/lib/utils";
-import { joinClasses, type ClassValue } from "@/lib/classes";
+import { clsx, type ClassValue } from "clsx";
 
 const variantClasses = {
   default: classNames.badge155,
@@ -24,7 +24,7 @@ function badgeVariants({
   let classes = classNames.badge154;
   if (variant !== null) classes += ` ${variantClasses[variant]}`;
   if (extraClass || className) {
-    const caller = joinClasses(extraClass, className);
+    const caller = clsx(extraClass, className);
     if (caller) classes += ` ${caller}`;
   }
   return classes;
